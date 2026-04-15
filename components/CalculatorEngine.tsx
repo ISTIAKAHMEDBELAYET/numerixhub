@@ -248,6 +248,91 @@ function TipCalculator() {
   );
 }
 
+// Safe recursive-descent math expression parser (no eval / new Function)
+function safeEval(raw: string): number {
+  const src = raw
+    .replace(/×/g, '*').replace(/÷/g, '/')
+    .replace(/π/g, String(Math.PI))
+    .replace(/\be\b/g, String(Math.E))
+    .replace(/Math\.sin\(/g, 'sin(').replace(/Math\.cos\(/g, 'cos(')
+    .replace(/Math\.tan\(/g, 'tan(').replace(/Math\.log10\(/g, 'log(')
+    .replace(/Math\.log\(/g, 'ln(').replace(/Math\.sqrt\(/g, 'sqrt(')
+    .replace(/\s+/g, '');
+
+  let pos = 0;
+
+  function peek() { return src[pos]; }
+  function consume() { return src[pos++]; }
+
+  function parseExpr(): number { return parseAddSub(); }
+
+  function parseAddSub(): number {
+    let left = parseMulDiv();
+    while (peek() === '+' || peek() === '-') {
+      const op = consume();
+      const right = parseMulDiv();
+      left = op === '+' ? left + right : left - right;
+    }
+    return left;
+  }
+
+  function parseMulDiv(): number {
+    let left = parsePow();
+    while (peek() === '*' || peek() === '/') {
+      const op = consume();
+      const right = parsePow();
+      left = op === '*' ? left * right : left / right;
+    }
+    return left;
+  }
+
+  function parsePow(): number {
+    let base = parseUnary();
+    if (peek() === '^') { consume(); base = Math.pow(base, parsePow()); }
+    return base;
+  }
+
+  function parseUnary(): number {
+    if (peek() === '-') { consume(); return -parseAtom(); }
+    if (peek() === '+') { consume(); }
+    return parseAtom();
+  }
+
+  function parseAtom(): number {
+    // named functions
+    const fns: Record<string, (x: number) => number> = {
+      sin: Math.sin, cos: Math.cos, tan: Math.tan,
+      ln: Math.log, log: Math.log10, sqrt: Math.sqrt,
+      abs: Math.abs,
+    };
+    for (const [name, fn] of Object.entries(fns)) {
+      if (src.startsWith(name + '(', pos)) {
+        pos += name.length;
+        consume(); // '('
+        const arg = parseExpr();
+        consume(); // ')'
+        return fn(arg);
+      }
+    }
+    // parentheses
+    if (peek() === '(') {
+      consume();
+      const val = parseExpr();
+      if (peek() === ')') consume();
+      return val;
+    }
+    // number
+    let numStr = '';
+    while (pos < src.length && /[0-9.]/.test(src[pos])) numStr += consume();
+    if (!numStr) throw new Error('Unexpected token at ' + pos);
+    return parseFloat(numStr);
+  }
+
+  const result = parseExpr();
+  if (pos < src.length) throw new Error('Unexpected characters remaining');
+  return result;
+}
+
 function ScientificCalculator() {
   const [display, setDisplay] = useState('0');
   const [expr, setExpr] = useState('');
@@ -260,9 +345,7 @@ function ScientificCalculator() {
     if (val === '⌫') { const s = expr.slice(0, -1) || '0'; setExpr(s); setDisplay(s); return; }
     if (val === '=') {
       try {
-        const e = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, String(Math.PI)).replace(/\be\b/g, String(Math.E));
-        // eslint-disable-next-line no-new-func
-        const r = new Function('"use strict"; return (' + e + ')')() as number;
+        const r = safeEval(expr);
         const rs = typeof r === 'number' && isFinite(r) ? String(parseFloat(r.toFixed(10))) : 'Error';
         setDisplay(rs); setExpr(rs); setJustCalc(true);
       } catch { setDisplay('Error'); setExpr(''); }
