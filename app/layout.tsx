@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
-import ConsentBanner from '@/components/ConsentBanner';
 
 const GA_ID = 'G-NDDGB7MLRH';
 const ADSENSE_ID = 'ca-pub-2278011013110319';
@@ -110,8 +109,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
         {children}
-        <ConsentBanner />
-
         {/* Google Analytics 4 */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
@@ -132,7 +129,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Google AdSense */}
         <Script
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}`}
-          strategy="lazyOnload"
+          strategy="afterInteractive"
           crossOrigin="anonymous"
         />
       </body>
