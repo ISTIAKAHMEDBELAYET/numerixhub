@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
+import Scripts from '@/app/_components/Scripts';
 import './globals.css';
-
-const GA_ID = 'G-NDDGB7MLRH';
-const ADSENSE_ID = 'ca-pub-2278011013110319';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://numerixhub.com'),
@@ -106,32 +103,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+        <Scripts />
       </head>
       <body className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
         {children}
-        {/* Google Analytics 4 */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}', {
-              page_path: window.location.pathname,
-              send_page_view: true
-            });
-          `}
-        </Script>
-
-        {/* Google AdSense */}
-        <Script
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}`}
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
       </body>
     </html>
   );
