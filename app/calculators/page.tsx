@@ -1,0 +1,123 @@
+'use client';
+
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import CalculatorCard from '@/components/CalculatorCard';
+import { calculators } from '@/lib/calculators';
+import { categories } from '@/lib/categories';
+
+function CalculatorsContent() {
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    const cat = searchParams.get('category') || 'all';
+    setSearch(q);
+    setActiveCategory(cat);
+  }, [searchParams]);
+
+  const filtered = calculators.filter(calc => {
+    const matchesCategory = activeCategory === 'all' || calc.category === activeCategory;
+    const q = search.toLowerCase();
+    const matchesSearch = !q ||
+      calc.name.toLowerCase().includes(q) ||
+      calc.description.toLowerCase().includes(q) ||
+      calc.keywords.some(k => k.toLowerCase().includes(q));
+    return matchesCategory && matchesSearch;
+  });
+
+  const categoryCountMap = Object.fromEntries(
+    categories.map(cat => [cat.id, calculators.filter(c => c.category === cat.id).length])
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        {/* Page Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-3xl md:text-4xl font-extrabold mb-3">All Calculators</h1>
+            <p className="text-white/80 text-lg">200+ free calculators for every need</p>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          {/* Search + Filter Bar */}
+          <div className="flex flex-col md:flex-row gap-4 mb-8">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search calculators..."
+                className="w-full px-5 py-3 pl-12 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveCategory('all')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+              >
+                All ({calculators.length})
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                >
+                  {cat.emoji} {cat.name} ({categoryCountMap[cat.id]})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Results count */}
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Showing {filtered.length} calculator{filtered.length !== 1 ? 's' : ''}
+            {search && ` for "${search}"`}
+            {activeCategory !== 'all' && ` in ${categories.find(c => c.id === activeCategory)?.name}`}
+          </p>
+
+          {/* Grid */}
+          {filtered.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {filtered.map(calc => (
+                <CalculatorCard key={calc.slug} calculator={calc} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No calculators found</h3>
+              <p className="text-gray-500 dark:text-gray-400">Try a different search term or browse all categories.</p>
+              <button
+                onClick={() => { setSearch(''); setActiveCategory('all'); }}
+                className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+export default function CalculatorsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-xl text-gray-500">Loading...</div></div>}>
+      <CalculatorsContent />
+    </Suspense>
+  );
+}
