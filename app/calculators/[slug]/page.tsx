@@ -13,14 +13,63 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const calc = getCalculatorBySlug(params.slug);
   if (!calc) return { title: 'Calculator Not Found' };
   return {
-    title: `${calc.name} – NumerixHub`,
+    title: calc.name,
     description: calc.description,
+    alternates: {
+      canonical: `https://numerixhub.com/calculators/${calc.slug}/`,
+    },
+    openGraph: {
+      title: `${calc.name} – NumerixHub`,
+      description: calc.description,
+      url: `https://numerixhub.com/calculators/${calc.slug}/`,
+      type: 'website',
+    },
   };
 }
 
 export default function CalculatorPage({ params }: { params: { slug: string } }) {
   const calc = getCalculatorBySlug(params.slug);
   if (!calc) notFound();
+
+  const softwareSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: calc.name,
+    description: calc.description,
+    url: `https://numerixhub.com/calculators/${calc.slug}/`,
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://numerixhub.com',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Calculators',
+        item: 'https://numerixhub.com/calculators/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: calc.name,
+        item: `https://numerixhub.com/calculators/${calc.slug}/`,
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -42,6 +91,16 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
         </div>
       </main>
       <Footer />
+
+      {/* Schema.org JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
     </div>
   );
 }
