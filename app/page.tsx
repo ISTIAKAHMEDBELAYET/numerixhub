@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import CalculatorCard from '@/components/CalculatorCard';
 import FAQAccordion from '@/components/FAQAccordion';
 import NewsletterForm from '@/components/NewsletterForm';
+import AdUnit from '@/components/AdUnit';
 import { getFeaturedCalculators, getCalculatorsByCategory } from '@/lib/calculators';
 import { categories } from '@/lib/categories';
 
@@ -92,6 +93,11 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Ad Unit – below hero */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <AdUnit slot="1234567890" format="horizontal" className="my-2" />
+        </div>
 
         {/* Featured Calculators */}
         <section className="py-16 bg-gray-50 dark:bg-gray-800/50">
@@ -194,6 +200,8 @@ export default function HomePage() {
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Frequently Asked Questions</h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2">Everything you need to know about NumerixHub</p>
             </div>
+            {/* Ad Unit – before FAQ */}
+            <AdUnit slot="0987654321" format="auto" className="mb-8" />
             <FAQAccordion items={faqItems} />
           </div>
         </section>
