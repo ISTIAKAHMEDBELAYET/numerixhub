@@ -12,17 +12,30 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const calc = getCalculatorBySlug(params.slug);
   if (!calc) return { title: 'Calculator Not Found' };
+  const title = `${calc.name} Online – Free | NumerixHub`;
+  const rawDesc = `Free ${calc.name} online. ${calc.description} No signup required. Fast and accurate.`;
+  const description = rawDesc.length > 160
+    ? rawDesc.slice(0, 160).replace(/\s+\S*$/, '')
+    : rawDesc;
   return {
-    title: calc.name,
-    description: calc.description,
+    title,
+    description,
+    keywords: calc.keywords,
     alternates: {
       canonical: `https://numerixhub.com/calculators/${calc.slug}/`,
     },
     openGraph: {
-      title: `${calc.name} – NumerixHub`,
+      title,
       description: calc.description,
       url: `https://numerixhub.com/calculators/${calc.slug}/`,
       type: 'website',
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${calc.name} – NumerixHub` }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: calc.description,
+      images: ['/og-image.png'],
     },
   };
 }

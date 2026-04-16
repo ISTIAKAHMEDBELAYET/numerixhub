@@ -135,16 +135,9 @@ html {
   outline-offset: 2px;
 }
 
-/* Ad unit styling */
-.ad-unit {
-  min-height: 90px;
-  background: transparent;
-}
-
 /* Print styles */
 @media print {
   .no-print { display: none !important; }
-  .ad-unit { display: none !important; }
   .calculator-output { page-break-inside: avoid; }
   header, footer, nav { display: none !important; }
   body { background: white !important; color: black !important; }
