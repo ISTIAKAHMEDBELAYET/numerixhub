@@ -433,7 +433,7 @@ function CompoundInterestCalculator() {
     const pmt = parseFloat(contribution);
     if (!P || !r || !t || !n) return;
     const totalPrincipal = P * Math.pow(1 + r / n, n * t) + pmt * (Math.pow(1 + r / n, n * t) - 1) / (r / n);
-    const contributed = P + pmt * n * t;
+    const contributed = P + pmt * n * t; // pmt per period × periods-per-year × years
     setResult({ total: totalPrincipal, interest: totalPrincipal - contributed, contributed });
   };
 
@@ -1589,7 +1589,8 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     'permutation-combination-calculator': {
       fields: [{ id: 'n', label: 'n (total items)', placeholder: '10' }, { id: 'r', label: 'r (chosen items)', placeholder: '3' }],
       compute: (v) => {
-        const fact = (x: number): number => x <= 1 ? 1 : x * fact(x - 1);
+        if (v.n > 20 || v.r > v.n || v.r < 0) return 'n must be ≤ 20 and r must be between 0 and n';
+        const fact = (x: number): number => { let r = 1; for (let i = 2; i <= x; i++) r *= i; return r; };
         const nPr = fact(v.n) / fact(v.n - v.r);
         const nCr = fact(v.n) / (fact(v.r) * fact(v.n - v.r));
         return `P(${v.n},${v.r}) = ${nPr.toLocaleString()} | C(${v.n},${v.r}) = ${nCr.toLocaleString()}`;

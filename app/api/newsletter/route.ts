@@ -9,17 +9,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Length check before regex to prevent ReDoS
+    if (email.length > 254) {
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+    }
+
+    // Simple linear-time email check: one @, at least one dot in domain
+    const atIndex = email.indexOf('@');
+    if (atIndex < 1 || atIndex !== email.lastIndexOf('@') || !email.slice(atIndex + 1).includes('.')) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
     // TODO: Integrate with email service provider (e.g., Mailchimp, ConvertKit)
-    // For now, log and return success
     console.log('Newsletter subscription:', email);
 
     return NextResponse.json({ message: 'Successfully subscribed!' }, { status: 200 });
-  } catch {
+  } catch (error) {
+    console.error('Newsletter API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
