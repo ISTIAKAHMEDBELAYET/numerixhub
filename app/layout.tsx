@@ -3,7 +3,7 @@ import Scripts from '@/app/_components/Scripts';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://numerixhub.com'),
+  metadataBase: new URL('https://numerixhub.pages.dev'),
   title: {
     default: 'NumerixHub – 200+ Free Online Calculators',
     template: '%s | NumerixHub – Free Calculators',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://numerixhub.com',
+    url: 'https://numerixhub.pages.dev',
     siteName: 'NumerixHub',
     title: 'NumerixHub – 200+ Free Online Calculators',
     description: 'Free online calculators for math, finance, health & fitness, and more. 200+ accurate tools. No signup required.',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     creator: '@numerixhub',
   },
   alternates: {
-    canonical: 'https://numerixhub.com',
+    canonical: 'https://numerixhub.pages.dev',
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
@@ -60,8 +60,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'NumerixHub',
-    url: 'https://numerixhub.com',
-    logo: 'https://numerixhub.com/logo.png',
+    url: 'https://numerixhub.pages.dev',
+    logo: 'https://numerixhub.pages.dev/logo.png',
     description: 'Free online calculators for math, finance, health & fitness, and more.',
     sameAs: [
       'https://twitter.com/numerixhub',
@@ -73,13 +73,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'NumerixHub',
-    url: 'https://numerixhub.com',
+    url: 'https://numerixhub.pages.dev',
     description: 'Free online calculators for math, finance, health & fitness, and more.',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://numerixhub.com/calculators/?q={search_term_string}',
+        urlTemplate: 'https://numerixhub.pages.dev/calculators/?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
