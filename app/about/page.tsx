@@ -23,7 +23,7 @@ export default function AboutPage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Mission</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                NumerixHub was built with one simple goal: to provide free, accurate, and easy-to-use calculators to everyone on the internet. Whether you're calculating a mortgage payment, planning your fitness journey, solving a math problem, or converting units — we have a tool for you.
+                NumerixHub was built with one simple goal: to provide free, accurate, and easy-to-use calculators to everyone on the internet. Whether you&apos;re calculating a mortgage payment, planning your fitness journey, solving a math problem, or converting units — we have a tool for you.
               </p>
             </div>
 
