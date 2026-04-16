@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     canonical: 'https://numerixhub.pages.dev',
   },
 verification: {
-  google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
+  google: "gz39ksQs_piWuN51AN4rlDuymFHHJrGdiju5MOgB1qs",
 },
 };
 
