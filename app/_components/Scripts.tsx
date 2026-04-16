@@ -8,6 +8,20 @@ const ADSENSE_ID = 'ca-pub-2278011013110319';
 export default function Scripts() {
   return (
     <>
+      {/* GA4 Consent Mode v2 - set defaults before any tracking fires */}
+      <Script id="consent-defaults" strategy="beforeInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'default', {
+            'analytics_storage': 'denied',
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied'
+          });
+        `}
+      </Script>
+
       {/* Google Analytics 4 */}
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}

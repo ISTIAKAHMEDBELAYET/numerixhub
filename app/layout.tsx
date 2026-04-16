@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     canonical: 'https://numerixhub.com',
   },
   verification: {
-    google: 'google-site-verification',
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
   },
 };
 
