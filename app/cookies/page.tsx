@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'Cookie Policy',
   description: 'NumerixHub Cookie Policy – Learn about the cookies we use, why we use them, and how you can control them.',
   alternates: {
-    canonical: 'https://numerixhub.com/cookies/',
+    canonical: 'https://numerixhub.pages.dev/cookies/',
   },
 };
 

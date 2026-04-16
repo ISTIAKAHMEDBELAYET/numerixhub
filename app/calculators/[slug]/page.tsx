@@ -22,12 +22,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     description,
     keywords: calc.keywords,
     alternates: {
-      canonical: `https://numerixhub.com/calculators/${calc.slug}/`,
+      canonical: `https://numerixhub.pages.dev/calculators/${calc.slug}/`,
     },
     openGraph: {
       title,
       description: calc.description,
-      url: `https://numerixhub.com/calculators/${calc.slug}/`,
+      url: `https://numerixhub.pages.dev/calculators/${calc.slug}/`,
       type: 'website',
       images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${calc.name} – NumerixHub` }],
     },
@@ -49,7 +49,7 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
     '@type': 'SoftwareApplication',
     name: calc.name,
     description: calc.description,
-    url: `https://numerixhub.com/calculators/${calc.slug}/`,
+    url: `https://numerixhub.pages.dev/calculators/${calc.slug}/`,
     applicationCategory: 'UtilitiesApplication',
     operatingSystem: 'Web',
     offers: {
@@ -67,19 +67,19 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://numerixhub.com',
+        item: 'https://numerixhub.pages.dev',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Calculators',
-        item: 'https://numerixhub.com/calculators/',
+        item: 'https://numerixhub.pages.dev/calculators/',
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: calc.name,
-        item: `https://numerixhub.com/calculators/${calc.slug}/`,
+        item: `https://numerixhub.pages.dev/calculators/${calc.slug}/`,
       },
     ],
   };

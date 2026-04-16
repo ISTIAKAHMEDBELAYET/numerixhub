@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { calculators } from '@/lib/calculators';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://numerixhub.com';
+  const baseUrl = 'https://numerixhub.pages.dev';
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
