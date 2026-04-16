@@ -50,9 +50,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://numerixhub.pages.dev',
   },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
-  },
+verification: {
+  google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || undefined,
+},
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
