@@ -20,14 +20,14 @@ export default function ContactPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">Contact Us</h1>
-            <p className="text-gray-500 dark:text-gray-400">Have a question or suggestion? We'd love to hear from you.</p>
+            <p className="text-gray-500 dark:text-gray-400">Have a question or suggestion? We&apos;d love to hear from you.</p>
           </div>
 
           {submitted ? (
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-2xl p-8 text-center">
               <div className="text-5xl mb-4">✅</div>
               <h2 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-2">Message Sent!</h2>
-              <p className="text-green-700 dark:text-green-400">Thanks for reaching out. We'll get back to you within 24–48 hours.</p>
+              <p className="text-green-700 dark:text-green-400">Thanks for reaching out. We&apos;ll get back to you within 24–48 hours.</p>
               <button onClick={() => setSubmitted(false)} className="mt-4 text-sm text-green-600 dark:text-green-400 hover:underline">Send another message</button>
             </div>
           ) : (

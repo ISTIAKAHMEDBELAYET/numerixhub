@@ -105,7 +105,7 @@ export default function CookiesPage() {
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">Managing Your Cookie Preferences</h2>
               <p>You can manage your cookie preferences in several ways:</p>
               <ul className="list-disc pl-6 space-y-2 mt-3">
-                <li><strong>Our consent banner</strong>: Use the "Accept All" or "Reject" buttons shown when you first visit.</li>
+                <li><strong>Our consent banner</strong>: Use the &ldquo;Accept All&rdquo; or &ldquo;Reject&rdquo; buttons shown when you first visit.</li>
                 <li><strong>Browser settings</strong>: Most browsers allow you to control cookies through their settings. Blocking all cookies may affect site functionality.</li>
                 <li><strong>Google opt-out</strong>: Use the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">Google Analytics Opt-Out Browser Add-on</a>.</li>
                 <li><strong>Ad personalization</strong>: Manage at <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">Google Ads Settings</a>.</li>
