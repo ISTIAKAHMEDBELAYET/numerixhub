@@ -5,10 +5,28 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      {/* Mobile footer: centered, simplified */}
+      <div className="md:hidden px-4 py-10 text-center">
+        <div className="flex items-center justify-center space-x-2 mb-3">
+          <span className="text-2xl">🧮</span>
+          <span className="font-bold text-xl text-white">NumerixHub</span>
+        </div>
+        <p className="text-sm text-gray-400 leading-relaxed max-w-xs mx-auto mb-6">
+          Free online calculators for math, finance, health, and more. Fast, accurate, and easy to use.
+        </p>
+        <nav className="flex flex-col items-center space-y-3 text-sm mb-6">
+          <Link href="/privacy/" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="/terms/" className="hover:text-white transition-colors">Terms of Service</Link>
+          <Link href="/cookies/" className="hover:text-white transition-colors">Cookie Policy</Link>
+        </nav>
+        <p className="text-sm text-gray-500">© {currentYear} NumerixHub. All rights reserved.</p>
+      </div>
+
+      {/* Desktop footer: multi-column grid */}
+      <div className="hidden md:block max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-1">
+          <div>
             <div className="flex items-center space-x-2 mb-4">
               <span className="text-2xl">🧮</span>
               <span className="font-bold text-xl text-white">NumerixHub</span>
@@ -18,7 +36,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Calculators */}
+          {/* Popular Calculators */}
           <div>
             <h3 className="text-white font-semibold mb-4">Popular Calculators</h3>
             <ul className="space-y-2 text-sm">
@@ -55,9 +73,9 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
+        <div className="mt-10 pt-8 border-t border-gray-800 flex items-center justify-between text-sm text-gray-500">
           <p>© {currentYear} NumerixHub. All rights reserved.</p>
-          <p className="mt-2 md:mt-0">Free online calculators for everyone.</p>
+          <p>Free online calculators for everyone.</p>
         </div>
       </div>
     </footer>
