@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Scripts from '@/app/_components/Scripts';
-import DarkModeToggle from '@/components/DarkModeToggle';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -107,7 +106,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Scripts />
       </head>
       <body className="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-        <DarkModeToggle />
         {children}
       </body>
     </html>

@@ -14,11 +14,6 @@ export default function Footer() {
         <p className="text-sm text-gray-400 leading-relaxed max-w-xs mx-auto mb-6">
           Free online calculators for math, finance, health, and more. Fast, accurate, and easy to use.
         </p>
-        <nav className="flex flex-col items-center space-y-3 text-sm mb-6">
-          <Link href="/privacy/" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <Link href="/terms/" className="hover:text-white transition-colors">Terms of Service</Link>
-          <Link href="/cookies/" className="hover:text-white transition-colors">Cookie Policy</Link>
-        </nav>
         <p className="text-sm text-gray-500">© {currentYear} NumerixHub. All rights reserved.</p>
       </div>
 
