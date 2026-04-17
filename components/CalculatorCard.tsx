@@ -21,7 +21,7 @@ export default function CalculatorCard({ calculator }: CalculatorCardProps) {
   };
 
   return (
-    <Link href={`/calculators/${calculator.slug}/`} className="group block">
+    <Link href={`/${calculator.slug}/`} className="group block">
       <div className="h-full bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 hover:-translate-y-1">
         <div className="flex items-start justify-between mb-3">
           <span className="text-3xl">{calculator.emoji}</span>
