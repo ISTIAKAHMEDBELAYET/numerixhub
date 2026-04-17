@@ -1995,19 +1995,12 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
             <div className="flex items-center space-x-3">
               <span className="text-4xl">{calc.emoji}</span>
               <div>
-                <h1 className="text-2xl font-bold">{calc.name}</h1>
+                <p className="text-2xl font-bold">{calc.name}</p>
                 <p className="text-white/80 text-sm mt-0.5">{calc.description}</p>
               </div>
             </div>
           </div>
           <div className="p-6">{ui}</div>
-        </div>
-
-        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">How to Use {calc.name}</h2>
-          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            {calc.description} Simply enter the required values in the fields above and click the Calculate button to get instant, accurate results. All calculations are performed locally in your browser — no data is sent to any server.
-          </p>
         </div>
       </div>
 
