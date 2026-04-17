@@ -1,0 +1,3 @@
+# Redirect old /calculators/:slug/ paths to new top-level /:slug/ paths
+/calculators/:slug/ /:slug/ 301
+/calculators/:slug /:slug/ 301

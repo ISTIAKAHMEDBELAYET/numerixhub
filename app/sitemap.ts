@@ -51,7 +51,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const calculatorPages: MetadataRoute.Sitemap = calculators.map((calc) => ({
-    url: `${baseUrl}/calculators/${calc.slug}/`,
+    url: `${baseUrl}/${calc.slug}/`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
