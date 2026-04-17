@@ -39,9 +39,12 @@ function BMICalculator() {
     else if (bmi < 30) { category = 'Overweight'; color = 'text-yellow-600'; bgColor = 'bg-yellow-50 dark:bg-yellow-900/20'; }
     else { category = 'Obese'; color = 'text-red-600'; bgColor = 'bg-red-50 dark:bg-red-900/20'; }
     // Healthy weight range (BMI 18.5 – 24.9) for the given height
-    const hLow = unit === 'imperial' ? (18.5 * totalInches * totalInches) / 703 : 18.5 * Math.pow(totalInches * 2.54 / 100, 2);
-    const hHigh = unit === 'imperial' ? (24.9 * totalInches * totalInches) / 703 : 24.9 * Math.pow(totalInches * 2.54 / 100, 2);
-    setResult({ bmi: Math.round(bmi * 10) / 10, category, color, bgColor, healthyLow: hLow, healthyHigh: hHigh, heightIn: totalInches });
+    const heightM = unit === 'imperial' ? totalInches * 0.0254 : parseFloat(heightCm) / 100;
+    const hLow = 18.5 * heightM * heightM;
+    const hHigh = 24.9 * heightM * heightM;
+    const healthyLow = unit === 'imperial' ? (hLow / 0.453592) : hLow;
+    const healthyHigh = unit === 'imperial' ? (hHigh / 0.453592) : hHigh;
+    setResult({ bmi: Math.round(bmi * 10) / 10, category, color, bgColor, healthyLow, healthyHigh, heightIn: totalInches });
   };
 
   return (
@@ -170,7 +173,7 @@ function MortgageCalculator() {
             </div>
             <input type="number" value={downValue} onChange={e => setDownValue(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder={downType === 'pct' ? '20' : '80000'} />
           </div>
-          {homePrice && <div className="text-xs text-gray-400 mt-1">{downPct}% down = {fmt(parseFloat(homePrice) - parseFloat(homePrice) * (1 - parseFloat(downPct) / 100))} loan</div>}
+          {homePrice && <div className="text-xs text-gray-400 mt-1">{downPct}% down = {fmt(parseFloat(homePrice) * (1 - parseFloat(downPct) / 100))} loan</div>}
         </div>
         <div>
           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Interest Rate (%)</label>
@@ -332,7 +335,7 @@ function AgeCalculator() {
         <button onClick={() => setMode('compare')} className={`px-5 py-2 text-sm font-medium ${mode === 'compare' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Compare Two Ages</button>
       </div>
 
-      <div className={`grid gap-4 ${mode === 'compare' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{mode === 'compare' ? 'Person 1 — Date of Birth' : 'Date of Birth'}</label>
           <input type="date" value={dob} onChange={e => setDob(e.target.value)} max={todayStr} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
@@ -1030,27 +1033,26 @@ function DateCalculator() {
 
   const calculateDiff = () => {
     if (!date1 || !date2) return;
-    const d1 = new Date(date1 + 'T00:00:00');
-    const d2 = new Date(date2 + 'T00:00:00');
-    const start = d1 < d2 ? d1 : d2;
-    const end = d1 < d2 ? d2 : d1;
-    if (includeEnd) end.setDate(end.getDate() + 1);
+    const earlier = date1 <= date2 ? date1 : date2;
+    const later = date1 <= date2 ? date2 : date1;
+    const start = new Date(earlier + 'T00:00:00');
+    const end = new Date(later + 'T00:00:00');
 
-    const diffMs = end.getTime() - start.getTime();
-    let totalDays = Math.floor(diffMs / 86400000);
-    if (includeEnd) totalDays += 0; // already added 1 day to end
+    const calDays = Math.floor((end.getTime() - start.getTime()) / 86400000) + (includeEnd ? 1 : 0);
 
-    // Compute years/months/days
-    let years = end.getFullYear() - start.getFullYear();
-    let months = end.getMonth() - start.getMonth();
-    let days = end.getDate() - start.getDate();
-    if (days < 0) { months--; const prev = new Date(end.getFullYear(), end.getMonth(), 0); days += prev.getDate(); }
+    // For years/months/days breakdown, use a copy of end adjusted for includeEnd
+    const endAdj = new Date(later + 'T00:00:00');
+    if (includeEnd) endAdj.setDate(endAdj.getDate() + 1);
+    let years = endAdj.getFullYear() - start.getFullYear();
+    let months = endAdj.getMonth() - start.getMonth();
+    let days = endAdj.getDate() - start.getDate();
+    if (days < 0) { months--; const prev = new Date(endAdj.getFullYear(), endAdj.getMonth(), 0); days += prev.getDate(); }
     if (months < 0) { years--; months += 12; }
 
-    const realEnd = includeEnd ? new Date(date2 + 'T00:00:00') : new Date(date2 + 'T00:00:00');
-    const realStart = new Date(date1 + 'T00:00:00');
-    const bDays = countBusinessDays(realStart < realEnd ? realStart : realEnd, realStart < realEnd ? realEnd : realStart);
-    const calDays = Math.floor(Math.abs(new Date(date2 + 'T00:00:00').getTime() - new Date(date1 + 'T00:00:00').getTime()) / 86400000) + (includeEnd ? 1 : 0);
+    // Business days between start and end (inclusive of end when includeEnd)
+    const bEnd = new Date(later + 'T00:00:00');
+    if (includeEnd) bEnd.setDate(bEnd.getDate() + 1);
+    const bDays = countBusinessDays(start, new Date(bEnd.getTime() - 86400000 > start.getTime() ? bEnd.getTime() - 86400000 : start.getTime()));
 
     setDiffResult({ years, months, days, totalDays: calDays, totalWeeks: Math.floor(calDays / 7), businessDays: bDays, weekends: calDays - bDays });
   };
@@ -1062,7 +1064,6 @@ function DateCalculator() {
     d.setFullYear(d.getFullYear() + sign * parseInt(addYears || '0'));
     d.setMonth(d.getMonth() + sign * parseInt(addMonths || '0'));
     d.setDate(d.getDate() + sign * (parseInt(addWeeks || '0') * 7 + parseInt(addDays || '0')));
-    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     setAddResult(d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
   };
 
@@ -1428,9 +1429,9 @@ function PregnancyCalculator() {
   };
 
   const getWeekLabel = (weeks: number) => {
-    const keys = Object.keys(MILESTONE_WEEKS).map(Number).sort((a, b) => a - b);
-    const key = keys.reverse().find(k => weeks >= k);
-    return key ? MILESTONE_WEEKS[key] : 'Growing every day!';
+    const keys = Object.keys(MILESTONE_WEEKS).map(Number).sort((a, b) => b - a);
+    const key = keys.find(k => weeks >= k);
+    return key !== undefined ? MILESTONE_WEEKS[key] : 'Growing every day!';
   };
 
   const calculate = () => {
