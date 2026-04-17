@@ -84,7 +84,7 @@ export default function HomePage() {
                 Browse All Calculators →
               </Link>
               <Link
-                href="/calculators/mortgage-calculator/"
+                href="/mortgage-calculator/"
                 className="inline-flex items-center justify-center px-8 py-3.5 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 hover:bg-white/30 transition-all text-base"
               >
                 🏠 Try Mortgage Calculator
