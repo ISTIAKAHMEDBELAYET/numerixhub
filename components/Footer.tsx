@@ -35,12 +35,12 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Popular Calculators</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/calculators/mortgage-calculator/" className="hover:text-white transition-colors">Mortgage Calculator</Link></li>
-              <li><Link href="/calculators/bmi-calculator/" className="hover:text-white transition-colors">BMI Calculator</Link></li>
-              <li><Link href="/calculators/compound-interest-calculator/" className="hover:text-white transition-colors">Compound Interest</Link></li>
-              <li><Link href="/calculators/calorie-calculator/" className="hover:text-white transition-colors">Calorie Calculator</Link></li>
-              <li><Link href="/calculators/loan-calculator/" className="hover:text-white transition-colors">Loan Calculator</Link></li>
-              <li><Link href="/calculators/tip-calculator/" className="hover:text-white transition-colors">Tip Calculator</Link></li>
+              <li><Link href="/mortgage-calculator/" className="hover:text-white transition-colors">Mortgage Calculator</Link></li>
+              <li><Link href="/bmi-calculator/" className="hover:text-white transition-colors">BMI Calculator</Link></li>
+              <li><Link href="/compound-interest-calculator/" className="hover:text-white transition-colors">Compound Interest</Link></li>
+              <li><Link href="/calorie-calculator/" className="hover:text-white transition-colors">Calorie Calculator</Link></li>
+              <li><Link href="/loan-calculator/" className="hover:text-white transition-colors">Loan Calculator</Link></li>
+              <li><Link href="/tip-calculator/" className="hover:text-white transition-colors">Tip Calculator</Link></li>
             </ul>
           </div>
 
