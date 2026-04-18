@@ -3681,7 +3681,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
                 overflow: hidden;
                 margin-bottom: 0.5rem;
               }
-              details.dark {
+              :root.dark details {
                 border-color: #374151;
               }
               summary {
@@ -3696,20 +3696,20 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
                 align-items: center;
                 transition: background-color 0.2s;
               }
-              details.dark summary {
+              :root.dark summary {
                 background-color: #374151;
                 color: #f3f4f6;
               }
               summary:hover {
                 background-color: #f3f4f6;
               }
-              details.dark summary:hover {
+              :root.dark summary:hover {
                 background-color: #4b5563;
               }
               details[open] summary {
                 border-bottom: 1px solid #e5e7eb;
               }
-              details.dark[open] summary {
+              :root.dark details[open] summary {
                 border-bottom-color: #374151;
               }
               details > *:not(summary) {
@@ -3717,7 +3717,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
                 background-color: white;
                 color: #4b5563;
               }
-              details.dark > *:not(summary) {
+              :root.dark details > *:not(summary) {
                 background-color: #1f2937;
                 color: #9ca3af;
               }
@@ -3728,7 +3728,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
                 transition: transform 0.3s;
                 flex-shrink: 0;
               }
-              details.dark .chevron {
+              :root.dark .chevron {
                 color: #818cf8;
               }
               details[open] .chevron {
@@ -3737,7 +3737,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
             `}</style>
             <div>
               {content.faqs.map((faq, i) => (
-                <details key={i} className="dark">
+                <details key={i}>
                   <summary>
                     <span className="text-left pr-4">{faq.q}</span>
                     <svg className="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
