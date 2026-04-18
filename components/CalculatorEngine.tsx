@@ -3343,6 +3343,62 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { q: 'What if my cycle is not 28 days?', a: 'If your cycle is longer or shorter than 28 days, adjust the LMP date by the difference. For example, a 35-day cycle means ovulation is approximately day 21, so subtract 7 days from the LMP.' },
     ],
   },
+  'loan-calculator': {
+    howTo: 'Enter the loan amount (principal), annual interest rate, and loan term in years. Click Calculate to see your monthly payment, total interest paid, and total amount paid over the life of the loan.',
+    formula: 'Monthly Payment = P × [r(1+r)^n] / [(1+r)^n − 1], where P = principal, r = monthly interest rate, n = number of months.',
+    faqs: [
+      { q: 'What does APR mean?', a: 'APR (Annual Percentage Rate) is the yearly cost of the loan including interest and fees, expressed as a percentage.' },
+      { q: 'Can I pay off a loan early?', a: 'Yes, most loans allow early repayment. Paying extra reduces total interest paid and shortens the loan term.' },
+    ],
+  },
+  'percentage-calculator': {
+    howTo: 'Choose your calculation type (what is X% of Y, X is what % of Y, or percentage change). Enter the values and click Calculate. This is useful for discounts, markups, tips, and finding percentages.',
+    formula: 'Percentage of: (Part ÷ Total) × 100. Percentage Change: ((New − Old) ÷ Old) × 100.',
+    faqs: [
+      { q: 'How do I calculate a 20% discount?', a: 'Multiply the original price by 0.20, then subtract from the original price. Or use this calculator\'s "percentage of" function.' },
+      { q: 'What is the difference between markup and margin?', a: 'Markup is the percentage added to cost. Margin is the profit as a percentage of the selling price.' },
+    ],
+  },
+  'tip-calculator': {
+    howTo: 'Enter the bill amount and select a tip percentage (typically 15-20%). The calculator shows the tip amount and total with tip. You can also split the bill among multiple people.',
+    formula: 'Tip = Bill Amount × (Tip % ÷ 100). Total = Bill + Tip.',
+    faqs: [
+      { q: 'What is a standard tip amount?', a: 'In the US, standard tips are 15% for standard service, 18% for good service, and 20%+ for excellent service. Tips vary by country and establishment.' },
+      { q: 'Should I tip on the pre-tax or post-tax amount?', a: 'Tips are typically calculated on the pre-tax total, but this varies by country and custom.' },
+    ],
+  },
+  'compound-interest-calculator': {
+    howTo: 'Enter your principal amount, annual interest rate, compounding frequency (annually, semi-annually, quarterly, monthly, daily), and time in years. Click Calculate to see how your investment grows with compound interest.',
+    formula: 'A = P(1 + r/n)^(nt), where P = principal, r = annual rate, n = compounding frequency, t = time in years.',
+    faqs: [
+      { q: 'What is compound interest?', a: 'Compound interest is when you earn interest on both your principal and your previously earned interest. The more frequently it compounds, the faster it grows.' },
+      { q: 'What\'s the difference between simple and compound interest?', a: 'Simple interest is calculated only on the principal. Compound interest is calculated on the principal plus accumulated interest.' },
+    ],
+  },
+  'temperature-calculator': {
+    howTo: 'Enter a temperature value and select the unit (Celsius, Fahrenheit, or Kelvin). The calculator automatically converts to the other units. Useful for cooking, science, and international comparisons.',
+    formula: 'Celsius to Fahrenheit: (C × 9/5) + 32. Fahrenheit to Celsius: (F − 32) × 5/9.',
+    faqs: [
+      { q: 'What\'s the difference between Celsius and Fahrenheit?', a: 'Celsius is the standard in most countries. Fahrenheit is used primarily in the US. Celsius is based on water\'s freezing and boiling points (0° and 100°).' },
+      { q: 'What is absolute zero?', a: 'Absolute zero (−273.15°C or −459.67°F) is the lowest possible temperature where all molecular motion stops.' },
+    ],
+  },
+  'currency-converter': {
+    howTo: 'Enter an amount and select the source and target currencies. The calculator converts between different world currencies using current exchange rates. Useful for travel and international transactions.',
+    formula: 'Converted Amount = Original Amount × (Target Rate ÷ Source Rate).',
+    faqs: [
+      { q: 'Are exchange rates real-time?', a: 'Exchange rates fluctuate constantly based on market conditions. For large transactions, check with your bank for the exact rate they use.' },
+      { q: 'Why do exchange rates change?', a: 'Exchange rates are determined by supply and demand in currency markets, influenced by economic conditions, interest rates, and political factors.' },
+    ],
+  },
+  'scientific-calculator': {
+    howTo: 'Enter a mathematical expression using numbers and operators (+ − × ÷ ^ √). Click Calculate to evaluate the expression and see the result with full precision.',
+    formula: 'Evaluates mathematical expressions following standard order of operations (PEMDAS/BODMAS).',
+    faqs: [
+      { q: 'What operations are supported?', a: 'Addition, subtraction, multiplication, division, exponents, square roots, and basic trigonometric functions.' },
+      { q: 'What is the order of operations?', a: 'PEMDAS: Parentheses, Exponents, Multiplication/Division (left to right), Addition/Subtraction (left to right).' },
+    ],
+  },
 };
 
 const defaultContent = (name: string) => ({
