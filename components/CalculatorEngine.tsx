@@ -3524,8 +3524,6 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
             {relatedCalcs.map(r => (
               <li key={r.slug}>
                 <Link href={`/${r.slug}/`} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
-                  <span>{r.emoji}</span>
-                <Link href={`/calculators/${r.slug}/`} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
                   <span aria-hidden="true">{r.emoji}</span>
                   <span className="group-hover:underline">{r.name}</span>
                 </Link>
