@@ -3310,12 +3310,15 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
     ],
   },
   'mortgage-calculator': {
-    howTo: 'Enter your home price and down payment (as a percentage or fixed dollar amount). The loan amount updates automatically. Set your interest rate and loan term, then click Calculate. Expand the advanced section to add property tax, home insurance, PMI, HOA fees, and extra monthly payments to see your full monthly cost and a yearly amortization schedule.',
-    formula: 'Monthly P&I = P × r(1+r)ⁿ / [(1+r)ⁿ − 1], where P = loan amount, r = monthly rate, n = number of payments.',
+    howTo: 'Enter your home price and down payment (as a percentage or fixed dollar amount). The loan amount updates automatically. Set your interest rate and loan term, then click Calculate. Expand the advanced section to add property tax, home insurance, PMI, HOA fees, and extra monthly payments to see your full monthly cost and a yearly amortization schedule.\n\n**Mortgage Components:**\n• **Down Payment**: Upfront cash paid to the seller (typically 3–20% of home price). Lenders prefer 20%+.\n• **Loan Amount**: Home price minus down payment — the amount you borrow.\n• **Interest Rate**: Annual percentage charged by the lender (varies by credit score, market conditions, loan type).\n• **Loan Term**: Duration to repay (typically 15, 20, or 30 years for fixed-rate mortgages).\n• **Property Tax**: Annual tax paid to local government (~0.8–1.3% of home value annually, varies by location).\n• **Homeowner\'s Insurance**: Annual insurance protecting your property (required by lenders; typical cost $800–2,000/year).\n• **PMI (Private Mortgage Insurance)**: Required if down payment < 20%; protects lender if you default (~0.5–1% annually).\n• **HOA Fees**: Monthly fees for homeowner association maintenance (common in condos/planned communities).',
+    formula: 'Monthly P&I = P × r(1+r)ⁿ / [(1+r)ⁿ − 1], where P = loan amount, r = monthly rate (APR÷12), n = number of payments (years×12).',
     faqs: [
-      { q: 'What is PMI and when does it apply?', a: 'Private Mortgage Insurance (PMI) is required when your down payment is less than 20%. It protects the lender and typically costs 0.5–1% of the loan amount per year.' },
-      { q: 'How does an extra monthly payment help?', a: 'Extra principal payments reduce your balance faster, saving significant interest over the life of the loan and shortening the payoff timeline.' },
-      { q: 'What is included in the total monthly payment?', a: 'The full monthly cost includes principal & interest, property tax (1/12 of annual), homeowner\'s insurance (1/12 of annual), PMI (if applicable), and HOA fees.' },
+      { q: 'What is PMI and when does it apply?', a: 'Private Mortgage Insurance (PMI) is required when your down payment is less than 20%. It protects the lender if you default, and typically costs 0.5–1.9% of the loan amount annually. Once you reach 20% equity (80% LTV), you can usually request removal.' },
+      { q: 'How does an extra monthly payment help?', a: 'Extra principal payments reduce your loan balance faster, which means less interest accumulates. On a 30-year mortgage, even $100/month extra can save tens of thousands in interest and shorten your payoff by several years.' },
+      { q: 'What is included in the total monthly payment?', a: 'The full monthly housing cost includes principal & interest (the core payment), property tax (1/12 of annual), homeowner\'s insurance (1/12 of annual), PMI (if down payment < 20%), and HOA fees (if applicable).' },
+      { q: 'How do interest rates affect my monthly payment?', a: 'Higher interest rates increase the monthly payment significantly. A 1% rate increase on a $300,000 loan can add $250–300/month. Factors affecting your rate include credit score, market conditions, loan type (FRM vs ARM), and loan term.' },
+      { q: 'What\'s the difference between fixed-rate and adjustable-rate mortgages?', a: 'Fixed-rate mortgages (FRM) have the same interest rate for the entire loan term, so your payment never changes. Adjustable-rate mortgages (ARM) start with a lower rate but adjust periodically (usually annually), which can increase your payment.' },
+      { q: 'Can I pay off my mortgage early?', a: 'Yes, most mortgages allow early repayment without penalty. Extra payments directly reduce your principal and save substantial interest. You can choose to make lump-sum payments or add a set amount each month.' },
     ],
   },
   'bmi-calculator': {
@@ -3397,6 +3400,27 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
     faqs: [
       { q: 'What operations are supported?', a: 'Addition, subtraction, multiplication, division, exponents, square roots, and basic trigonometric functions.' },
       { q: 'What is the order of operations?', a: 'PEMDAS: Parentheses, Exponents, Multiplication/Division (left to right), Addition/Subtraction (left to right).' },
+    ],
+  },
+  'body-fat-calculator': {
+    howTo: 'Select your gender and unit system (metric or imperial). Enter your measurements: waist (or abdomen) circumference, neck circumference, and for women, hip circumference. The calculator uses the U.S. Navy Method (Hodgdon & Beckett formulas) to estimate body fat percentage based on these circumference measurements. Results include body fat category (Essential, Athlete, Fitness, Average, or Obese), fat mass, lean body mass, and ideal body fat for your age.',
+    formula: 'U.S. Navy Method (Males): BFP = 86.010×log₁₀(abdomen−neck) − 70.041×log₁₀(height) + 36.76. (Females): BFP = 163.205×log₁₀(waist+hip−neck) − 97.684×log₁₀(height) − 78.387. Fat Mass (kg) = BF% × Weight. Lean Mass = Weight − Fat Mass.',
+    faqs: [
+      { q: 'What are body fat categories?', a: 'Essential fat (10–13% women, 2–5% men) is necessary for life functions. Athletes: 6–13% men, 14–20% women. Fitness: 14–17% men, 21–24% women. Average: 18–24% men, 25–31% women. Obese: 25%+ men, 32%+ women.' },
+      { q: 'How accurate is the U.S. Navy Method?', a: 'The Navy Method is reasonably accurate but estimates based on circumference, not direct measurement. For highest accuracy, use DEXA scans or hydrostatic weighing. The Navy method ±3–5% error is typical.' },
+      { q: 'How do I measure circumferences correctly?', a: 'For waist: horizontal at navel level (relax stomach). For neck: just below larynx, tape sloping downward. For hips (women): at widest horizontal point around buttocks. Use a cloth tape measure, not metal. Measure to the nearest 0.25 inch (0.5 cm).' },
+      { q: 'Why is body fat percentage important?', a: 'Body fat percentage reveals health better than weight alone. It indicates cardiovascular health, metabolic function, and fitness level. Healthy ranges vary by age; generally, lower (within range) is associated with better health outcomes.' },
+    ],
+  },
+  'triangle-calculator': {
+    howTo: 'Provide any 3 values from the following 6: side lengths (a, b, c) and angles (A, B, C). At least one side must be provided. The calculator solves the triangle using the Law of Sines, Law of Cosines, and Pythagorean theorem (for right triangles). Results include all missing sides, angles, area, perimeter, height, median, inradius, and circumradius.',
+    formula: 'Law of Cosines: c² = a² + b² − 2ab×cos(C). Law of Sines: a/sin(A) = b/sin(B) = c/sin(C). Area (Heron\'s): √[s(s−a)(s−b)(s−c)] where s = (a+b+c)/2. Area (SAS): 0.5×a×b×sin(C). Pythagorean (right): a² + b² = c².',
+    faqs: [
+      { q: 'What is the Law of Sines and when is it used?', a: 'The Law of Sines states that the ratio of a side to the sine of its opposite angle is constant for all three sides. Use it when you know two angles and one side (AAS/ASA) or two sides and a non-opposite angle (SSA, ambiguous case).' },
+      { q: 'What is the Law of Cosines?', a: 'The Law of Cosines (c² = a² + b² − 2ab×cos(C)) relates sides and angles. Use it for SAS (two sides + included angle) or SSS (all three sides) cases.' },
+      { q: 'What is Heron\'s Formula?', a: 'Heron\'s Formula calculates the area of any triangle given only its three side lengths: Area = √[s(s−a)(s−b)(s−c)], where s is the semi-perimeter (a+b+c)/2.' },
+      { q: 'What are inradius and circumradius?', a: 'Inradius is the radius of the largest circle that fits inside the triangle. Circumradius is the radius of the circle that passes through all three vertices. Both are useful in geometry and trigonometry.' },
+      { q: 'What is the difference between acute, right, and obtuse triangles?', a: 'Acute: all angles < 90°. Right: one angle = 90° (uses Pythagorean theorem). Obtuse: one angle > 90°. Sum of angles in any triangle always = 180°.' },
     ],
   },
 };
