@@ -3423,6 +3423,98 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { q: 'What is the difference between acute, right, and obtuse triangles?', a: 'Acute: all angles < 90°. Right: one angle = 90° (uses Pythagorean theorem). Obtuse: one angle > 90°. Sum of angles in any triangle always = 180°.' },
     ],
   },
+  'auto-loan-calculator': {
+    howTo: 'Enter your vehicle price, down payment, trade-in value (if applicable), loan term, and interest rate. Include any cash incentives, rebates, sales tax, and fees. The calculator shows monthly payment, total interest, total cost, and an amortization schedule. You can compare different financing options to find the best deal.',
+    formula: 'Monthly Payment = [P × r(1+r)^n] / [(1+r)^n − 1], where P = financed amount, r = monthly rate (APR÷12), n = number of payments. Sales Tax varies by state and trade-in value accounting.',
+    faqs: [
+      { q: 'What is a trade-in value and how does it affect my loan?', a: 'A trade-in is when you sell your current vehicle to the dealership for credit toward a new car. The trade-in value reduces the financed amount. Some states reduce sales tax based on trade-in value; others calculate tax on the full price.' },
+      { q: 'What are common car purchase fees?', a: 'Document fees (~$100–200), Title & Registration fees (varies by state), Destination fee (~$900–1,500), Advertising fees, and Insurance (mandatory for full coverage on financed cars). Some dealerships add mysterious fees—ask for justification.' },
+      { q: 'Should I take cash rebate or low interest rate financing?', a: 'Cash rebates instantly reduce the price; low rates reduce interest paid. With a low APR (0–2.9%), financing is often better. With a higher rate (5%+), a cash rebate may save more money overall.' },
+      { q: 'What is the best auto loan term?', a: 'Typical terms: 36, 48, 60, 72, or 84 months. Shorter terms (36–48 mo) have lower interest but higher payments. Longer terms (60–84 mo) have lower payments but higher total interest.' },
+      { q: 'Can I pay off my auto loan early?', a: 'Most lenders allow early payoff without penalty. Extra payments directly reduce principal, saving significant interest. For example, paying $100 extra per month can save thousands over the loan life.' },
+      { q: 'What is the difference between direct lending and dealership financing?', a: 'Direct lending: You get pre-approved from a bank/credit union, then use that financing at the dealership. Dealership financing: The dealership arranges financing directly. Direct lending gives you more negotiating power.' },
+    ],
+  },
+  'loan-calculator': {
+    howTo: 'Choose a loan type: Amortized (fixed payments), Deferred (single lump sum at maturity), or Bond (predetermined face value). Enter the loan amount, annual interest rate, term, and compounding frequency. Click Calculate to see monthly/annual payment, total interest, and total amount owed. Use this for mortgages, auto loans, personal loans, student loans, or bonds.',
+    formula: 'Amortized: PMT = [P × r(1+r)^n] / [(1+r)^n − 1]. Deferred: A = P(1+r)^t. Bond: P = FV / (1+r)^t, where P = principal, r = rate, n/t = periods, FV = face value.',
+    faqs: [
+      { q: 'What is an amortized loan?', a: 'An amortized loan has regular payments (usually monthly) where each payment includes principal and interest. Common examples: mortgages, auto loans, personal loans. The balance decreases over time until fully paid.' },
+      { q: 'What is a secured vs unsecured loan?', a: 'Secured loans require collateral (home, car, etc.). If you default, the lender can seize the asset. Unsecured loans (credit cards, personal loans) have no collateral but higher interest rates and stricter approval.' },
+      { q: 'What are the 5 C\'s of credit?', a: 'Lenders evaluate: (1) Character—credit history & reliability, (2) Capacity—debt-to-income ratio, (3) Capital—savings & assets, (4) Collateral—items pledged, (5) Conditions—lending climate & loan purpose.' },
+      { q: 'What is APR vs Interest Rate?', a: 'Interest Rate is the cost of borrowing principal only. APR (Annual Percentage Rate) includes interest plus fees (broker fees, points, closing costs). APR gives a more complete picture of total borrowing cost.' },
+      { q: 'What is a deferred payment loan?', a: 'A deferred payment loan has a single large payment due at maturity, with little-to-no payments beforehand. Common in commercial loans and balloon loans. Interest accrues throughout the term.' },
+    ],
+  },
+  'interest-calculator': {
+    howTo: 'Enter your initial investment amount, annual interest rate, and time period (years/months). Choose compounding frequency (daily, monthly, quarterly, annually) and add periodic contributions if desired. Optionally include tax rate and inflation to see real vs nominal returns. The calculator displays total interest earned and shows your money\'s growth over time.',
+    formula: 'Compound Interest: A = P(1+r/n)^(nt), where P = principal, r = annual rate, n = compounding periods per year, t = time in years. Rule of 72: Years to double ≈ 72 ÷ interest rate (%).',
+    faqs: [
+      { q: 'What is the difference between simple and compound interest?', a: 'Simple interest: calculated only on the principal (rare). Compound interest: calculated on principal + accumulated interest (common). Compound interest grows exponentially; the more frequently it compounds, the faster it grows.' },
+      { q: 'What is the Rule of 72?', a: 'A quick mental math trick: Divide 72 by your interest rate to estimate years needed to double money. Example: At 6% interest, money doubles in ~12 years (72÷6=12). Accurate for rates 5–10%.' },
+      { q: 'How do taxes affect my returns?', a: 'Interest income is taxable in most cases. If your marginal tax rate is 25% and you earn 5% interest, your after-tax return is ~3.75%. CDs, bonds, and savings account interest are fully taxable; Treasury bonds may have tax advantages.' },
+      { q: 'How does inflation reduce purchasing power?', a: 'Inflation (typically 2–3% annually) reduces what each dollar can buy. A 5% interest rate with 3% inflation means 2% real growth. To maintain value, your return must exceed inflation.' },
+      { q: 'What\'s the best compounding frequency?', a: 'The more frequent, the better: Daily > Monthly > Quarterly > Annually. Continuous compounding is theoretical maximum. Most savings accounts compound daily; investment accounts vary.' },
+    ],
+  },
+  'payment-calculator': {
+    howTo: 'Use the Fixed Term tab to calculate monthly payment for a loan with a set term. Use the Fixed Payments tab to calculate how long it takes to pay off a loan with a fixed monthly payment. Enter loan amount, interest rate, and term (or desired monthly payment). Choose between fixed or variable rates. The calculator displays monthly payment, total interest, and an amortization schedule.',
+    formula: 'Fixed Term: PMT = [P × r(1+r)^n] / [(1+r)^n − 1]. Fixed Payment: n = −log(1−[P×r/PMT]) / log(1+r), where P = principal, r = monthly rate, PMT = payment.',
+    faqs: [
+      { q: 'What is the difference between fixed and variable interest rates?', a: 'Fixed rates stay the same for the entire loan term, so your payment never changes. Variable (adjustable) rates fluctuate with market indices (Fed rate, LIBOR). Variable rates often start lower but can increase, making payments unpredictable.' },
+      { q: 'What is APR and why does it differ from the stated interest rate?', a: 'APR (Annual Percentage Rate) includes interest plus fees, commissions, and closing costs rolled into a yearly rate. Interest Rate is just the cost of borrowing. APR gives a true picture of total borrowing cost.' },
+      { q: 'Should I choose a shorter or longer loan term?', a: 'Shorter terms (15 yrs): Higher monthly payment, much less total interest paid, faster debt freedom. Longer terms (30 yrs): Lower monthly payment, higher total interest paid, more flexibility. Choose based on your budget.' },
+      { q: 'What happens if my monthly payment doesn\'t cover interest?', a: 'If your payment is too low to cover accrued interest, your balance grows (negative amortization). This is rare but can happen with option-ARM mortgages. Avoid this by ensuring your payment covers at least the interest.' },
+      { q: 'Can I pay off my loan early and avoid interest?', a: 'Yes, most loans allow early payoff without penalty (though some mortgages have prepayment penalties—check your contract). Every extra dollar reduces principal, saving interest and shortening the loan.' },
+    ],
+  },
+  'retirement-calculator': {
+    howTo: 'Enter your current age, retirement age, life expectancy, current income, and current retirement savings. Specify your assumed annual return rate and inflation. The calculator estimates: (1) how much you need at retirement, (2) how much to save monthly, (3) how much you can withdraw yearly, and (4) how long your money will last. Use the advanced options to include Social Security, pensions, and other income sources.',
+    formula: 'Amount Needed = Annual Expense Need / 4% (the 4% Rule). Monthly Savings = (Target Amount − Current Savings) / (Months Until Retirement × (1+Return)^(months/12)). Annual Withdrawal ≈ 4% of portfolio (inflation-adjusted).',
+    faqs: [
+      { q: 'How much do I need to retire?', a: 'The 4% Rule suggests you can safely withdraw 4% of your portfolio annually. To need $50,000/year, you need $1.25M saved ($50k÷0.04). However, this varies by lifestyle, life expectancy, and market returns.' },
+      { q: 'What is the 80% Rule?', a: 'Suggests you need 70–80% of pre-retirement income to maintain lifestyle. If you earned $100k/year, plan for $70–80k/year in retirement. Adjust based on your specific circumstances (travel, health, lifestyle changes).' },
+      { q: 'What is the 10% Rule?', a: 'Save 10–15% of your pre-tax income annually starting at age 25. By retirement age (~65), this typically generates a $1M+ nest egg. This assumes consistent returns and disciplined savings.' },
+      { q: 'What are the main sources of retirement income?', a: '(1) Social Security (~40% of pre-retirement income for average earner), (2) 401(k)/IRA savings, (3) Pensions, (4) Passive income (rentals, dividends, royalties), (5) Part-time work, (6) Home equity (reverse mortgage).' },
+      { q: 'Should I retire at 62, 67, or 70?', a: 'Retiring at 62: Lowest monthly Social Security benefit (~70% of full), but more retirement years to enjoy. At 67 (full retirement age): 100% benefit, good balance. At 70: Highest benefit (~124% of full), best if you live long.' },
+      { q: 'How does inflation affect retirement savings?', a: 'Average inflation is ~3% annually. A $50k/year need in today\'s dollars requires $65k+ in 10 years. Your investment returns must exceed inflation to maintain purchasing power. Consider inflation-protected investments (TIPS).' },
+    ],
+  },
+  'amortization-calculator': {
+    howTo: 'Enter the loan amount, annual interest rate, and loan term (years/months). Click Calculate to generate a detailed amortization schedule showing each year\'s principal paid, interest paid, and remaining balance. Optional: add extra monthly payments to see accelerated payoff and interest savings. Useful for mortgages, auto loans, personal loans, and business loans.',
+    formula: 'Monthly Payment = [P × r(1+r)^n] / [(1+r)^n − 1]. Each period: Interest = Balance × r; Principal = Payment − Interest; New Balance = Balance − Principal.',
+    faqs: [
+      { q: 'What is amortization?', a: 'Amortization is the systematic repayment of a loan over time through regular payments. Each payment covers interest and reduces principal. The term also refers to spreading business asset costs over their useful life in accounting.' },
+      { q: 'Why does my first payment mostly go toward interest?', a: 'Early payments are mostly interest because the outstanding balance is high. As you pay down principal, the balance shrinks, so less interest accrues and more of each payment goes toward principal. This is why extra payments early in the loan save significant interest.' },
+      { q: 'How much interest do I actually pay over the loan life?', a: 'Total interest = (Monthly Payment × Number of Payments) − Loan Amount. For a $300k mortgage at 6% over 30 years: ~$647k paid total, ~$347k in interest. Extra payments can reduce this dramatically.' },
+      { q: 'What if I make bi-weekly payments instead of monthly?', a: 'Bi-weekly payments (half the monthly payment every 2 weeks) = 26 payments/year = 13 months of payments. This accelerates payoff and saves interest compared to 12 monthly payments.' },
+      { q: 'Can I use amortization for business assets?', a: 'Yes, amortization spreads the cost of intangible assets (patents, trademarks, goodwill, copyrights) over their useful life for tax purposes. Tangible assets use depreciation. Both reduce taxable income over time.' },
+    ],
+  },
+  'investment-calculator': {
+    howTo: 'Enter your starting amount, desired monthly/annual contributions, expected annual return rate, and investment length. The calculator shows your ending balance, total contributions, and interest earned. Choose from different investment tabs to calculate: end amount, required return rate, needed contributions, or time to reach a goal. View the accumulation schedule to see yearly growth.',
+    formula: 'Future Value = P(1+r)^t + PMT × [((1+r)^t − 1) / r], where P = principal, r = periodic rate, t = periods, PMT = periodic payment.',
+    faqs: [
+      { q: 'What are the main investment types?', a: 'CDs & Bonds (low-risk, 1–4% returns), Stocks & ETFs (medium risk, 8–10% average), Real Estate (medium risk, 3–7% returns), Commodities (high volatility, gold ~5%, oil ~6%), Mutual Funds (diversified, varies).' },
+      { q: 'What is a CD (Certificate of Deposit)?', a: 'A CD is a low-risk savings product. You deposit money for a fixed term (3 months–5 years) at a guaranteed interest rate (typically 4–5% currently). In the US, CDs up to $250k are FDIC-insured. Penalty applies for early withdrawal.' },
+      { q: 'What is the difference between stocks and bonds?', a: 'Stocks represent ownership in companies; value fluctuates, dividends vary. Bonds are IOUs; you lend money and earn fixed interest. Stocks: higher risk, higher potential return. Bonds: lower risk, steady income.' },
+      { q: 'What is the S&P 500 and why does it matter?', a: 'The S&P 500 is an index of 500 large US companies. Historical average return: ~10% annually. Many use it as a benchmark for investment performance. Low-cost index funds (VOO, SPY) track it.' },
+      { q: 'What is a real estate investment?', a: 'Buying property to rent out (rental income) or flip (buy low, sell high). Returns: 3–7% rental yield + appreciation. Requires capital upfront, maintenance costs, and management. REITs offer passive real estate exposure.' },
+      { q: 'Should I invest for the short or long term?', a: 'Short term (< 5 years): Prefer bonds, CDs, stable value funds. Long term (10+ years): Can weather stock market volatility; historically stocks outpace inflation. Younger investors can take more risk; older investors need more stability.' },
+    ],
+  },
+  'currency-converter': {
+    howTo: 'Enter an amount, select source and target currencies, then click Calculate. The converter displays the converted amount using current market exchange rates. You can also view a comparison table with major currencies and their rates. Useful for travel planning, international business, and comparing purchasing power across countries.',
+    formula: 'Converted Amount = Original Amount × (Target Currency Rate ÷ Source Currency Rate). Exchange rates are based on interbank rates (wholesale) but actual rates depend on your bank, fees, and bid-ask spreads.',
+    faqs: [
+      { q: 'Where do exchange rates come from?', a: 'Exchange rates are determined by the foreign exchange market (forex)—a global, decentralized market where currencies are traded. Rates fluctuate every second based on supply, demand, interest rates, inflation, and economic news.' },
+      { q: 'Why do exchange rates change?', a: 'Differences in inflation, interest rates, trade deficits, political stability, economic performance, and investor sentiment all influence exchange rates. Stronger economies usually have stronger currencies.' },
+      { q: 'What is a bid-ask spread?', a: 'The bid is what buyers offer; the ask is what sellers want. The spread is the difference. Your bank/money changer pockets this as profit. Forex traders typically get tighter spreads than consumers.' },
+      { q: 'Should I exchange money at home or abroad?', a: 'Generally, exchanging at home (via your bank) is better than airport kiosks or overseas hotels—you get better rates and avoid rush fees. Compare rates from multiple banks before exchanging.' },
+      { q: 'What is "major currency pair"?', a: 'Major pairs involve the USD paired with other major currencies (EUR, GBP, JPY, CAD, AUD, CHF). They trade highest volumes and have tightest spreads. EUR/USD is the most-traded pair globally.' },
+      { q: 'How do credit/debit cards compare to cash when traveling?', a: 'Cards: Better exchange rates (close to wholesale), no carrying cash risk, fraud protection. Disadvantages: foreign transaction fees (1–3%), some places don\'t accept cards. Cash: Accepted everywhere, no fees, but vulnerable to theft.' },
+    ],
+  },
 };
 
 const defaultContent = (name: string) => ({
