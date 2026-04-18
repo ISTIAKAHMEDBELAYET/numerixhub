@@ -3345,14 +3345,6 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { q: 'What if my cycle is not 28 days?', a: 'If your cycle is longer or shorter than 28 days, adjust the LMP date by the difference. For example, a 35-day cycle means ovulation is approximately day 21, so subtract 7 days from the LMP.' },
     ],
   },
-  'loan-calculator': {
-    howTo: 'Enter the loan amount (principal), annual interest rate, and loan term in years. Click Calculate to see your monthly payment, total interest paid, and total amount paid over the life of the loan.',
-    formula: 'Monthly Payment = P × [r(1+r)^n] / [(1+r)^n − 1], where P = principal, r = monthly interest rate, n = number of months.',
-    faqs: [
-      { q: 'What does APR mean?', a: 'APR (Annual Percentage Rate) is the yearly cost of the loan including interest and fees, expressed as a percentage.' },
-      { q: 'Can I pay off a loan early?', a: 'Yes, most loans allow early repayment. Paying extra reduces total interest paid and shortens the loan term.' },
-    ],
-  },
   'percentage-calculator': {
     howTo: 'Choose your calculation type (what is X% of Y, X is what % of Y, or percentage change). Enter the values and click Calculate. This is useful for discounts, markups, tips, and finding percentages.',
     formula: 'Percentage of: (Part ÷ Total) × 100. Percentage Change: ((New − Old) ÷ Old) × 100.',
