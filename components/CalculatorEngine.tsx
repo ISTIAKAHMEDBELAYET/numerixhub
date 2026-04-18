@@ -3377,14 +3377,6 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { q: 'What is absolute zero?', a: 'Absolute zero (−273.15°C or −459.67°F) is the lowest possible temperature where all molecular motion stops.' },
     ],
   },
-  'currency-converter': {
-    howTo: 'Enter an amount and select the source and target currencies. The calculator converts between different world currencies using current exchange rates. Useful for travel and international transactions.',
-    formula: 'Converted Amount = Original Amount × (Target Rate ÷ Source Rate).',
-    faqs: [
-      { q: 'Are exchange rates real-time?', a: 'Exchange rates fluctuate constantly based on market conditions. For large transactions, check with your bank for the exact rate they use.' },
-      { q: 'Why do exchange rates change?', a: 'Exchange rates are determined by supply and demand in currency markets, influenced by economic conditions, interest rates, and political factors.' },
-    ],
-  },
   'scientific-calculator': {
     howTo: 'Enter a mathematical expression using numbers and operators (+ − × ÷ ^ √). Click Calculate to evaluate the expression and see the result with full precision.',
     formula: 'Evaluates mathematical expressions following standard order of operations (PEMDAS/BODMAS).',
