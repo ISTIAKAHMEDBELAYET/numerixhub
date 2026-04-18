@@ -3596,7 +3596,6 @@ const defaultContent = (name: string) => ({
 });
 
 export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
-  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const relatedCalcs = calculators.filter(c => c.category === calc.category && c.slug !== calc.slug).slice(0, 6);
   const content = calcContent[calc.slug] ?? defaultContent(calc.name);
 
@@ -3687,33 +3686,82 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
           )}
         </div>
 
-        {/* FAQ */}
+        {/* FAQ - Pure CSS Accordion */}
         {content.faqs.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
-            <div className="space-y-2">
+            <style>{`
+              details {
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                margin-bottom: 0.5rem;
+              }
+              details.dark {
+                border-color: #374151;
+              }
+              summary {
+                background-color: #f9fafb;
+                padding: 1rem;
+                cursor: pointer;
+                user-select: none;
+                font-weight: 600;
+                color: #111827;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: background-color 0.2s;
+              }
+              details.dark summary {
+                background-color: #374151;
+                color: #f3f4f6;
+              }
+              summary:hover {
+                background-color: #f3f4f6;
+              }
+              details.dark summary:hover {
+                background-color: #4b5563;
+              }
+              details[open] summary {
+                border-bottom: 1px solid #e5e7eb;
+              }
+              details.dark[open] summary {
+                border-bottom-color: #374151;
+              }
+              details > *:not(summary) {
+                padding: 0.75rem 1rem;
+                background-color: white;
+                color: #4b5563;
+              }
+              details.dark > *:not(summary) {
+                background-color: #1f2937;
+                color: #9ca3af;
+              }
+              .chevron {
+                width: 1.25rem;
+                height: 1.25rem;
+                color: #4f46e5;
+                transition: transform 0.3s;
+                flex-shrink: 0;
+              }
+              details.dark .chevron {
+                color: #818cf8;
+              }
+              details[open] .chevron {
+                transform: rotate(180deg);
+              }
+            `}</style>
+            <div>
               {content.faqs.map((faq, i) => (
-                <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setExpandedFAQ(expandedFAQ === i ? null : i)}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <span className="font-semibold text-gray-900 dark:text-white text-left">{faq.q}</span>
-                    <svg
-                      className={`w-5 h-5 text-indigo-600 dark:text-indigo-400 transition-transform ${expandedFAQ === i ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                <details key={i} className="dark">
+                  <summary>
+                    <span className="text-left pr-4">{faq.q}</span>
+                    <svg className="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
-                  </button>
-                  {expandedFAQ === i && (
-                    <div className="px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{faq.a}</p>
-                    </div>
-                  )}
-                </div>
+                  </summary>
+                  <p className="text-sm leading-relaxed">{faq.a}</p>
+                </details>
               ))}
             </div>
           </div>
