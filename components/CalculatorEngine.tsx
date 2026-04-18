@@ -13,14 +13,15 @@ function BMICalculator() {
   const [heightFt, setHeightFt] = useState('');
   const [heightIn, setHeightIn] = useState('');
   const [heightCm, setHeightCm] = useState('');
-  const [result, setResult] = useState<{ bmi: number; category: string; color: string } | null>(null);
+  const [result, setResult] = useState<{ bmi: number; category: string; color: string; bgColor: string; healthyLow: number; healthyHigh: number; heightIn: number } | null>(null);
 
   const calculate = () => {
     let bmi = 0;
+    let totalInches = 0;
     if (unit === 'imperial') {
       const ft = parseFloat(heightFt) || 0;
-      const inches = parseFloat(heightIn) || 0;
-      const totalInches = ft * 12 + inches;
+      const inVal = parseFloat(heightIn) || 0;
+      totalInches = ft * 12 + inVal;
       const lbs = parseFloat(weight);
       if (!lbs || !totalInches) return;
       bmi = (lbs / (totalInches * totalInches)) * 703;
@@ -30,21 +31,27 @@ function BMICalculator() {
       if (!kg || !cm) return;
       const m = cm / 100;
       bmi = kg / (m * m);
+      totalInches = cm / 2.54;
     }
-    let category = '';
-    let color = '';
-    if (bmi < 18.5) { category = 'Underweight'; color = 'text-blue-600'; }
-    else if (bmi < 25) { category = 'Normal weight'; color = 'text-green-600'; }
-    else if (bmi < 30) { category = 'Overweight'; color = 'text-yellow-600'; }
-    else { category = 'Obese'; color = 'text-red-600'; }
-    setResult({ bmi: Math.round(bmi * 10) / 10, category, color });
+    let category = '', color = '', bgColor = '';
+    if (bmi < 18.5) { category = 'Underweight'; color = 'text-blue-600'; bgColor = 'bg-blue-50 dark:bg-blue-900/20'; }
+    else if (bmi < 25) { category = 'Normal weight'; color = 'text-green-600'; bgColor = 'bg-green-50 dark:bg-green-900/20'; }
+    else if (bmi < 30) { category = 'Overweight'; color = 'text-yellow-600'; bgColor = 'bg-yellow-50 dark:bg-yellow-900/20'; }
+    else { category = 'Obese'; color = 'text-red-600'; bgColor = 'bg-red-50 dark:bg-red-900/20'; }
+    // Healthy weight range (BMI 18.5 – 24.9) for the given height
+    const heightM = unit === 'imperial' ? totalInches * 0.0254 : parseFloat(heightCm) / 100;
+    const hLow = 18.5 * heightM * heightM;
+    const hHigh = 24.9 * heightM * heightM;
+    const healthyLow = unit === 'imperial' ? (hLow / 0.453592) : hLow;
+    const healthyHigh = unit === 'imperial' ? (hHigh / 0.453592) : hHigh;
+    setResult({ bmi: Math.round(bmi * 10) / 10, category, color, bgColor, healthyLow, healthyHigh, heightIn: totalInches });
   };
 
   return (
     <div className="space-y-5">
       <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
-        <button onClick={() => setUnit('imperial')} className={`px-5 py-2 text-sm font-medium ${unit === 'imperial' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Imperial</button>
-        <button onClick={() => setUnit('metric')} className={`px-5 py-2 text-sm font-medium ${unit === 'metric' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Metric</button>
+        <button onClick={() => { setUnit('imperial'); setResult(null); }} className={`px-5 py-2 text-sm font-medium ${unit === 'imperial' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Imperial</button>
+        <button onClick={() => { setUnit('metric'); setResult(null); }} className={`px-5 py-2 text-sm font-medium ${unit === 'metric' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Metric</button>
       </div>
       {unit === 'imperial' ? (
         <div className="grid grid-cols-3 gap-4">
@@ -60,14 +67,24 @@ function BMICalculator() {
       )}
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate BMI</button>
       {result && (
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 text-center">
-          <div className={`text-5xl font-extrabold ${result.color} mb-2`}>{result.bmi}</div>
-          <div className={`text-xl font-semibold ${result.color}`}>{result.category}</div>
-          <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
-            {[['< 18.5', 'Underweight', 'bg-blue-100 text-blue-700'], ['18.5–24.9', 'Normal', 'bg-green-100 text-green-700'], ['25–29.9', 'Overweight', 'bg-yellow-100 text-yellow-700'], ['≥ 30', 'Obese', 'bg-red-100 text-red-700']].map(([range, label, cls]) => (
-              <div key={label} className={`p-2 rounded-lg ${cls}`}><div className="font-bold">{range}</div><div>{label}</div></div>
+        <div className="space-y-3">
+          <div className={`${result.bgColor} rounded-xl p-6 text-center`}>
+            <div className={`text-5xl font-extrabold ${result.color} mb-2`}>{result.bmi}</div>
+            <div className={`text-xl font-semibold ${result.color}`}>{result.category}</div>
+            <div className="text-xs text-gray-500 mt-1">
+              Healthy weight range: <span className="font-medium">
+                {unit === 'imperial'
+                  ? `${Math.round(result.healthyLow)} – ${Math.round(result.healthyHigh)} lbs`
+                  : `${Math.round(result.healthyLow)} – ${Math.round(result.healthyHigh)} kg`}
+              </span> for your height
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-2 text-xs">
+            {[['< 18.5', 'Underweight', 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'], ['18.5–24.9', 'Normal', 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'], ['25–29.9', 'Overweight', 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300'], ['≥ 30', 'Obese', 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300']].map(([range, label, cls]) => (
+              <div key={label} className={`p-2 rounded-lg ${cls} ${result.category === label || (result.category === 'Normal weight' && label === 'Normal') ? 'ring-2 ring-offset-1 ring-indigo-500' : ''}`}><div className="font-bold">{range}</div><div>{label}</div></div>
             ))}
           </div>
+          <p className="text-xs text-gray-400 italic">⚕️ BMI is a screening tool, not a diagnostic measure. Consult a healthcare provider for personalized advice.</p>
         </div>
       )}
     </div>
@@ -75,46 +92,168 @@ function BMICalculator() {
 }
 
 function MortgageCalculator() {
-  const [principal, setPrincipal] = useState('300000');
+  const [homePrice, setHomePrice] = useState('400000');
+  const [downType, setDownType] = useState<'pct' | 'fixed'>('pct');
+  const [downValue, setDownValue] = useState('20');
   const [rate, setRate] = useState('7');
   const [term, setTerm] = useState('30');
-  const [result, setResult] = useState<{ monthly: number; totalPayment: number; totalInterest: number } | null>(null);
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 7));
+  const [propTax, setPropTax] = useState('1.2');
+  const [insurance, setInsurance] = useState('1200');
+  const [pmi, setPmi] = useState('0.5');
+  const [hoa, setHoa] = useState('0');
+  const [extraMonthly, setExtraMonthly] = useState('0');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAmort, setShowAmort] = useState(false);
+  const [result, setResult] = useState<{
+    loanAmount: number; downPayment: number; monthly: number; totalMonthly: number;
+    totalPayment: number; totalInterest: number; propTaxMo: number; insuranceMo: number;
+    pmiMo: number; hoaMo: number; payoffDate: string; payoffMonths: number;
+    schedule: { year: number; principal: number; interest: number; balance: number }[];
+  } | null>(null);
 
   const calculate = () => {
-    const P = parseFloat(principal);
+    const price = parseFloat(homePrice) || 0;
+    const down = downType === 'pct' ? price * (parseFloat(downValue) / 100) : parseFloat(downValue) || 0;
+    const loan = price - down;
+    if (loan <= 0) return;
     const r = parseFloat(rate) / 100 / 12;
-    const n = parseFloat(term) * 12;
-    if (!P || !r || !n) return;
-    const monthly = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    const totalPayment = monthly * n;
-    const totalInterest = totalPayment - P;
-    setResult({ monthly, totalPayment, totalInterest });
+    const n = parseInt(term) * 12;
+    if (!r || !n) return;
+    const monthly = (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    const propTaxMo = price * (parseFloat(propTax) / 100) / 12;
+    const insuranceMo = parseFloat(insurance) / 12;
+    const pmiMo = down / price < 0.2 ? loan * (parseFloat(pmi) / 100) / 12 : 0;
+    const hoaMo = parseFloat(hoa) || 0;
+    const extra = parseFloat(extraMonthly) || 0;
+    const totalMonthly = monthly + propTaxMo + insuranceMo + pmiMo + hoaMo;
+
+    // Payoff with extra payment
+    let balance = loan, months = 0;
+    const yearlyData: { year: number; principal: number; interest: number; balance: number }[] = [];
+    let yearPrin = 0, yearInt = 0;
+    while (balance > 0.01 && months < n + 360) {
+      const int = balance * r;
+      const prin = Math.min(monthly - int + extra, balance);
+      balance = Math.max(0, balance - prin);
+      yearPrin += prin; yearInt += int;
+      months++;
+      if (months % 12 === 0 || balance <= 0.01) {
+        yearlyData.push({ year: Math.ceil(months / 12), principal: yearPrin, interest: yearInt, balance });
+        yearPrin = 0; yearInt = 0;
+      }
+    }
+
+    const sd = new Date(startDate + '-01');
+    sd.setMonth(sd.getMonth() + months);
+    const payoffStr = sd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    const totalInterest = yearlyData.reduce((s, r) => s + r.interest, 0);
+
+    setResult({ loanAmount: loan, downPayment: down, monthly, totalMonthly, totalPayment: monthly * months, totalInterest, propTaxMo, insuranceMo, pmiMo, hoaMo, payoffDate: payoffStr, payoffMonths: months, schedule: yearlyData });
   };
 
-  const fmt = (n: number) => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  const fmt = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
+  const fmtD = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const downPct = homePrice ? ((downType === 'pct' ? parseFloat(downValue) : (parseFloat(downValue) / parseFloat(homePrice)) * 100) || 0).toFixed(1) : '0';
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Home Price ($)</label><input type="number" value={principal} onChange={e => setPrincipal(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Interest Rate (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Loan Term (years)</label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Home Price ($)</label>
+          <input type="number" value={homePrice} onChange={e => setHomePrice(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="400000" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Down Payment</label>
+          <div className="flex gap-2">
+            <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 flex-shrink-0">
+              <button onClick={() => setDownType('pct')} className={`px-3 py-2 text-xs font-medium ${downType === 'pct' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>%</button>
+              <button onClick={() => setDownType('fixed')} className={`px-3 py-2 text-xs font-medium ${downType === 'fixed' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>$</button>
+            </div>
+            <input type="number" value={downValue} onChange={e => setDownValue(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder={downType === 'pct' ? '20' : '80000'} />
+          </div>
+          {homePrice && <div className="text-xs text-gray-400 mt-1">{downPct}% down = {fmt(parseFloat(homePrice) * (1 - parseFloat(downPct) / 100))} loan</div>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Interest Rate (%)</label>
+          <input type="number" step="0.125" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Loan Term</label>
           <select value={term} onChange={e => setTerm(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="30">30 years</option><option value="20">20 years</option><option value="15">15 years</option><option value="10">10 years</option>
           </select>
         </div>
       </div>
-      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Payment</button>
+
+      <button type="button" onClick={() => setShowAdvanced(v => !v)} className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+        <span>{showAdvanced ? '▲' : '▼'}</span> {showAdvanced ? 'Hide' : 'Show'} taxes, insurance & extra payment
+      </button>
+
+      {showAdvanced && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+          <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Property Tax (%)</label><input type="number" step="0.1" value={propTax} onChange={e => setPropTax(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="1.2" /></div>
+          <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Home Insurance ($)</label><input type="number" value={insurance} onChange={e => setInsurance(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="1200" /></div>
+          <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">PMI Rate (% of loan, if &lt;20% down)</label><input type="number" step="0.1" value={pmi} onChange={e => setPmi(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="0.5" /></div>
+          <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">HOA Fees ($/month)</label><input type="number" value={hoa} onChange={e => setHoa(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="0" /></div>
+          <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Extra Monthly Payment ($)</label><input type="number" value={extraMonthly} onChange={e => setExtraMonthly(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="0" /></div>
+          <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Loan Start Month</label><input type="month" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        </div>
+      )}
+
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Mortgage</button>
+
       {result && (
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
-          <div className="text-center mb-5">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Payment</div>
-            <div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">{fmt(result.monthly)}</div>
+        <div className="space-y-4">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+            <div className="text-center mb-5">
+              <div className="text-xs text-gray-500 mb-1">Principal & Interest / Month</div>
+              <div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">{fmtD(result.monthly)}</div>
+              {result.totalMonthly > result.monthly && (
+                <div className="text-sm text-gray-500 mt-1">Total monthly (incl. taxes/ins): <span className="font-bold text-gray-800 dark:text-gray-200">{fmtD(result.totalMonthly)}</span></div>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-sm">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Loan Amount</div><div className="font-bold">{fmt(result.loanAmount)}</div></div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Down Payment</div><div className="font-bold">{fmt(result.downPayment)}</div></div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.totalInterest)}</div></div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Payoff Date</div><div className="font-bold text-xs">{result.payoffDate}</div></div>
+            </div>
+            {(result.propTaxMo > 0 || result.insuranceMo > 0 || result.pmiMo > 0 || result.hoaMo > 0) && (
+              <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-4">
+                <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Monthly Breakdown</div>
+                <div className="space-y-1 text-sm">
+                  {[['Principal & Interest', result.monthly], ['Property Tax', result.propTaxMo], ['Home Insurance', result.insuranceMo], result.pmiMo > 0 ? ['PMI', result.pmiMo] : null, result.hoaMo > 0 ? ['HOA', result.hoaMo] : null].filter(Boolean).map((row) => (
+                    <div key={(row as [string, number])[0]} className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{(row as [string, number])[0]}</span><span className="font-medium">{fmtD((row as [string, number])[1])}</span></div>
+                  ))}
+                  <div className="flex justify-between font-bold border-t border-gray-200 dark:border-gray-600 pt-1"><span>Total</span><span>{fmtD(result.totalMonthly)}</span></div>
+                </div>
+              </div>
+            )}
+            {result.pmiMo > 0 && <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">⚠️ PMI applies until you reach 20% equity (~{fmt(result.loanAmount * 0.8)} remaining balance)</div>}
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Payment</div><div className="font-bold text-gray-900 dark:text-white">{fmt(result.totalPayment)}</div></div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.totalInterest)}</div></div>
-          </div>
+
+          <button type="button" onClick={() => setShowAmort(v => !v)} className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+            <span>{showAmort ? '▲' : '▼'}</span> {showAmort ? 'Hide' : 'Show'} yearly amortization schedule
+          </button>
+          {showAmort && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead><tr className="bg-gray-100 dark:bg-gray-700">{['Year', 'Principal', 'Interest', 'Remaining Balance'].map(h => <th key={h} className="px-3 py-2 font-semibold text-gray-600 dark:text-gray-300">{h}</th>)}</tr></thead>
+                <tbody>
+                  {result.schedule.map(row => (
+                    <tr key={row.year} className="border-t border-gray-100 dark:border-gray-700">
+                      <td className="px-3 py-2">{row.year}</td>
+                      <td className="px-3 py-2 text-green-600">{fmt(row.principal)}</td>
+                      <td className="px-3 py-2 text-red-500">{fmt(row.interest)}</td>
+                      <td className="px-3 py-2">{row.balance < 1 ? '—' : fmt(row.balance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -122,45 +261,144 @@ function MortgageCalculator() {
 }
 
 function AgeCalculator() {
+  const [mode, setMode] = useState<'single' | 'compare'>('single');
   const [dob, setDob] = useState('');
-  const [result, setResult] = useState<{ years: number; months: number; days: number; nextBirthday: number } | null>(null);
+  const [asOfDate, setAsOfDate] = useState('');
+  const [dob2, setDob2] = useState('');
+  const [result, setResult] = useState<{
+    years: number; months: number; days: number;
+    totalMonths: number; totalWeeks: number; totalDays: number; totalHours: number;
+    nextBirthday: number; nextBirthdayDate: string; nextBirthdayWeekday: string;
+    prevBirthdayDate: string; birthWeekday: string; asOf: string;
+  } | null>(null);
+  const [compare, setCompare] = useState<{ diff: string; older: string } | null>(null);
+
+  const calcAge = (birthStr: string, refStr: string) => {
+    const birth = new Date(birthStr + 'T00:00:00');
+    const ref = new Date(refStr + 'T00:00:00');
+    let years = ref.getFullYear() - birth.getFullYear();
+    let months = ref.getMonth() - birth.getMonth();
+    let days = ref.getDate() - birth.getDate();
+    if (days < 0) { months--; const d = new Date(ref.getFullYear(), ref.getMonth(), 0); days += d.getDate(); }
+    if (months < 0) { years--; months += 12; }
+    const diffMs = ref.getTime() - birth.getTime();
+    const totalDays = Math.floor(diffMs / 86400000);
+    return { years, months, days, totalMonths: years * 12 + months, totalWeeks: Math.floor(totalDays / 7), totalDays, totalHours: totalDays * 24 };
+  };
 
   const calculate = () => {
     if (!dob) return;
-    const birth = new Date(dob);
-    const today = new Date();
-    let years = today.getFullYear() - birth.getFullYear();
-    let months = today.getMonth() - birth.getMonth();
-    let days = today.getDate() - birth.getDate();
-    if (days < 0) { months--; const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0); days += prevMonth.getDate(); }
-    if (months < 0) { years--; months += 12; }
-    const nextBday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
-    if (nextBday <= today) nextBday.setFullYear(today.getFullYear() + 1);
-    const daysUntil = Math.ceil((nextBday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    setResult({ years, months, days, nextBirthday: daysUntil });
+    const todayStr = new Date().toISOString().split('T')[0];
+    const ref = asOfDate || todayStr;
+    const { years, months, days, totalMonths, totalWeeks, totalDays, totalHours } = calcAge(dob, ref);
+
+    const birth = new Date(dob + 'T00:00:00');
+    const refDate = new Date(ref + 'T00:00:00');
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const birthWeekday = weekdays[birth.getDay()];
+
+    const nextBday = new Date(refDate.getFullYear(), birth.getMonth(), birth.getDate());
+    if (nextBday <= refDate) nextBday.setFullYear(refDate.getFullYear() + 1);
+    const daysUntil = Math.ceil((nextBday.getTime() - refDate.getTime()) / 86400000);
+    const nextBdayStr = nextBday.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const nextBdayWeekday = weekdays[nextBday.getDay()];
+
+    const prevBday = new Date(refDate.getFullYear(), birth.getMonth(), birth.getDate());
+    if (prevBday >= refDate) prevBday.setFullYear(refDate.getFullYear() - 1);
+    const prevBdayStr = prevBday.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    setResult({ years, months, days, totalMonths, totalWeeks, totalDays, totalHours, nextBirthday: daysUntil, nextBirthdayDate: nextBdayStr, nextBirthdayWeekday: nextBdayWeekday, prevBirthdayDate: prevBdayStr, birthWeekday, asOf: new Date(ref + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) });
+
+    if (mode === 'compare' && dob2) {
+      const a = calcAge(dob, todayStr);
+      const b = calcAge(dob2, todayStr);
+      const diffDays = Math.abs(a.totalDays - b.totalDays);
+      const diffYears = Math.floor(diffDays / 365);
+      const diffMonths = Math.floor((diffDays % 365) / 30);
+      const diffRemDays = diffDays % 30;
+      const parts = [];
+      if (diffYears) parts.push(`${diffYears} year${diffYears !== 1 ? 's' : ''}`);
+      if (diffMonths) parts.push(`${diffMonths} month${diffMonths !== 1 ? 's' : ''}`);
+      if (diffRemDays) parts.push(`${diffRemDays} day${diffRemDays !== 1 ? 's' : ''}`);
+      setCompare({ diff: parts.join(', ') || '0 days', older: a.totalDays > b.totalDays ? 'Person 1 is older' : a.totalDays < b.totalDays ? 'Person 2 is older' : 'Same age' });
+    } else {
+      setCompare(null);
+    }
   };
+
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="space-y-5">
-      <div>
-        <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Date of Birth</label>
-        <input type="date" value={dob} onChange={e => setDob(e.target.value)} max={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => { setMode('single'); setCompare(null); }} className={`px-5 py-2 text-sm font-medium ${mode === 'single' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Single Age</button>
+        <button onClick={() => setMode('compare')} className={`px-5 py-2 text-sm font-medium ${mode === 'compare' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Compare Two Ages</button>
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{mode === 'compare' ? 'Person 1 — Date of Birth' : 'Date of Birth'}</label>
+          <input type="date" value={dob} onChange={e => setDob(e.target.value)} max={todayStr} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        </div>
+        {mode === 'compare' ? (
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Person 2 — Date of Birth</label>
+            <input type="date" value={dob2} onChange={e => setDob2(e.target.value)} max={todayStr} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Age As Of Date <span className="text-gray-400 font-normal">(leave blank for today)</span></label>
+            <input type="date" value={asOfDate} onChange={e => setAsOfDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+        )}
+      </div>
+
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Age</button>
+
       {result && (
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
-          <div className="text-center mb-4">
-            <div className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400">{result.years}</div>
-            <div className="text-gray-500 dark:text-gray-400 font-medium">Years Old</div>
+        <div className="space-y-4">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+            <div className="text-center mb-4">
+              <div className="text-xs text-gray-400 mb-1">Age as of {result.asOf}</div>
+              <div className="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400">{result.years}</div>
+              <div className="text-gray-500 dark:text-gray-400 font-medium">Years Old</div>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-2xl font-bold text-purple-600">{result.years}</div><div className="text-xs text-gray-500">Years</div></div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-2xl font-bold text-purple-600">{result.months}</div><div className="text-xs text-gray-500">Months</div></div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-2xl font-bold text-purple-600">{result.days}</div><div className="text-xs text-gray-500">Days</div></div>
+            </div>
+            <div className="text-center mt-2 text-xs text-gray-400">Born on a {result.birthWeekday}</div>
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-2xl font-bold text-purple-600">{result.years}</div><div className="text-xs text-gray-500">Years</div></div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-2xl font-bold text-purple-600">{result.months}</div><div className="text-xs text-gray-500">Months</div></div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-3"><div className="text-2xl font-bold text-purple-600">{result.days}</div><div className="text-xs text-gray-500">Days</div></div>
+
+          <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4">
+            <div className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2 uppercase tracking-wide">Total Duration</div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {[['Total Months', result.totalMonths.toLocaleString()], ['Total Weeks', result.totalWeeks.toLocaleString()], ['Total Days', result.totalDays.toLocaleString()], ['Total Hours', result.totalHours.toLocaleString()]].map(([label, val]) => (
+                <div key={label} className="flex justify-between bg-white dark:bg-gray-800 rounded-lg px-3 py-2"><span className="text-gray-500">{label}</span><span className="font-bold text-indigo-700 dark:text-indigo-300">{val}</span></div>
+              ))}
+            </div>
           </div>
-          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            🎂 Next birthday in <span className="font-bold text-indigo-600">{result.nextBirthday}</span> days
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+              <div className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">🎂 Next Birthday</div>
+              <div className="font-bold text-green-700 dark:text-green-300">{result.nextBirthdayDate}</div>
+              <div className="text-sm text-gray-500">{result.nextBirthdayWeekday} · in {result.nextBirthday} day{result.nextBirthday !== 1 ? 's' : ''}</div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+              <div className="text-xs font-semibold text-gray-500 mb-1">📅 Previous Birthday</div>
+              <div className="font-bold text-gray-800 dark:text-gray-200">{result.prevBirthdayDate}</div>
+            </div>
           </div>
+
+          {compare && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center">
+              <div className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">Age Difference</div>
+              <div className="font-bold text-amber-700 dark:text-amber-300 text-lg">{compare.diff}</div>
+              <div className="text-sm text-gray-500 mt-1">{compare.older}</div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -768,31 +1006,133 @@ function MacroCalculator() {
 }
 
 function DateCalculator() {
+  const [tab, setTab] = useState<'diff' | 'add'>('diff');
   const [date1, setDate1] = useState('');
   const [date2, setDate2] = useState('');
-  const [result, setResult] = useState<{ days: number; weeks: number; months: number; years: number } | null>(null);
+  const [includeEnd, setIncludeEnd] = useState(false);
+  const [businessOnly, setBusinessOnly] = useState(false);
+  const [diffResult, setDiffResult] = useState<{ years: number; months: number; days: number; totalDays: number; totalWeeks: number; businessDays: number; weekends: number } | null>(null);
+  const [addDate, setAddDate] = useState('');
+  const [addYears, setAddYears] = useState('0');
+  const [addMonths, setAddMonths] = useState('0');
+  const [addWeeks, setAddWeeks] = useState('0');
+  const [addDays, setAddDays] = useState('0');
+  const [addOp, setAddOp] = useState<'+' | '-'>('+');
+  const [addResult, setAddResult] = useState<string | null>(null);
 
-  const calculate = () => {
+  const countBusinessDays = (start: Date, end: Date) => {
+    let count = 0;
+    const cur = new Date(start);
+    while (cur <= end) {
+      const d = cur.getDay();
+      if (d !== 0 && d !== 6) count++;
+      cur.setDate(cur.getDate() + 1);
+    }
+    return count;
+  };
+
+  const calculateDiff = () => {
     if (!date1 || !date2) return;
-    const d1 = new Date(date1), d2 = new Date(date2);
-    const diffMs = Math.abs(d2.getTime() - d1.getTime());
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    setResult({ days, weeks: Math.floor(days / 7), months: Math.floor(days / 30.44), years: Math.floor(days / 365.25) });
+    const earlier = date1 <= date2 ? date1 : date2;
+    const later = date1 <= date2 ? date2 : date1;
+    const start = new Date(earlier + 'T00:00:00');
+    const end = new Date(later + 'T00:00:00');
+
+    const calDays = Math.floor((end.getTime() - start.getTime()) / 86400000) + (includeEnd ? 1 : 0);
+
+    // For years/months/days breakdown, use a copy of end adjusted for includeEnd
+    const endAdj = new Date(later + 'T00:00:00');
+    if (includeEnd) endAdj.setDate(endAdj.getDate() + 1);
+    let years = endAdj.getFullYear() - start.getFullYear();
+    let months = endAdj.getMonth() - start.getMonth();
+    let days = endAdj.getDate() - start.getDate();
+    if (days < 0) { months--; const prev = new Date(endAdj.getFullYear(), endAdj.getMonth(), 0); days += prev.getDate(); }
+    if (months < 0) { years--; months += 12; }
+
+    // Business days between start and end (inclusive of end when includeEnd)
+    const bEnd = new Date(later + 'T00:00:00');
+    if (includeEnd) bEnd.setDate(bEnd.getDate() + 1);
+    const bDays = countBusinessDays(start, new Date(bEnd.getTime() - 86400000 > start.getTime() ? bEnd.getTime() - 86400000 : start.getTime()));
+
+    setDiffResult({ years, months, days, totalDays: calDays, totalWeeks: Math.floor(calDays / 7), businessDays: bDays, weekends: calDays - bDays });
+  };
+
+  const calculateAdd = () => {
+    if (!addDate) return;
+    const d = new Date(addDate + 'T00:00:00');
+    const sign = addOp === '+' ? 1 : -1;
+    d.setFullYear(d.getFullYear() + sign * parseInt(addYears || '0'));
+    d.setMonth(d.getMonth() + sign * parseInt(addMonths || '0'));
+    d.setDate(d.getDate() + sign * (parseInt(addWeeks || '0') * 7 + parseInt(addDays || '0')));
+    setAddResult(d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
   };
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Start Date</label><input type="date" value={date1} onChange={e => setDate1(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">End Date</label><input type="date" value={date2} onChange={e => setDate2(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => setTab('diff')} className={`px-5 py-2 text-sm font-medium ${tab === 'diff' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Date Difference</button>
+        <button onClick={() => setTab('add')} className={`px-5 py-2 text-sm font-medium ${tab === 'add' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Add / Subtract</button>
       </div>
-      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Difference</button>
-      {result && (
-        <div className="grid grid-cols-2 gap-3">
-          {[['Days', result.days], ['Weeks', result.weeks], ['Months', result.months], ['Years', result.years]].map(([label, val]) => (
-            <div key={label as string} className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4 text-center"><div className="text-3xl font-extrabold text-indigo-600">{val}</div><div className="text-sm text-gray-500">{label}</div></div>
-          ))}
-        </div>
+
+      {tab === 'diff' ? (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Start Date</label><input type="date" value={date1} onChange={e => setDate1(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+            <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">End Date</label><input type="date" value={date2} onChange={e => setDate2(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+              <input type="checkbox" checked={includeEnd} onChange={e => setIncludeEnd(e.target.checked)} className="w-4 h-4 accent-indigo-600" />
+              Include end date
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+              <input type="checkbox" checked={businessOnly} onChange={e => setBusinessOnly(e.target.checked)} className="w-4 h-4 accent-indigo-600" />
+              Highlight business days
+            </label>
+          </div>
+          <button onClick={calculateDiff} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Difference</button>
+          {diffResult && (
+            <div className="space-y-3">
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4 text-center">
+                <div className="text-xs text-gray-500 mb-1">Duration</div>
+                <div className="text-2xl font-extrabold text-indigo-700 dark:text-indigo-300">
+                  {diffResult.years > 0 && `${diffResult.years}y `}{diffResult.months > 0 && `${diffResult.months}mo `}{diffResult.days}d
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[['Total Days', diffResult.totalDays.toLocaleString()], ['Total Weeks', diffResult.totalWeeks.toLocaleString()], ['Business Days', diffResult.businessDays.toLocaleString()], ['Weekends/Holidays', diffResult.weekends.toLocaleString()]].map(([label, val]) => (
+                  <div key={label} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">{label}</div><div className="font-bold text-gray-900 dark:text-white">{val}</div></div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Starting Date</label>
+            <input type="date" value={addDate} onChange={e => setAddDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+            <button onClick={() => setAddOp('+')} className={`px-5 py-2 text-sm font-medium ${addOp === '+' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Add (+)</button>
+            <button onClick={() => setAddOp('-')} className={`px-5 py-2 text-sm font-medium ${addOp === '-' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Subtract (−)</button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[['Years', addYears, setAddYears], ['Months', addMonths, setAddMonths], ['Weeks', addWeeks, setAddWeeks], ['Days', addDays, setAddDays]].map(([label, val, setter]) => (
+              <div key={label as string}>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{label as string}</label>
+                <input type="number" min="0" value={val as string} onChange={e => (setter as (v: string) => void)(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="0" />
+              </div>
+            ))}
+          </div>
+          <button onClick={calculateAdd} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Date</button>
+          {addResult && (
+            <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-5 text-center">
+              <div className="text-xs text-gray-500 mb-2">Result</div>
+              <div className="text-xl font-bold text-indigo-700 dark:text-indigo-300">{addResult}</div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -1075,37 +1415,88 @@ function HeightConverter() {
 }
 
 function PregnancyCalculator() {
+  const [mode, setMode] = useState<'lmp' | 'duedate' | 'conception'>('lmp');
   const [lmp, setLmp] = useState('');
-  const [result, setResult] = useState<{ dueDate: string; weeks: number; days: number; trimester: number; conception: string } | null>(null);
+  const [dueDate, setDueDate] = useState('');
+  const [conception, setConception] = useState('');
+  const [result, setResult] = useState<{ dueDate: string; lmpDate: string; conceptionDate: string; weeks: number; days: number; trimester: number; progress: number; weekLabel: string } | null>(null);
+
+  const MILESTONE_WEEKS: Record<number, string> = {
+    4: 'Size of a poppy seed', 8: 'Size of a raspberry', 12: 'End of 1st trimester – size of a lime',
+    16: 'Size of an avocado', 20: 'Halfway point – size of a banana', 24: 'Size of an ear of corn',
+    28: 'End of 2nd trimester – size of an eggplant', 32: 'Size of a squash', 36: 'Size of a papaya',
+    40: 'Full term – size of a watermelon',
+  };
+
+  const getWeekLabel = (weeks: number) => {
+    const keys = Object.keys(MILESTONE_WEEKS).map(Number).sort((a, b) => b - a);
+    const key = keys.find(k => weeks >= k);
+    return key !== undefined ? MILESTONE_WEEKS[key] : 'Growing every day!';
+  };
 
   const calculate = () => {
-    if (!lmp) return;
-    const lmpDate = new Date(lmp);
-    const dueDate = new Date(lmpDate);
-    dueDate.setDate(dueDate.getDate() + 280);
+    let lmpDate: Date;
+    if (mode === 'lmp') {
+      if (!lmp) return;
+      lmpDate = new Date(lmp + 'T00:00:00');
+    } else if (mode === 'duedate') {
+      if (!dueDate) return;
+      lmpDate = new Date(dueDate + 'T00:00:00');
+      lmpDate.setDate(lmpDate.getDate() - 280);
+    } else {
+      if (!conception) return;
+      lmpDate = new Date(conception + 'T00:00:00');
+      lmpDate.setDate(lmpDate.getDate() - 14);
+    }
+    const due = new Date(lmpDate); due.setDate(due.getDate() + 280);
+    const concDate = new Date(lmpDate); concDate.setDate(concDate.getDate() + 14);
     const today = new Date();
     const diffMs = today.getTime() - lmpDate.getTime();
-    const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const totalDays = Math.floor(diffMs / 86400000);
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
     const trimester = weeks < 13 ? 1 : weeks < 27 ? 2 : 3;
-    const conception = new Date(lmpDate);
-    conception.setDate(conception.getDate() + 14);
-    setResult({ dueDate: dueDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), weeks, days, trimester, conception: conception.toLocaleDateString() });
+    const progress = Math.min(100, Math.round((totalDays / 280) * 100));
+    setResult({
+      dueDate: due.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      lmpDate: lmpDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      conceptionDate: concDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      weeks, days, trimester, progress, weekLabel: getWeekLabel(weeks),
+    });
   };
+
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="space-y-5">
-      <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">First Day of Last Menstrual Period (LMP)</label><input type="date" value={lmp} onChange={e => setLmp(e.target.value)} max={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+        {([['lmp', 'Last Period'], ['conception', 'Conception Date'], ['duedate', 'Due Date']] as [string, string][]).map(([m, label]) => (
+          <button key={m} onClick={() => { setMode(m as typeof mode); setResult(null); }} className={`flex-1 py-2 text-xs font-medium ${mode === m ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>{label}</button>
+        ))}
+      </div>
+      {mode === 'lmp' && <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">First Day of Last Menstrual Period</label><input type="date" value={lmp} onChange={e => setLmp(e.target.value)} max={todayStr} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>}
+      {mode === 'duedate' && <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Known Due Date (EDD)</label><input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>}
+      {mode === 'conception' && <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Estimated Conception Date</label><input type="date" value={conception} onChange={e => setConception(e.target.value)} max={todayStr} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>}
+      <p className="text-xs text-gray-400">Based on standard Naegele&apos;s rule (LMP + 280 days). Assumes a 28-day cycle.</p>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
       {result && (
         <div className="space-y-3">
-          <div className="bg-pink-50 dark:bg-pink-900/20 rounded-xl p-5 text-center"><div className="text-sm text-gray-500 mb-1">Estimated Due Date</div><div className="text-xl font-bold text-pink-600">{result.dueDate}</div></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Gestational Age</div><div className="font-bold">{result.weeks}w {result.days}d</div></div>
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Trimester</div><div className="font-bold">{result.trimester === 1 ? '1st (0-12w)' : result.trimester === 2 ? '2nd (13-26w)' : '3rd (27-40w)'}</div></div>
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center col-span-2"><div className="text-xs text-gray-500 mb-1">Est. Conception Date</div><div className="font-bold">{result.conception}</div></div>
+          <div className="bg-pink-50 dark:bg-pink-900/20 rounded-xl p-5">
+            <div className="text-xs text-gray-500 mb-1">Estimated Due Date</div>
+            <div className="text-xl font-bold text-pink-600 dark:text-pink-400">{result.dueDate}</div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Gestational Age</div><div className="font-bold text-lg">{result.weeks}w {result.days}d</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Trimester</div><div className="font-bold">{result.trimester === 1 ? '1st (0–12w)' : result.trimester === 2 ? '2nd (13–26w)' : '3rd (27–40w)'}</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">LMP Date</div><div className="font-bold text-xs">{result.lmpDate}</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Est. Conception</div><div className="font-bold text-xs">{result.conceptionDate}</div></div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+            <div className="flex justify-between text-xs text-gray-500 mb-1"><span>Progress</span><span>{result.progress}% · Week {result.weeks}</span></div>
+            <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5"><div className="bg-pink-500 h-2.5 rounded-full transition-all" style={{ width: `${result.progress}%` }} /></div>
+            <div className="text-xs text-gray-500 mt-2 italic">{result.weekLabel}</div>
+          </div>
+          <p className="text-xs text-gray-400 italic">⚕️ This is an estimate only. Always confirm dates with your healthcare provider.</p>
         </div>
       )}
     </div>
@@ -1937,8 +2328,72 @@ interface CalculatorEngineProps {
   calc: Calculator;
 }
 
+// Per-calculator SEO content: how-to, formula, FAQ
+const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: string; a: string }[] }> = {
+  'age-calculator': {
+    howTo: 'Enter your date of birth and optionally choose an "age as of" date (leave blank to use today). Click Calculate Age to see your exact age in years, months, and days, plus total weeks, days, and hours lived, your next birthday countdown, and the weekday you were born. Use the Compare mode to find the age difference between two people.',
+    formula: 'Age = Reference Date − Date of Birth (calendar-accurate, accounting for leap years and varying month lengths).',
+    faqs: [
+      { q: 'How is age calculated accurately?', a: 'The calculator subtracts the birth date from the reference date, adjusting for different month lengths and leap years — not just dividing by 365.' },
+      { q: 'What does "total hours lived" mean?', a: 'It multiplies total calendar days lived by 24 to give a rough total-hours figure (does not account for daylight saving time shifts).' },
+      { q: 'Can I calculate age at a past or future date?', a: 'Yes — enter any date in the "Age As Of Date" field, including future dates, and the calculator will compute your age on that day.' },
+    ],
+  },
+  'date-calculator': {
+    howTo: 'Use the Date Difference tab to find how many days, weeks, months, and business days lie between two dates. Toggle "Include end date" to count inclusively. Switch to the Add / Subtract tab to add or remove years, months, weeks, or days from any starting date.',
+    formula: 'Date difference = |End Date − Start Date| in milliseconds ÷ 86,400,000. Business days exclude Saturdays and Sundays.',
+    faqs: [
+      { q: 'What counts as a business day?', a: 'The calculator counts every weekday (Monday–Friday) between the two dates, excluding Saturdays and Sundays. It does not automatically exclude public holidays.' },
+      { q: 'Does "include end date" matter?', a: 'Yes. For example, Jan 1 to Jan 3 is 2 days without the end date or 3 days with it included (counting both endpoints).' },
+    ],
+  },
+  'mortgage-calculator': {
+    howTo: 'Enter your home price and down payment (as a percentage or fixed dollar amount). The loan amount updates automatically. Set your interest rate and loan term, then click Calculate. Expand the advanced section to add property tax, home insurance, PMI, HOA fees, and extra monthly payments to see your full monthly cost and a yearly amortization schedule.',
+    formula: 'Monthly P&I = P × r(1+r)ⁿ / [(1+r)ⁿ − 1], where P = loan amount, r = monthly rate, n = number of payments.',
+    faqs: [
+      { q: 'What is PMI and when does it apply?', a: 'Private Mortgage Insurance (PMI) is required when your down payment is less than 20%. It protects the lender and typically costs 0.5–1% of the loan amount per year.' },
+      { q: 'How does an extra monthly payment help?', a: 'Extra principal payments reduce your balance faster, saving significant interest over the life of the loan and shortening the payoff timeline.' },
+      { q: 'What is included in the total monthly payment?', a: 'The full monthly cost includes principal & interest, property tax (1/12 of annual), homeowner\'s insurance (1/12 of annual), PMI (if applicable), and HOA fees.' },
+    ],
+  },
+  'bmi-calculator': {
+    howTo: 'Select Imperial or Metric units, enter your weight and height, then click Calculate BMI. Your BMI score will appear along with its category (Underweight, Normal, Overweight, or Obese) and the healthy weight range for your height.',
+    formula: 'BMI = weight(kg) / height(m)² — or in imperial: BMI = 703 × weight(lbs) / height(in)²',
+    faqs: [
+      { q: 'Is BMI an accurate measure of health?', a: 'BMI is a useful screening tool but does not account for muscle mass, bone density, age, or body fat distribution. Consult a healthcare provider for a complete assessment.' },
+      { q: 'What is a healthy BMI?', a: 'For adults, a BMI of 18.5–24.9 is considered normal/healthy by the WHO and CDC.' },
+    ],
+  },
+  'calorie-calculator': {
+    howTo: 'Select your sex, then enter your age, weight (kg), and height (cm). Choose your typical activity level and click Calculate. Results show your Basal Metabolic Rate (BMR) and your Total Daily Energy Expenditure (TDEE), plus calorie targets for weight loss and gain.',
+    formula: 'BMR (Mifflin–St Jeor): Men = 10×weight + 6.25×height − 5×age + 5; Women = 10×weight + 6.25×height − 5×age − 161. TDEE = BMR × activity multiplier.',
+    faqs: [
+      { q: 'What is BMR vs TDEE?', a: 'BMR is the calories your body burns at complete rest. TDEE (Total Daily Energy Expenditure) is BMR multiplied by an activity factor — the actual calories you burn in a day.' },
+      { q: 'How many calories should I cut to lose weight?', a: 'A 500-calorie daily deficit typically results in about 1 lb of fat loss per week. Never go below ~1200 cal/day (women) or ~1500 cal/day (men) without medical supervision.' },
+    ],
+  },
+  'pregnancy-calculator': {
+    howTo: 'Choose your input mode: enter the first day of your Last Menstrual Period (LMP), your known due date, or your estimated conception date. The calculator will compute your estimated due date, current gestational age, trimester, and conception date based on Naegele\'s rule.',
+    formula: 'Estimated Due Date (EDD) = LMP + 280 days (Naegele\'s Rule). Conception date ≈ LMP + 14 days (assumes 28-day cycle).',
+    faqs: [
+      { q: 'What is Naegele\'s Rule?', a: 'Naegele\'s Rule estimates the due date by adding 280 days (40 weeks) to the first day of the last menstrual period. It assumes a regular 28-day cycle.' },
+      { q: 'How accurate is this calculator?', a: 'This provides an estimate. Only an ultrasound in the first trimester can confirm gestational age and due date with high accuracy.' },
+      { q: 'What if my cycle is not 28 days?', a: 'If your cycle is longer or shorter than 28 days, adjust the LMP date by the difference. For example, a 35-day cycle means ovulation is approximately day 21, so subtract 7 days from the LMP.' },
+    ],
+  },
+};
+
+const defaultContent = (name: string) => ({
+  howTo: `${name} — enter the required values in the fields above and click Calculate to get instant, accurate results. All calculations run locally in your browser with no data sent to any server.`,
+  faqs: [
+    { q: `Is this ${name} free to use?`, a: 'Yes, completely free with no signup, no ads, and no data collection.' },
+    { q: 'Are the results accurate?', a: 'All formulas follow standard mathematical and financial definitions. For professional decisions, please consult a qualified expert.' },
+  ],
+});
+
 export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
   const relatedCalcs = calculators.filter(c => c.category === calc.category && c.slug !== calc.slug).slice(0, 6);
+  const content = calcContent[calc.slug] ?? defaultContent(calc.name);
 
   const calculatorComponents: Record<string, React.ReactNode> = {
     'bmi-calculator': <BMICalculator />,
@@ -1989,11 +2444,11 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Main Calculator */}
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2 space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
             <div className="flex items-center space-x-3">
-              <span className="text-4xl">{calc.emoji}</span>
+              <span className="text-4xl" aria-hidden="true">{calc.emoji}</span>
               <div>
                 <h1 className="text-2xl font-bold">{calc.name}</h1>
                 <p className="text-white/80 text-sm mt-0.5">{calc.description}</p>
@@ -2003,12 +2458,32 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
           <div className="p-6">{ui}</div>
         </div>
 
-        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">How to Use {calc.name}</h2>
-          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            {calc.description} Simply enter the required values in the fields above and click the Calculate button to get instant, accurate results. All calculations are performed locally in your browser — no data is sent to any server.
-          </p>
+        {/* How to Use */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">How to Use the {calc.name}</h2>
+          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{content.howTo}</p>
+          {content.formula && (
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Formula: </span>
+              <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">{content.formula}</span>
+            </div>
+          )}
         </div>
+
+        {/* FAQ */}
+        {content.faqs.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {content.faqs.map((faq, i) => (
+                <div key={i} className="border-b border-gray-100 dark:border-gray-700 last:border-0 pb-4 last:pb-0">
+                  <div className="font-semibold text-gray-900 dark:text-white mb-1">{faq.q}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{faq.a}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Sidebar */}
@@ -2019,7 +2494,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
             {relatedCalcs.map(r => (
               <li key={r.slug}>
                 <Link href={`/calculators/${r.slug}/`} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group">
-                  <span>{r.emoji}</span>
+                  <span aria-hidden="true">{r.emoji}</span>
                   <span className="group-hover:underline">{r.name}</span>
                 </Link>
               </li>
