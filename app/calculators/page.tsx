@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CalculatorCard from '@/components/CalculatorCard';
@@ -10,6 +10,7 @@ import { categories } from '@/lib/categories';
 
 function CalculatorsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
 
@@ -20,9 +21,33 @@ function CalculatorsContent() {
     setActiveCategory(cat);
   }, [searchParams]);
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    const cat = activeCategory !== 'all' ? `&category=${activeCategory}` : '';
+    if (value.trim()) {
+      router.push(`/calculators/?q=${encodeURIComponent(value.trim())}${cat}`);
+    } else {
+      router.push(`/calculators/${cat ? `?category=${activeCategory}` : ''}`);
+    }
+  }, [activeCategory, router]);
+
+  const handleCategoryChange = useCallback((category: string) => {
+    setActiveCategory(category);
+    const q = search ? `?q=${encodeURIComponent(search)}` : '';
+    if (category !== 'all' && search) {
+      router.push(`/calculators/?q=${encodeURIComponent(search)}&category=${category}`);
+    } else if (category !== 'all') {
+      router.push(`/calculators/?category=${category}`);
+    } else if (search) {
+      router.push(`/calculators/?q=${encodeURIComponent(search)}`);
+    } else {
+      router.push('/calculators/');
+    }
+  }, [search, router]);
+
   const filtered = calculators.filter(calc => {
     const matchesCategory = activeCategory === 'all' || calc.category === activeCategory;
-    const q = search.toLowerCase();
+    const q = search.toLowerCase().trim();
     const matchesSearch = !q ||
       calc.name.toLowerCase().includes(q) ||
       calc.description.toLowerCase().includes(q) ||
@@ -53,7 +78,7 @@ function CalculatorsContent() {
               <input
                 type="text"
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={e => handleSearchChange(e.target.value)}
                 placeholder="Search calculators..."
                 className="w-full px-5 py-3 pl-12 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -63,20 +88,23 @@ function CalculatorsContent() {
             </div>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setActiveCategory('all')}
+                onClick={() => handleCategoryChange('all')}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
               >
                 All ({calculators.length})
               </button>
-              {categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-                >
-                  {cat.emoji} {cat.name} ({categoryCountMap[cat.id]})
-                </button>
-              ))}
+              {categories.map(cat => {
+                const count = calculators.filter(c => c.category === cat.id).length;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategoryChange(cat.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeCategory === cat.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                  >
+                    {cat.emoji} {cat.name} ({count})
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -100,7 +128,7 @@ function CalculatorsContent() {
               <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No calculators found</h3>
               <p className="text-gray-500 dark:text-gray-400">Try a different search term or browse all categories.</p>
               <button
-                onClick={() => { setSearch(''); setActiveCategory('all'); }}
+                onClick={() => { handleSearchChange(''); handleCategoryChange('all'); }}
                 className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
               >
                 Clear Filters
