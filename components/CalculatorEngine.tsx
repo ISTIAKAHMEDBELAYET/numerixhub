@@ -1585,6 +1585,569 @@ function CreditCardCalculator() {
   );
 }
 
+// ── Additional specific calculators ──────────────────────────────────────────
+
+function AutoLoanCalculator() {
+  const [price, setPrice] = useState('30000');
+  const [down, setDown] = useState('3000');
+  const [rate, setRate] = useState('7.5');
+  const [term, setTerm] = useState('60');
+  const [tradeIn, setTradeIn] = useState('0');
+  const [result, setResult] = useState<{ monthly: number; totalPaid: number; totalInterest: number; loanAmount: number } | null>(null);
+
+  const calculate = () => {
+    const P = parseFloat(price) - parseFloat(down) - parseFloat(tradeIn);
+    const r = parseFloat(rate) / 100 / 12;
+    const n = parseFloat(term);
+    if (!P || P <= 0 || !n) return;
+    let monthly: number;
+    if (r === 0) {
+      monthly = P / n;
+    } else {
+      monthly = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    }
+    const totalPaid = monthly * n;
+    setResult({ monthly, totalPaid, totalInterest: totalPaid - P, loanAmount: P });
+  };
+  const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Vehicle Price ($)</label><input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Down Payment ($)</label><input type="number" value={down} onChange={e => setDown(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Trade-In Value ($)</label><input type="number" value={tradeIn} onChange={e => setTradeIn(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Interest Rate (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Loan Term (months)</label>
+          <select value={term} onChange={e => setTerm(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            {['24','36','48','60','72','84'].map(t => <option key={t} value={t}>{t} months ({parseInt(t)/12} yrs)</option>)}
+          </select>
+        </div>
+      </div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
+      {result && (
+        <div className="space-y-3">
+          <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-5 text-center">
+            <div className="text-xs text-gray-500 mb-1">Monthly Payment</div>
+            <div className="text-4xl font-extrabold text-indigo-600">{fmt(result.monthly)}</div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Loan Amount</div><div className="font-bold">{fmt(result.loanAmount)}</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Paid</div><div className="font-bold">{fmt(result.totalPaid)}</div></div>
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.totalInterest)}</div></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SalaryCalculator() {
+  const [amount, setAmount] = useState('75000');
+  const [type, setType] = useState<'annual' | 'monthly' | 'biweekly' | 'weekly' | 'daily' | 'hourly'>('annual');
+  const [hoursPerWeek, setHoursPerWeek] = useState('40');
+  const [result, setResult] = useState<{ hourly: number; daily: number; weekly: number; biweekly: number; monthly: number; annual: number } | null>(null);
+
+  const calculate = () => {
+    const val = parseFloat(amount);
+    const hrs = parseFloat(hoursPerWeek) || 40;
+    if (!val) return;
+    let annual = 0;
+    switch (type) {
+      case 'annual': annual = val; break;
+      case 'monthly': annual = val * 12; break;
+      case 'biweekly': annual = val * 26; break;
+      case 'weekly': annual = val * 52; break;
+      case 'daily': annual = val * 260; break;
+      case 'hourly': annual = val * hrs * 52; break;
+    }
+    const hourly = annual / (hrs * 52);
+    setResult({ hourly, daily: hourly * hrs / 5, weekly: hourly * hrs, biweekly: hourly * hrs * 2, monthly: annual / 12, annual });
+  };
+  const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pay Type</label>
+          <select value={type} onChange={e => setType(e.target.value as typeof type)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="annual">Annual Salary</option>
+            <option value="monthly">Monthly</option>
+            <option value="biweekly">Bi-Weekly</option>
+            <option value="weekly">Weekly</option>
+            <option value="daily">Daily</option>
+            <option value="hourly">Hourly</option>
+          </select>
+        </div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Amount ($)</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Hours per Week</label><input type="number" value={hoursPerWeek} onChange={e => setHoursPerWeek(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+      </div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Convert</button>
+      {result && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+          {[['Hourly', result.hourly], ['Daily', result.daily], ['Weekly', result.weekly], ['Bi-Weekly', result.biweekly], ['Monthly', result.monthly], ['Annual', result.annual]].map(([label, val]) => (
+            <div key={label as string} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">{label as string}</div><div className="font-bold text-indigo-600">{fmt(val as number)}</div></div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BodyFatCalculator() {
+  const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [weight, setWeight] = useState('180');
+  const [neck, setNeck] = useState('15');
+  const [waist, setWaist] = useState('34');
+  const [hip, setHip] = useState('');
+  const [height, setHeight] = useState('70');
+  const [result, setResult] = useState<{ bf: number; lbm: number; fat: number; category: string; color: string } | null>(null);
+
+  const calculate = () => {
+    const h = parseFloat(height), w = parseFloat(waist), n = parseFloat(neck), wt = parseFloat(weight);
+    if (!h || !w || !n || !wt) return;
+    let bf: number;
+    if (gender === 'male') {
+      bf = 86.010 * Math.log10(w - n) - 70.041 * Math.log10(h) + 36.76;
+    } else {
+      const hp = parseFloat(hip);
+      if (!hp) return;
+      bf = 163.205 * Math.log10(w + hp - n) - 97.684 * Math.log10(h) - 78.387;
+    }
+    bf = Math.max(0, Math.round(bf * 10) / 10);
+    const lbm = wt * (1 - bf / 100);
+    const fat = wt * bf / 100;
+    let category = '', color = '';
+    if (gender === 'male') {
+      if (bf < 6) { category = 'Essential Fat'; color = 'text-blue-600'; }
+      else if (bf < 14) { category = 'Athletes'; color = 'text-green-600'; }
+      else if (bf < 18) { category = 'Fitness'; color = 'text-green-500'; }
+      else if (bf < 25) { category = 'Average'; color = 'text-yellow-600'; }
+      else { category = 'Obese'; color = 'text-red-600'; }
+    } else {
+      if (bf < 14) { category = 'Essential Fat'; color = 'text-blue-600'; }
+      else if (bf < 21) { category = 'Athletes'; color = 'text-green-600'; }
+      else if (bf < 25) { category = 'Fitness'; color = 'text-green-500'; }
+      else if (bf < 32) { category = 'Average'; color = 'text-yellow-600'; }
+      else { category = 'Obese'; color = 'text-red-600'; }
+    }
+    setResult({ bf, lbm: Math.round(lbm * 10) / 10, fat: Math.round(fat * 10) / 10, category, color });
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => setGender('male')} className={`px-5 py-2 text-sm font-medium ${gender === 'male' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Male</button>
+        <button onClick={() => setGender('female')} className={`px-5 py-2 text-sm font-medium ${gender === 'female' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Female</button>
+      </div>
+      <p className="text-xs text-gray-500 dark:text-gray-400">Uses US Navy method. All measurements in inches.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Height (in)</label><input type="number" value={height} onChange={e => setHeight(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="70" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Neck (in)</label><input type="number" value={neck} onChange={e => setNeck(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="15" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Waist (in)</label><input type="number" value={waist} onChange={e => setWaist(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="34" /></div>
+        {gender === 'female' && <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Hip (in)</label><input type="number" value={hip} onChange={e => setHip(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="38" /></div>}
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Weight (lbs)</label><input type="number" value={weight} onChange={e => setWeight(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="180" /></div>
+      </div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Body Fat</button>
+      {result && (
+        <div className="space-y-3">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 text-center">
+            <div className={`text-5xl font-extrabold ${result.color} mb-2`}>{result.bf}%</div>
+            <div className={`text-xl font-semibold ${result.color}`}>{result.category}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Lean Body Mass</div><div className="font-bold">{result.lbm} lbs</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Fat Mass</div><div className="font-bold">{result.fat} lbs</div></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TDEECalculator() {
+  const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [age, setAge] = useState('30');
+  const [weight, setWeight] = useState('175');
+  const [heightFt, setHeightFt] = useState('5');
+  const [heightIn, setHeightIn] = useState('10');
+  const [activity, setActivity] = useState('1.55');
+  const [result, setResult] = useState<{ bmr: number; tdee: number; lose05: number; lose1: number; gain05: number } | null>(null);
+
+  const activityLevels = [
+    { value: '1.2', label: 'Sedentary (little/no exercise)' },
+    { value: '1.375', label: 'Light (1-3 days/week)' },
+    { value: '1.55', label: 'Moderate (3-5 days/week)' },
+    { value: '1.725', label: 'Active (6-7 days/week)' },
+    { value: '1.9', label: 'Very Active (hard daily exercise)' },
+  ];
+
+  const calculate = () => {
+    const a = parseFloat(age), w = parseFloat(weight) * 0.453592;
+    const totalIn = parseFloat(heightFt) * 12 + parseFloat(heightIn);
+    const h = totalIn * 2.54;
+    const act = parseFloat(activity);
+    if (!a || !w || !h) return;
+    let bmr: number;
+    if (gender === 'male') {
+      bmr = 10 * w + 6.25 * h - 5 * a + 5;
+    } else {
+      bmr = 10 * w + 6.25 * h - 5 * a - 161;
+    }
+    const tdee = bmr * act;
+    setResult({ bmr: Math.round(bmr), tdee: Math.round(tdee), lose05: Math.round(tdee - 250), lose1: Math.round(tdee - 500), gain05: Math.round(tdee + 250) });
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => setGender('male')} className={`px-5 py-2 text-sm font-medium ${gender === 'male' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Male</button>
+        <button onClick={() => setGender('female')} className={`px-5 py-2 text-sm font-medium ${gender === 'female' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Female</button>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Age (years)</label><input type="number" value={age} onChange={e => setAge(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Weight (lbs)</label><input type="number" value={weight} onChange={e => setWeight(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Height (ft)</label><input type="number" value={heightFt} onChange={e => setHeightFt(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Height (in)</label><input type="number" value={heightIn} onChange={e => setHeightIn(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Activity Level</label>
+          <select value={activity} onChange={e => setActivity(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            {activityLevels.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+          </select>
+        </div>
+      </div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate TDEE</button>
+      {result && (
+        <div className="space-y-3">
+          <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-5 text-center">
+            <div className="text-xs text-gray-500 mb-1">TDEE (Maintenance Calories)</div>
+            <div className="text-4xl font-extrabold text-indigo-600">{result.tdee.toLocaleString()}</div>
+            <div className="text-sm text-gray-500 mt-1">calories/day • BMR: {result.bmr.toLocaleString()}</div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Lose 0.5 lb/wk</div><div className="font-bold text-red-500">{result.lose05.toLocaleString()}</div></div>
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Lose 1 lb/wk</div><div className="font-bold text-orange-500">{result.lose1.toLocaleString()}</div></div>
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Gain 0.5 lb/wk</div><div className="font-bold text-green-500">{result.gain05.toLocaleString()}</div></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CaloriesBurnedCalculator() {
+  const [weight, setWeight] = useState('175');
+  const [duration, setDuration] = useState('30');
+  const [activity, setActivity] = useState('running');
+  const [result, setResult] = useState<number | null>(null);
+
+  const activities: Record<string, { met: number; label: string }> = {
+    running: { met: 9.8, label: 'Running (6 mph)' },
+    cycling: { met: 7.5, label: 'Cycling (moderate)' },
+    swimming: { met: 7.0, label: 'Swimming (laps)' },
+    walking: { met: 3.5, label: 'Walking (3.5 mph)' },
+    hiking: { met: 5.3, label: 'Hiking' },
+    weights: { met: 3.5, label: 'Weight Training' },
+    yoga: { met: 2.5, label: 'Yoga' },
+    basketball: { met: 6.5, label: 'Basketball' },
+    soccer: { met: 7.0, label: 'Soccer' },
+    tennis: { met: 7.3, label: 'Tennis (singles)' },
+    dancing: { met: 4.8, label: 'Dancing' },
+    jump_rope: { met: 11.8, label: 'Jump Rope' },
+  };
+
+  const calculate = () => {
+    const wt = parseFloat(weight) * 0.453592;
+    const dur = parseFloat(duration);
+    const met = activities[activity]?.met ?? 5;
+    if (!wt || !dur) return;
+    const cal = met * wt * (dur / 60);
+    setResult(Math.round(cal));
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Activity</label>
+          <select value={activity} onChange={e => setActivity(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            {Object.entries(activities).map(([key, { label }]) => <option key={key} value={key}>{label}</option>)}
+          </select>
+        </div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Weight (lbs)</label><input type="number" value={weight} onChange={e => setWeight(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Duration (minutes)</label><input type="number" value={duration} onChange={e => setDuration(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+      </div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
+      {result !== null && (
+        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-6 text-center">
+          <div className="text-xs text-gray-500 mb-1">Calories Burned</div>
+          <div className="text-5xl font-extrabold text-orange-600">{result.toLocaleString()}</div>
+          <div className="text-sm text-gray-500 mt-1">kcal in {duration} minutes of {activities[activity]?.label}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BinaryCalculator() {
+  const [input, setInput] = useState('1010');
+  const [fromBase, setFromBase] = useState<'2' | '8' | '10' | '16'>('10');
+  const [result, setResult] = useState<{ binary: string; octal: string; decimal: string; hex: string } | null>(null);
+
+  const calculate = () => {
+    try {
+      const dec = parseInt(input, parseInt(fromBase));
+      if (isNaN(dec)) return;
+      setResult({ decimal: dec.toString(10), binary: dec.toString(2), octal: dec.toString(8), hex: dec.toString(16).toUpperCase() });
+    } catch { /* ignore */ }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Input Base</label>
+          <select value={fromBase} onChange={e => setFromBase(e.target.value as typeof fromBase)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="2">Binary (Base 2)</option>
+            <option value="8">Octal (Base 8)</option>
+            <option value="10">Decimal (Base 10)</option>
+            <option value="16">Hex (Base 16)</option>
+          </select>
+        </div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Value</label><input type="text" value={input} onChange={e => setInput(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono" placeholder="e.g. 255" /></div>
+      </div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Convert</button>
+      {result && (
+        <div className="grid grid-cols-2 gap-3">
+          {[['Decimal (Base 10)', result.decimal], ['Binary (Base 2)', result.binary], ['Octal (Base 8)', result.octal], ['Hex (Base 16)', result.hex]].map(([label, val]) => (
+            <div key={label} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">{label}</div><div className="font-mono font-bold text-indigo-600 break-all">{val}</div></div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Base64Calculator() {
+  const [text, setText] = useState('Hello, World!');
+  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const process = () => {
+    setError(null);
+    try {
+      if (mode === 'encode') {
+        setResult(btoa(unescape(encodeURIComponent(text))));
+      } else {
+        setResult(decodeURIComponent(escape(atob(text))));
+      }
+    } catch {
+      setError('Invalid input for ' + mode);
+      setResult(null);
+    }
+  };
+
+  const copy = () => { if (result) navigator.clipboard.writeText(result); };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => setMode('encode')} className={`px-5 py-2 text-sm font-medium ${mode === 'encode' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Encode</button>
+        <button onClick={() => setMode('decode')} className={`px-5 py-2 text-sm font-medium ${mode === 'decode' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Decode</button>
+      </div>
+      <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{mode === 'encode' ? 'Text to Encode' : 'Base64 to Decode'}</label><textarea value={text} onChange={e => setText(e.target.value)} rows={4} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono text-sm" /></div>
+      <button onClick={process} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">{mode === 'encode' ? 'Encode to Base64' : 'Decode from Base64'}</button>
+      {error && <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl p-3 text-red-600 text-sm">{error}</div>}
+      {result && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+          <div className="font-mono text-sm break-all text-gray-900 dark:text-white mb-3">{result}</div>
+          <button onClick={copy} className="text-sm text-indigo-600 hover:underline">Copy to clipboard</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function URLEncoder() {
+  const [text, setText] = useState('https://example.com/path?name=hello world&foo=bar&baz=<test>');
+  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
+  const [result, setResult] = useState<string | null>(null);
+
+  const process = () => {
+    try {
+      setResult(mode === 'encode' ? encodeURIComponent(text) : decodeURIComponent(text));
+    } catch {
+      setResult('Invalid input');
+    }
+  };
+  const copy = () => { if (result) navigator.clipboard.writeText(result); };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => setMode('encode')} className={`px-5 py-2 text-sm font-medium ${mode === 'encode' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Encode</button>
+        <button onClick={() => setMode('decode')} className={`px-5 py-2 text-sm font-medium ${mode === 'decode' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Decode</button>
+      </div>
+      <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{mode === 'encode' ? 'Text / URL to Encode' : 'Encoded URL to Decode'}</label><textarea value={text} onChange={e => setText(e.target.value)} rows={4} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono text-sm" /></div>
+      <button onClick={process} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">{mode === 'encode' ? 'URL Encode' : 'URL Decode'}</button>
+      {result && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+          <div className="font-mono text-sm break-all text-gray-900 dark:text-white mb-3">{result}</div>
+          <button onClick={copy} className="text-sm text-indigo-600 hover:underline">Copy to clipboard</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TimeZoneCalculator() {
+  const [time, setTime] = useState(() => new Date().toTimeString().slice(0, 5));
+  const [fromZone, setFromZone] = useState('America/New_York');
+  const [toZone, setToZone] = useState('Europe/London');
+  const [result, setResult] = useState<string | null>(null);
+
+  const zones = [
+    { value: 'America/New_York', label: 'New York (ET)' },
+    { value: 'America/Chicago', label: 'Chicago (CT)' },
+    { value: 'America/Denver', label: 'Denver (MT)' },
+    { value: 'America/Los_Angeles', label: 'Los Angeles (PT)' },
+    { value: 'Europe/London', label: 'London (GMT/BST)' },
+    { value: 'Europe/Paris', label: 'Paris (CET)' },
+    { value: 'Europe/Berlin', label: 'Berlin (CET)' },
+    { value: 'Asia/Kolkata', label: 'India (IST)' },
+    { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+    { value: 'Asia/Shanghai', label: 'China (CST)' },
+    { value: 'Asia/Dubai', label: 'Dubai (GST)' },
+    { value: 'Australia/Sydney', label: 'Sydney (AEDT)' },
+    { value: 'Pacific/Auckland', label: 'Auckland (NZST)' },
+    { value: 'UTC', label: 'UTC' },
+  ];
+
+  const convert = () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const dt = new Date(`${today}T${time}:00`);
+      const fmt = (tz: string) => dt.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: true, weekday: 'short' });
+      setResult(`${fmt(fromZone)} → ${fmt(toZone)}`);
+    } catch {
+      setResult('Conversion error');
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Time</label><input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">From Time Zone</label>
+          <select value={fromZone} onChange={e => setFromZone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            {zones.map(z => <option key={z.value} value={z.value}>{z.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">To Time Zone</label>
+          <select value={toZone} onChange={e => setToZone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            {zones.map(z => <option key={z.value} value={z.value}>{z.label}</option>)}
+          </select>
+        </div>
+      </div>
+      <button onClick={convert} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Convert Time</button>
+      {result && <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl p-5 text-center text-xl font-bold text-indigo-700 dark:text-indigo-300">{result}</div>}
+    </div>
+  );
+}
+
+function TimeCalculator() {
+  const [mode, setMode] = useState<'add' | 'subtract'>('add');
+  const [h1, setH1] = useState('2'); const [m1, setM1] = useState('30'); const [s1, setS1] = useState('0');
+  const [h2, setH2] = useState('1'); const [m2, setM2] = useState('45'); const [s2, setS2] = useState('0');
+  const [result, setResult] = useState<string | null>(null);
+
+  const calculate = () => {
+    const t1 = parseInt(h1) * 3600 + parseInt(m1) * 60 + parseInt(s1);
+    const t2 = parseInt(h2) * 3600 + parseInt(m2) * 60 + parseInt(s2);
+    let total = mode === 'add' ? t1 + t2 : t1 - t2;
+    const neg = total < 0; if (neg) total = -total;
+    const rh = Math.floor(total / 3600);
+    const rm = Math.floor((total % 3600) / 60);
+    const rs = total % 60;
+    setResult(`${neg ? '-' : ''}${rh}h ${rm}m ${rs}s (${total.toLocaleString()} total seconds)`);
+  };
+
+  const inp = (label: string, val: string, setter: (v: string) => void, max: number) => (
+    <div><label className="block text-xs font-medium mb-1 text-gray-500 dark:text-gray-400">{label}</label><input type="number" min={0} max={max} value={val} onChange={e => setter(e.target.value)} className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center" /></div>
+  );
+
+  return (
+    <div className="space-y-5">
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 w-fit">
+        <button onClick={() => setMode('add')} className={`px-5 py-2 text-sm font-medium ${mode === 'add' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Add</button>
+        <button onClick={() => setMode('subtract')} className={`px-5 py-2 text-sm font-medium ${mode === 'subtract' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Subtract</button>
+      </div>
+      <div className="grid grid-cols-3 gap-3">{inp('Hours', h1, setH1, 999)}{inp('Minutes', m1, setM1, 59)}{inp('Seconds', s1, setS1, 59)}</div>
+      <div className="text-center text-gray-400 font-bold text-xl">{mode === 'add' ? '+' : '−'}</div>
+      <div className="grid grid-cols-3 gap-3">{inp('Hours', h2, setH2, 999)}{inp('Minutes', m2, setM2, 59)}{inp('Seconds', s2, setS2, 59)}</div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
+      {result && <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl p-5 text-center text-lg font-bold text-indigo-700 dark:text-indigo-300">{result}</div>}
+    </div>
+  );
+}
+
+function HoursCalculator() {
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const [entries, setEntries] = useState<{ start: string; end: string; break: string }[]>(
+    days.map(() => ({ start: '09:00', end: '17:00', break: '30' }))
+  );
+  const [rate, setRate] = useState('25');
+  const [result, setResult] = useState<{ total: number; pay: number } | null>(null);
+
+  const update = (i: number, field: string, val: string) => {
+    setEntries(prev => prev.map((e, idx) => idx === i ? { ...e, [field]: val } : e));
+  };
+
+  const calculate = () => {
+    let total = 0;
+    entries.forEach(e => {
+      const [sh, sm] = e.start.split(':').map(Number);
+      const [eh, em] = e.end.split(':').map(Number);
+      const mins = (eh * 60 + em) - (sh * 60 + sm) - (parseFloat(e.break) || 0);
+      if (mins > 0) total += mins;
+    });
+    const hrs = total / 60;
+    setResult({ total: Math.round(hrs * 100) / 100, pay: Math.round(hrs * parseFloat(rate) * 100) / 100 });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead><tr className="text-left text-gray-500"><th className="pb-2">Day</th><th className="pb-2">Start</th><th className="pb-2">End</th><th className="pb-2">Break (min)</th></tr></thead>
+          <tbody>
+            {days.map((day, i) => (
+              <tr key={day} className="border-t border-gray-100 dark:border-gray-700">
+                <td className="py-2 pr-3 font-medium text-gray-700 dark:text-gray-300 text-xs">{day}</td>
+                <td className="py-1 pr-2"><input type="time" value={entries[i].start} onChange={e => update(i, 'start', e.target.value)} className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none" /></td>
+                <td className="py-1 pr-2"><input type="time" value={entries[i].end} onChange={e => update(i, 'end', e.target.value)} className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none" /></td>
+                <td className="py-1"><input type="number" value={entries[i].break} onChange={e => update(i, 'break', e.target.value)} className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none" /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Hourly Rate ($)</label><input type="number" value={rate} onChange={e => setRate(e.target.value)} className="w-full sm:w-40 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Hours</button>
+      {result && (
+        <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4"><div className="text-xs text-gray-500 mb-1">Total Hours</div><div className="text-3xl font-extrabold text-indigo-600">{result.total}</div></div>
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4"><div className="text-xs text-gray-500 mb-1">Total Pay</div><div className="text-3xl font-extrabold text-green-600">${result.pay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Generic calculator for all other slugs
 function GenericCalculator({ slug, name }: { slug: string; name: string }) {
   const [inputs, setInputs] = useState<Record<string, string>>({});
@@ -2280,6 +2843,405 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       fields: [{ id: 'carbon', label: 'Carbon atoms (C)', placeholder: '2' }, { id: 'hydrogen', label: 'Hydrogen atoms (H)', placeholder: '6' }, { id: 'oxygen', label: 'Oxygen atoms (O)', placeholder: '1' }],
       compute: (v) => { const mw = v.carbon * 12.011 + v.hydrogen * 1.008 + v.oxygen * 15.999; return `Molecular Weight: ${mw.toFixed(3)} g/mol (C${v.carbon}H${v.hydrogen}O${v.oxygen})`; },
     },
+    // Additional financial calculators
+    'currency-calculator': {
+      fields: [{ id: 'amount', label: 'Amount (USD)', placeholder: '100' }, { id: 'rate', label: 'Exchange Rate (1 USD = X foreign)', placeholder: '0.92' }],
+      compute: (v) => `${v.amount.toFixed(2)} USD = ${(v.amount * v.rate).toFixed(2)} foreign | Reverse: ${(v.amount / v.rate).toFixed(2)} USD`,
+    },
+    'finance-calculator': {
+      fields: [{ id: 'pv', label: 'Present Value ($)', placeholder: '0' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' }, { id: 'n', label: 'Periods (months)', placeholder: '60' }, { id: 'pmt', label: 'Payment ($, optional)', placeholder: '0' }],
+      compute: (v) => {
+        const r = v.rate / 100 / 12;
+        const fv = v.pv * Math.pow(1+r, v.n) + (v.pmt > 0 ? v.pmt * ((Math.pow(1+r, v.n) - 1) / r) : 0);
+        return `Future Value: $${fv.toFixed(2)} (over ${v.n} months at ${v.rate}% annual)`;
+      },
+    },
+    'mortgage-payoff-calculator': {
+      fields: [{ id: 'balance', label: 'Remaining Balance ($)', placeholder: '250000' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '6.5' }, { id: 'payment', label: 'Current Monthly Payment ($)', placeholder: '1580' }, { id: 'extra', label: 'Extra Monthly Payment ($)', placeholder: '200' }],
+      compute: (v) => {
+        const r = v.rate / 100 / 12;
+        const calcMonths = (bal: number, pmt: number) => { let b = bal, m = 0; while (b > 0 && m < 1200) { b = b * (1 + r) - pmt; m++; } return m; };
+        const orig = calcMonths(v.balance, v.payment);
+        const fast = calcMonths(v.balance, v.payment + v.extra);
+        return `Original payoff: ${orig} months (${(orig/12).toFixed(1)} yrs) | With extra $${v.extra}/mo: ${fast} months (${(fast/12).toFixed(1)} yrs) | Saved: ${orig - fast} months`;
+      },
+    },
+    'marriage-tax-calculator': {
+      fields: [{ id: 'income1', label: 'Spouse 1 Income ($)', placeholder: '60000' }, { id: 'income2', label: 'Spouse 2 Income ($)', placeholder: '40000' }],
+      compute: (v) => {
+        const calcTax = (inc: number, std: number) => {
+          const t = Math.max(0, inc - std);
+          const b = [[11000,0.10],[44725,0.12],[95375,0.22],[201050,0.24],[383900,0.32],[487450,0.35],[Infinity,0.37]];
+          let tax = 0, prev = 0;
+          for (const [lim, r] of b) { if (t <= prev) break; tax += (Math.min(t, lim as number) - prev) * (r as number); prev = lim as number; }
+          return tax;
+        };
+        const single1 = calcTax(v.income1, 13850);
+        const single2 = calcTax(v.income2, 13850);
+        const married = calcTax(v.income1 + v.income2, 27700);
+        const diff = married - (single1 + single2);
+        return `Single taxes: $${(single1+single2).toFixed(0)} | Married filing jointly: $${married.toFixed(0)} | ${diff > 0 ? 'Marriage Penalty' : 'Marriage Bonus'}: $${Math.abs(diff).toFixed(0)}`;
+      },
+    },
+    'estate-tax-calculator': {
+      fields: [{ id: 'estate', label: 'Estate Value ($)', placeholder: '15000000' }, { id: 'exemption', label: 'Federal Exemption ($)', placeholder: '12920000' }],
+      compute: (v) => {
+        const taxable = Math.max(0, v.estate - v.exemption);
+        const tax = taxable * 0.40;
+        return `Taxable Estate: $${taxable.toLocaleString()} | Estimated Tax (40%): $${Math.round(tax).toLocaleString()} | After Tax: $${Math.round(v.estate - tax).toLocaleString()}`;
+      },
+    },
+    'social-security-calculator': {
+      fields: [{ id: 'pia', label: 'Primary Insurance Amount ($)', placeholder: '2000' }, { id: 'age', label: 'Claiming Age', placeholder: '67' }],
+      compute: (v) => {
+        const fra = 67;
+        let benefit = v.pia;
+        if (v.age < fra) benefit *= (1 - 0.067 * (fra - v.age));
+        else if (v.age > fra) benefit *= (1 + 0.08 * (v.age - fra));
+        return `Estimated Monthly: $${benefit.toFixed(0)} | Annual: $${(benefit * 12).toFixed(0)} | 20-yr Total: $${(benefit * 12 * 20).toFixed(0)}`;
+      },
+    },
+    'annuity-calculator': {
+      fields: [{ id: 'principal', label: 'Principal ($)', placeholder: '100000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '5' }, { id: 'years', label: 'Years', placeholder: '20' }],
+      compute: (v) => {
+        const r = v.rate / 100 / 12, n = v.years * 12;
+        const pmt = v.principal * r / (1 - Math.pow(1+r, -n));
+        return `Monthly Payout: $${pmt.toFixed(2)} | Annual: $${(pmt*12).toFixed(2)} | Total: $${(pmt*n).toFixed(2)}`;
+      },
+    },
+    'annuity-payout-calculator': {
+      fields: [{ id: 'balance', label: 'Account Balance ($)', placeholder: '500000' }, { id: 'rate', label: 'Annual Return (%)', placeholder: '4' }, { id: 'years', label: 'Payout Years', placeholder: '25' }],
+      compute: (v) => {
+        const r = v.rate / 100 / 12, n = v.years * 12;
+        const pmt = v.balance * r / (1 - Math.pow(1+r, -n));
+        return `Monthly Income: $${pmt.toFixed(2)} | Annual: $${(pmt*12).toFixed(2)} | Total Received: $${(pmt*n).toFixed(2)}`;
+      },
+    },
+    'debt-consolidation-calculator': {
+      fields: [{ id: 'debt', label: 'Total Debt ($)', placeholder: '25000' }, { id: 'currentRate', label: 'Current Avg Rate (%)', placeholder: '19.99' }, { id: 'newRate', label: 'New Rate (%)', placeholder: '9.99' }, { id: 'years', label: 'Term (years)', placeholder: '5' }],
+      compute: (v) => {
+        const calc = (r: number) => { const mr = r/100/12; const n = v.years*12; return (v.debt * mr * Math.pow(1+mr,n)) / (Math.pow(1+mr,n) - 1); };
+        const old = calc(v.currentRate), nw = calc(v.newRate);
+        return `Old Payment: $${old.toFixed(2)}/mo | New Payment: $${nw.toFixed(2)}/mo | Monthly Savings: $${(old-nw).toFixed(2)} | Total Savings: $${((old-nw)*v.years*12).toFixed(0)}`;
+      },
+    },
+    'repayment-calculator': {
+      fields: [{ id: 'amount', label: 'Loan Amount ($)', placeholder: '15000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '8' }, { id: 'years', label: 'Repayment Period (years)', placeholder: '5' }],
+      compute: (v) => {
+        const r = v.rate/100/12, n = v.years*12;
+        const m = (v.amount * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        return `Monthly: $${m.toFixed(2)} | Total: $${(m*n).toFixed(2)} | Interest: $${(m*n - v.amount).toFixed(2)}`;
+      },
+    },
+    'student-loan-calculator': {
+      fields: [{ id: 'balance', label: 'Loan Balance ($)', placeholder: '35000' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '5.5' }, { id: 'years', label: 'Repayment Years', placeholder: '10' }],
+      compute: (v) => {
+        const r = v.rate/100/12, n = v.years*12;
+        const m = (v.balance * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        return `Monthly: $${m.toFixed(2)} | Total Paid: $${(m*n).toFixed(2)} | Total Interest: $${(m*n - v.balance).toFixed(2)}`;
+      },
+    },
+    'college-cost-calculator': {
+      fields: [{ id: 'annual', label: 'Current Annual Cost ($)', placeholder: '35000' }, { id: 'inflation', label: 'Tuition Inflation (%)', placeholder: '4' }, { id: 'years', label: 'Years Until Enrollment', placeholder: '5' }, { id: 'duration', label: 'Years in College', placeholder: '4' }],
+      compute: (v) => {
+        let total = 0;
+        for (let i = 0; i < v.duration; i++) {
+          total += v.annual * Math.pow(1 + v.inflation/100, v.years + i);
+        }
+        return `Total 4-Year Cost (future $): $${Math.round(total).toLocaleString()} | Avg Year: $${Math.round(total/v.duration).toLocaleString()}`;
+      },
+    },
+    'bond-calculator': {
+      fields: [{ id: 'face', label: 'Face Value ($)', placeholder: '1000' }, { id: 'coupon', label: 'Coupon Rate (%)', placeholder: '5' }, { id: 'years', label: 'Years to Maturity', placeholder: '10' }, { id: 'ytm', label: 'Yield to Maturity (%)', placeholder: '6' }],
+      compute: (v) => {
+        const r = v.ytm/100, c = v.face * v.coupon/100;
+        const price = c * (1 - Math.pow(1+r,-v.years)) / r + v.face * Math.pow(1+r,-v.years);
+        const annualIncome = c;
+        return `Bond Price: $${price.toFixed(2)} | Annual Income: $${annualIncome.toFixed(2)} | Current Yield: ${((c/price)*100).toFixed(2)}%`;
+      },
+    },
+    'rmd-calculator': {
+      fields: [{ id: 'balance', label: 'Account Balance ($)', placeholder: '500000' }, { id: 'age', label: 'Your Age', placeholder: '73' }],
+      compute: (v) => {
+        const factors: Record<number, number> = {72:27.4,73:26.5,74:25.5,75:24.6,76:23.7,77:22.9,78:22.0,79:21.1,80:20.2,81:19.4,82:18.5,83:17.7,84:16.8,85:16.0};
+        const factor = factors[Math.round(v.age)] ?? (v.age < 72 ? 28.0 : 15.0);
+        const rmd = v.balance / factor;
+        return `Required RMD: $${rmd.toFixed(0)} | Distribution Period: ${factor} years | Monthly: $${(rmd/12).toFixed(0)}`;
+      },
+    },
+    'cash-back-calculator': {
+      fields: [{ id: 'balance', label: 'Card Balance ($)', placeholder: '5000' }, { id: 'cashBack', label: 'Cash Back Rate (%)', placeholder: '2' }, { id: 'lowRate', label: 'Low APR (%)', placeholder: '14.99' }, { id: 'highRate', label: 'Current APR (%)', placeholder: '24.99' }],
+      compute: (v) => {
+        const cashRewards = v.balance * v.cashBack / 100;
+        const interestSavings = v.balance * (v.highRate - v.lowRate) / 100;
+        return `Annual Cash Back: $${cashRewards.toFixed(2)} | Annual Interest Savings (low APR card): $${interestSavings.toFixed(2)} | Better choice: ${interestSavings > cashRewards ? 'Low APR card' : 'Cash Back card'}`;
+      },
+    },
+    'average-return-calculator': {
+      fields: [{ id: 'initial', label: 'Initial Investment ($)', placeholder: '10000' }, { id: 'final', label: 'Final Value ($)', placeholder: '20000' }, { id: 'years', label: 'Investment Period (years)', placeholder: '10' }],
+      compute: (v) => {
+        const cagr = (Math.pow(v.final / v.initial, 1 / v.years) - 1) * 100;
+        const totalReturn = ((v.final - v.initial) / v.initial) * 100;
+        return `CAGR: ${cagr.toFixed(2)}% | Total Return: ${totalReturn.toFixed(1)}% | Gain: $${(v.final - v.initial).toLocaleString()}`;
+      },
+    },
+    'business-loan-calculator': {
+      fields: [{ id: 'amount', label: 'Loan Amount ($)', placeholder: '100000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '8.5' }, { id: 'years', label: 'Term (years)', placeholder: '5' }],
+      compute: (v) => {
+        const r = v.rate/100/12, n = v.years*12;
+        const m = (v.amount * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        return `Monthly: $${m.toFixed(2)} | Total: $${(m*n).toFixed(2)} | Interest: $${(m*n - v.amount).toFixed(2)}`;
+      },
+    },
+    'real-estate-calculator': {
+      fields: [{ id: 'price', label: 'Property Price ($)', placeholder: '300000' }, { id: 'rent', label: 'Monthly Rent ($)', placeholder: '1800' }, { id: 'expenses', label: 'Annual Expenses ($)', placeholder: '6000' }, { id: 'down', label: 'Down Payment (%)', placeholder: '20' }],
+      compute: (v) => {
+        const annualRent = v.rent * 12;
+        const noi = annualRent - v.expenses;
+        const capRate = (noi / v.price) * 100;
+        const cashInvested = v.price * v.down / 100;
+        const cashReturn = (noi / cashInvested) * 100;
+        return `NOI: $${noi.toLocaleString()} | Cap Rate: ${capRate.toFixed(2)}% | Cash-on-Cash: ${cashReturn.toFixed(2)}% | GRM: ${(v.price/annualRent).toFixed(1)}x`;
+      },
+    },
+    'take-home-paycheck-calculator': {
+      fields: [{ id: 'gross', label: 'Gross Pay ($)', placeholder: '5000' }, { id: 'federal', label: 'Federal Tax Rate (%)', placeholder: '22' }, { id: 'state', label: 'State Tax Rate (%)', placeholder: '5' }, { id: 'fica', label: 'FICA/Social Security (%)', placeholder: '7.65' }, { id: 'other', label: 'Other Deductions ($)', placeholder: '0' }],
+      compute: (v) => {
+        const deductions = v.gross * (v.federal + v.state + v.fica) / 100 + v.other;
+        const net = v.gross - deductions;
+        return `Net Pay: $${net.toFixed(2)} | Deductions: $${deductions.toFixed(2)} | Annual Net: $${(net*26).toFixed(0)} (bi-weekly)`;
+      },
+    },
+    'personal-loan-calculator': {
+      fields: [{ id: 'amount', label: 'Loan Amount ($)', placeholder: '15000' }, { id: 'rate', label: 'APR (%)', placeholder: '12' }, { id: 'months', label: 'Term (months)', placeholder: '48' }],
+      compute: (v) => {
+        const r = v.rate/100/12;
+        const m = (v.amount * r * Math.pow(1+r, v.months)) / (Math.pow(1+r, v.months) - 1);
+        return `Monthly: $${m.toFixed(2)} | Total: $${(m * v.months).toFixed(2)} | Interest: $${(m * v.months - v.amount).toFixed(2)}`;
+      },
+    },
+    'boat-loan-calculator': {
+      fields: [{ id: 'price', label: 'Boat Price ($)', placeholder: '50000' }, { id: 'down', label: 'Down Payment ($)', placeholder: '10000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '8' }, { id: 'years', label: 'Term (years)', placeholder: '10' }],
+      compute: (v) => {
+        const P = v.price - v.down, r = v.rate/100/12, n = v.years*12;
+        const m = (P * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        return `Monthly: $${m.toFixed(2)} | Total: $${(m*n).toFixed(2)} | Interest: $${(m*n - P).toFixed(2)}`;
+      },
+    },
+    'lease-calculator': {
+      fields: [{ id: 'value', label: 'Asset Value ($)', placeholder: '30000' }, { id: 'residual', label: 'Residual Value ($)', placeholder: '18000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' }, { id: 'months', label: 'Lease Term (months)', placeholder: '36' }],
+      compute: (v) => {
+        const r = v.rate/100/12;
+        const monthly = (v.value - v.residual * Math.pow(1+r,-v.months)) * r / (1 - Math.pow(1+r,-v.months));
+        return `Monthly Payment: $${monthly.toFixed(2)} | Total: $${(monthly * v.months).toFixed(2)} | Total Interest: $${(monthly * v.months - (v.value - v.residual)).toFixed(2)}`;
+      },
+    },
+    'budget-calculator': {
+      fields: [{ id: 'income', label: 'Monthly Income ($)', placeholder: '5000' }, { id: 'housing', label: 'Housing ($)', placeholder: '1500' }, { id: 'food', label: 'Food ($)', placeholder: '400' }, { id: 'transport', label: 'Transport ($)', placeholder: '300' }, { id: 'other', label: 'Other Expenses ($)', placeholder: '500' }],
+      compute: (v) => {
+        const expenses = v.housing + v.food + v.transport + v.other;
+        const savings = v.income - expenses;
+        const savingsRate = (savings / v.income) * 100;
+        return `Total Expenses: $${expenses.toFixed(0)} | Savings: $${savings.toFixed(0)} | Savings Rate: ${savingsRate.toFixed(1)}% | ${savings >= 0 ? '✅ Budget OK' : '❌ Over Budget'}`;
+      },
+    },
+    'rental-property-calculator': {
+      fields: [{ id: 'price', label: 'Purchase Price ($)', placeholder: '300000' }, { id: 'rent', label: 'Monthly Rent ($)', placeholder: '2000' }, { id: 'expenses', label: 'Monthly Expenses ($)', placeholder: '800' }, { id: 'down', label: 'Down Payment ($)', placeholder: '60000' }, { id: 'rate', label: 'Mortgage Rate (%)', placeholder: '7' }],
+      compute: (v) => {
+        const loan = v.price - v.down, r = v.rate/100/12, n = 360;
+        const mortgage = (loan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        const cashFlow = v.rent - v.expenses - mortgage;
+        const coc = (cashFlow * 12 / v.down) * 100;
+        return `Mortgage: $${mortgage.toFixed(0)}/mo | Cash Flow: $${cashFlow.toFixed(0)}/mo | Cash-on-Cash: ${coc.toFixed(1)}% | ${cashFlow > 0 ? '✅ Positive' : '❌ Negative'} cash flow`;
+      },
+    },
+    'irr-calculator': {
+      fields: [{ id: 'initial', label: 'Initial Investment ($)', placeholder: '10000' }, { id: 'y1', label: 'Year 1 Cash Flow ($)', placeholder: '3000' }, { id: 'y2', label: 'Year 2 Cash Flow ($)', placeholder: '4000' }, { id: 'y3', label: 'Year 3 Cash Flow ($)', placeholder: '5000' }],
+      compute: (v) => {
+        const flows = [-v.initial, v.y1, v.y2, v.y3];
+        let r = 0.1;
+        for (let iter = 0; iter < 100; iter++) {
+          let npv = 0, dnpv = 0;
+          flows.forEach((cf, t) => { npv += cf / Math.pow(1+r, t); dnpv += -t * cf / Math.pow(1+r, t+1); });
+          r = r - npv / dnpv;
+        }
+        const npv = flows.reduce((acc, cf, t) => acc + cf / Math.pow(1.1, t), 0);
+        return `IRR: ${(r * 100).toFixed(2)}% | NPV @10%: $${npv.toFixed(0)}`;
+      },
+    },
+    'fha-loan-calculator': {
+      fields: [{ id: 'price', label: 'Home Price ($)', placeholder: '300000' }, { id: 'down', label: 'Down Payment (%, min 3.5)', placeholder: '3.5' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '7' }, { id: 'years', label: 'Term (years)', placeholder: '30' }],
+      compute: (v) => {
+        const downAmt = v.price * v.down / 100;
+        const upfrontMip = (v.price - downAmt) * 0.0175;
+        const loan = v.price - downAmt + upfrontMip;
+        const r = v.rate/100/12, n = v.years*12;
+        const m = (loan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        const annualMip = (v.price - downAmt) * 0.0055 / 12;
+        return `Down: $${downAmt.toFixed(0)} | P&I: $${m.toFixed(2)}/mo | Annual MIP: $${annualMip.toFixed(2)}/mo | Total: $${(m + annualMip).toFixed(2)}/mo`;
+      },
+    },
+    'va-mortgage-calculator': {
+      fields: [{ id: 'price', label: 'Home Price ($)', placeholder: '300000' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '6.5' }, { id: 'years', label: 'Term (years)', placeholder: '30' }, { id: 'fundingFee', label: 'Funding Fee (%)', placeholder: '2.3' }],
+      compute: (v) => {
+        const fee = v.price * v.fundingFee / 100;
+        const loan = v.price + fee;
+        const r = v.rate/100/12, n = v.years*12;
+        const m = (loan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        return `Loan (with fee): $${Math.round(loan).toLocaleString()} | Monthly: $${m.toFixed(2)} | VA Funding Fee: $${fee.toFixed(0)} | No PMI required ✅`;
+      },
+    },
+    'home-equity-loan-calculator': {
+      fields: [{ id: 'homeValue', label: 'Home Value ($)', placeholder: '400000' }, { id: 'mortgage', label: 'Mortgage Balance ($)', placeholder: '250000' }, { id: 'rate', label: 'Loan Rate (%)', placeholder: '8.5' }, { id: 'years', label: 'Term (years)', placeholder: '10' }],
+      compute: (v) => {
+        const equity = v.homeValue - v.mortgage;
+        const maxLoan = equity * 0.85;
+        const r = v.rate/100/12, n = v.years*12;
+        const m = (maxLoan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        return `Home Equity: $${equity.toLocaleString()} | Max Loan (85%): $${maxLoan.toLocaleString()} | Monthly: $${m.toFixed(2)} | LTV: ${((v.mortgage/v.homeValue)*100).toFixed(1)}%`;
+      },
+    },
+    'heloc-calculator': {
+      fields: [{ id: 'homeValue', label: 'Home Value ($)', placeholder: '400000' }, { id: 'mortgage', label: 'Mortgage Balance ($)', placeholder: '250000' }, { id: 'rate', label: 'HELOC Rate (%)', placeholder: '9' }, { id: 'draw', label: 'Amount to Draw ($)', placeholder: '50000' }],
+      compute: (v) => {
+        const equity = v.homeValue - v.mortgage;
+        const maxLine = equity * 0.85;
+        const monthlyInterest = v.draw * v.rate / 100 / 12;
+        return `Available Equity: $${equity.toLocaleString()} | Max Credit Line (85%): $${maxLine.toLocaleString()} | Monthly Interest-Only on Draw: $${monthlyInterest.toFixed(2)}`;
+      },
+    },
+    'rent-vs-buy-calculator': {
+      fields: [{ id: 'homePrice', label: 'Home Price ($)', placeholder: '400000' }, { id: 'rent', label: 'Monthly Rent ($)', placeholder: '2000' }, { id: 'rate', label: 'Mortgage Rate (%)', placeholder: '7' }, { id: 'years', label: 'Horizon (years)', placeholder: '7' }],
+      compute: (v) => {
+        const down = v.homePrice * 0.20, loan = v.homePrice - down;
+        const r = v.rate/100/12, n = 360;
+        const m = (loan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        const totalBuy = down + m * v.years * 12;
+        const totalRent = v.rent * v.years * 12;
+        const equity = v.homePrice * Math.pow(1.03, v.years) - loan;
+        const buyCost = totalBuy - equity;
+        return `Monthly Mortgage: $${m.toFixed(0)} | Total Buy Cost: $${buyCost.toFixed(0)} | Total Rent: $${totalRent.toFixed(0)} | ${buyCost < totalRent ? 'Buying' : 'Renting'} is cheaper over ${v.years} yrs`;
+      },
+    },
+    'mortgage-calculator-uk': {
+      fields: [{ id: 'price', label: 'Property Price (£)', placeholder: '300000' }, { id: 'deposit', label: 'Deposit (%)', placeholder: '10' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '5.5' }, { id: 'years', label: 'Term (years)', placeholder: '25' }],
+      compute: (v) => {
+        const loan = v.price * (1 - v.deposit/100), r = v.rate/100/12, n = v.years*12;
+        const m = (loan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        const stampDuty = v.price > 250000 ? (v.price - 250000) * 0.05 + (Math.min(v.price, 925000) - 250000 < 0 ? 0 : 0) : 0;
+        return `Monthly: £${m.toFixed(2)} | Total: £${(m*n).toFixed(2)} | Interest: £${(m*n - loan).toFixed(2)} | Est. Stamp Duty: £${stampDuty.toFixed(0)}`;
+      },
+    },
+    'canadian-mortgage-calculator': {
+      fields: [{ id: 'price', label: 'Purchase Price (CAD $)', placeholder: '600000' }, { id: 'down', label: 'Down Payment (%)', placeholder: '20' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '5.5' }, { id: 'years', label: 'Amortization (years)', placeholder: '25' }],
+      compute: (v) => {
+        const loan = v.price * (1 - v.down/100);
+        const r = Math.pow(1 + v.rate/100/2, 1/6) - 1;
+        const n = v.years * 12;
+        const m = (loan * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
+        const cmhc = v.down < 20 ? loan * 0.028 : 0;
+        return `Monthly: $${m.toFixed(2)} | CMHC Insurance: $${cmhc.toFixed(0)} | Total Interest: $${(m*n - loan).toFixed(0)} | Semi-annual compounding used`;
+      },
+    },
+    'army-body-fat-calculator': {
+      fields: [{ id: 'height', label: 'Height (inches)', placeholder: '70' }, { id: 'neck', label: 'Neck (inches)', placeholder: '15' }, { id: 'waist', label: 'Waist (inches)', placeholder: '34' }],
+      compute: (v) => {
+        const bf = 86.010 * Math.log10(v.waist - v.neck) - 70.041 * Math.log10(v.height) + 36.76;
+        const standard = bf <= 20 ? '✅ Meets standard' : bf <= 26 ? '⚠️ Borderline' : '❌ Over standard (male)';
+        return `Body Fat: ${Math.max(0, bf).toFixed(1)}% | Army Standard: ${standard}`;
+      },
+    },
+    'carbohydrate-calculator': {
+      fields: [{ id: 'calories', label: 'Daily Calorie Target', placeholder: '2000' }, { id: 'percent', label: 'Carb Percentage (%)', placeholder: '50' }],
+      compute: (v) => {
+        const carbCals = v.calories * v.percent / 100;
+        const grams = carbCals / 4;
+        return `Daily Carbs: ${grams.toFixed(0)}g (${carbCals.toFixed(0)} calories) | Per Meal (3 meals): ${(grams/3).toFixed(0)}g`;
+      },
+    },
+    'healthy-weight-calculator': {
+      fields: [{ id: 'heightFt', label: 'Height Feet', placeholder: '5' }, { id: 'heightIn', label: 'Height Inches', placeholder: '10' }],
+      compute: (v) => {
+        const totalIn = v.heightFt * 12 + v.heightIn;
+        const lowBmi = 18.5, highBmi = 24.9;
+        const low = (lowBmi * totalIn * totalIn / 703).toFixed(1);
+        const high = (highBmi * totalIn * totalIn / 703).toFixed(1);
+        return `Healthy Weight Range: ${low} – ${high} lbs (BMI 18.5–24.9) for ${v.heightFt}'${v.heightIn}" height`;
+      },
+    },
+    'body-type-calculator': {
+      fields: [{ id: 'shoulder', label: 'Shoulder Width (inches)', placeholder: '17' }, { id: 'waist', label: 'Waist (inches)', placeholder: '32' }, { id: 'hip', label: 'Hip (inches)', placeholder: '38' }],
+      compute: (v) => {
+        const sw = v.shoulder / v.waist, hw = v.hip / v.waist;
+        const type = sw > 1.15 && hw < 1.10 ? 'Inverted Triangle (Athletic)' : sw < 1.05 && hw < 1.05 ? 'Rectangle (Athletic/Ectomorph)' : hw > 1.15 ? 'Pear / Triangle' : 'Hourglass / Oval';
+        return `Shoulder/Waist Ratio: ${sw.toFixed(2)} | Hip/Waist Ratio: ${hw.toFixed(2)} | Body Shape: ${type}`;
+      },
+    },
+    'weight-watchers-points-calculator': {
+      fields: [{ id: 'calories', label: 'Calories', placeholder: '300' }, { id: 'fat', label: 'Fat (g)', placeholder: '10' }, { id: 'fiber', label: 'Fiber (g)', placeholder: '5' }, { id: 'protein', label: 'Protein (g)', placeholder: '15' }],
+      compute: (v) => {
+        const points = Math.max(0, Math.round((v.calories / 50 + v.fat / 12 - v.fiber / 5)));
+        const smartpoints = Math.max(0, Math.round((v.calories * 0.0305 + v.fat * 0.275 + v.protein * -0.21)));
+        return `Old Points: ${points} | SmartPoints: ${smartpoints} | PointsPlus: ${Math.max(0, Math.round((v.fat * 0.036 + v.protein * 0.035 + v.fiber * -0.017)))}`;
+      },
+    },
+    'binary-calculator': {
+      fields: [{ id: 'decimal', label: 'Decimal Number', placeholder: '255' }],
+      compute: (v) => {
+        const n = Math.round(v.decimal);
+        return `Decimal: ${n} | Binary: ${n.toString(2)} | Octal: ${n.toString(8)} | Hex: 0x${n.toString(16).toUpperCase()}`;
+      },
+    },
+    'hex-calculator': {
+      fields: [{ id: 'decimal', label: 'Decimal Number', placeholder: '255' }],
+      compute: (v) => {
+        const n = Math.round(v.decimal);
+        return `Hex: 0x${n.toString(16).toUpperCase()} | Binary: ${n.toString(2)} | Octal: ${n.toString(8)} | Decimal: ${n}`;
+      },
+    },
+    'big-number-calculator': {
+      fields: [{ id: 'a', label: 'Number A', placeholder: '999999999' }, { id: 'b', label: 'Number B', placeholder: '888888888' }],
+      compute: (v) => {
+        const sum = v.a + v.b, diff = v.a - v.b, prod = v.a * v.b, quot = v.a / v.b;
+        return `A+B = ${sum.toLocaleString()} | A-B = ${diff.toLocaleString()} | A×B = ${prod.toLocaleString()} | A÷B = ${quot.toFixed(6)}`;
+      },
+    },
+    'matrix-calculator': {
+      fields: [{ id: 'a', label: 'Matrix A [a,b;c,d] — Enter a', placeholder: '1' }, { id: 'b', label: 'b', placeholder: '2' }, { id: 'c', label: 'c', placeholder: '3' }, { id: 'd', label: 'd', placeholder: '4' }],
+      compute: (v) => {
+        const det = v.a * v.d - v.b * v.c;
+        const trace = v.a + v.d;
+        const inv = det !== 0 ? `[${(v.d/det).toFixed(2)}, ${(-v.b/det).toFixed(2)}; ${(-v.c/det).toFixed(2)}, ${(v.a/det).toFixed(2)}]` : 'Not invertible';
+        return `Determinant: ${det} | Trace: ${trace} | Inverse: ${inv}`;
+      },
+    },
+    'time-calculator': {
+      fields: [{ id: 'h1', label: 'Time 1 – Hours', placeholder: '2' }, { id: 'm1', label: 'Time 1 – Minutes', placeholder: '30' }, { id: 'h2', label: 'Time 2 – Hours', placeholder: '1' }, { id: 'm2', label: 'Time 2 – Minutes', placeholder: '45' }],
+      compute: (v) => {
+        const total = (v.h1 + v.h2) * 60 + v.m1 + v.m2;
+        const diff = Math.abs((v.h1 * 60 + v.m1) - (v.h2 * 60 + v.m2));
+        return `Sum: ${Math.floor(total/60)}h ${total%60}m | Difference: ${Math.floor(diff/60)}h ${diff%60}m | Total minutes: ${total}`;
+      },
+    },
+    'hours-calculator': {
+      fields: [{ id: 'startH', label: 'Start Hour (0-23)', placeholder: '9' }, { id: 'startM', label: 'Start Minute', placeholder: '0' }, { id: 'endH', label: 'End Hour (0-23)', placeholder: '17' }, { id: 'endM', label: 'End Minute', placeholder: '0' }, { id: 'break', label: 'Break (minutes)', placeholder: '30' }, { id: 'rate', label: 'Hourly Rate ($)', placeholder: '25' }],
+      compute: (v) => {
+        let mins = (v.endH * 60 + v.endM) - (v.startH * 60 + v.startM) - v.break;
+        if (mins < 0) mins += 24 * 60;
+        const hrs = mins / 60;
+        return `Hours: ${hrs.toFixed(2)} | Pay: $${(hrs * v.rate).toFixed(2)} | Weekly (5 days): ${(hrs*5).toFixed(2)}h = $${(hrs*5*v.rate).toFixed(2)}`;
+      },
+    },
+    'construction-calculator': {
+      fields: [{ id: 'length', label: 'Length (ft)', placeholder: '20' }, { id: 'width', label: 'Width (ft)', placeholder: '15' }, { id: 'height', label: 'Height (ft)', placeholder: '9' }],
+      compute: (v) => {
+        const area = v.length * v.width;
+        const perimeter = 2 * (v.length + v.width);
+        const volume = area * v.height;
+        const wallArea = perimeter * v.height;
+        return `Floor Area: ${area.toFixed(1)} sq ft | Perimeter: ${perimeter.toFixed(1)} ft | Volume: ${volume.toFixed(1)} cu ft | Wall Area: ${wallArea.toFixed(1)} sq ft`;
+      },
+    },
   };
 
   const config = configs[slug];
@@ -2437,6 +3399,18 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'credit-card-calculator': <CreditCardCalculator />,
     'credit-cards-payoff-calculator': <CreditCardCalculator />,
     'debt-payoff-calculator': <CreditCardCalculator />,
+    'auto-loan-calculator': <AutoLoanCalculator />,
+    'salary-calculator': <SalaryCalculator />,
+    'body-fat-calculator': <BodyFatCalculator />,
+    'tdee-calculator': <TDEECalculator />,
+    'calories-burned-calculator': <CaloriesBurnedCalculator />,
+    'binary-calculator': <BinaryCalculator />,
+    'hex-calculator': <BinaryCalculator />,
+    'base64-calculator': <Base64Calculator />,
+    'url-encoder': <URLEncoder />,
+    'time-zone-calculator': <TimeZoneCalculator />,
+    'time-calculator': <TimeCalculator />,
+    'hours-calculator': <HoursCalculator />,
   };
 
   const ui = calculatorComponents[calc.slug] ?? <GenericCalculator slug={calc.slug} name={calc.name} />;
