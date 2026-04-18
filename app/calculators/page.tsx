@@ -48,11 +48,20 @@ function CalculatorsContent() {
   const filtered = calculators.filter(calc => {
     const matchesCategory = activeCategory === 'all' || calc.category === activeCategory;
     const q = search.toLowerCase().trim();
-    const matchesSearch = !q ||
-      calc.name.toLowerCase().includes(q) ||
-      calc.description.toLowerCase().includes(q) ||
-      calc.keywords.some(k => k.toLowerCase().includes(q));
-    return matchesCategory && matchesSearch;
+    
+    // If no search query, show all in category
+    if (!q) return matchesCategory;
+    
+    // Search in name (exact match or word start)
+    const nameMatch = calc.name.toLowerCase().includes(q);
+    
+    // Search in description
+    const descMatch = calc.description.toLowerCase().includes(q);
+    
+    // Search in keywords (word by word)
+    const keywordMatch = calc.keywords.some(k => k.toLowerCase().includes(q) || q.includes(k.toLowerCase()));
+    
+    return matchesCategory && (nameMatch || descMatch || keywordMatch);
   });
 
   const categoryCountMap = Object.fromEntries(
