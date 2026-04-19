@@ -647,17 +647,17 @@ function ScientificCalculator() {
   ];
 
   return (
-    <div className="w-full max-w-none sm:max-w-md lg:max-w-xl mx-auto px-1 sm:px-0">
-      <div className="bg-gray-900 text-white rounded-2xl p-4 sm:p-6 shadow-xl">
-        <div className="bg-black/50 rounded-xl p-3 sm:p-5 mb-4 min-h-[72px] sm:min-h-[96px] flex items-end justify-end">
+    <div className="w-full max-w-none sm:max-w-md lg:max-w-xl mx-auto px-0 sm:px-0">
+      <div className="bg-gray-900 text-white rounded-2xl p-2 sm:p-6 shadow-xl">
+        <div className="bg-black/50 rounded-xl p-2 sm:p-5 mb-3 sm:mb-4 min-h-[64px] sm:min-h-[96px] flex items-end justify-end">
           <div className="text-right w-full">
-            <div className="text-gray-400 text-sm sm:text-base truncate">{expr || '0'}</div>
-            <div className="text-2xl sm:text-4xl font-bold truncate">{display}</div>
+            <div className="text-gray-400 text-xs sm:text-base truncate">{expr || '0'}</div>
+            <div className="text-xl sm:text-4xl font-bold truncate">{display}</div>
           </div>
         </div>
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-1.5 sm:space-y-3">
           {rows.map((row, ri) => (
-            <div key={ri} className={`grid gap-2 sm:gap-3 ${row.length === 1 ? 'grid-cols-1' : 'grid-cols-5'}`}>
+            <div key={ri} className={`grid gap-1.5 sm:gap-3 ${row.length === 1 ? 'grid-cols-1' : 'grid-cols-5'}`}>
               {row.map((btn) => {
                 const isOp = ['/', '*', '-', '+'].includes(btn);
                 const isClear = btn === 'C';
@@ -673,7 +673,7 @@ function ScientificCalculator() {
                       }
                       press(btn);
                     }}
-                    className={`py-3 sm:py-4 rounded-xl text-base sm:text-xl font-bold transition-all active:scale-95 ${
+                    className={`min-w-0 py-2 sm:py-4 rounded-xl text-[11px] sm:text-xl leading-tight font-bold transition-all active:scale-95 ${
                       isEq ? 'bg-indigo-600 hover:bg-indigo-500 text-white' :
                       isClear ? 'bg-red-500 hover:bg-red-400 text-white' :
                       isOp ? 'bg-orange-500 hover:bg-orange-400 text-white' :
