@@ -1075,7 +1075,7 @@ function InvestmentCalculator() {
   const [years, setYears] = useState('10');
   const [additional, setAdditional] = useState('0');
   const [contribFreq, setContribFreq] = useState<'annual' | 'monthly'>('annual');
-  const [result, setResult] = useState<{ fv: number; contributed: number; gain: number; annualizedReturn: number } | null>(null);
+  const [result, setResult] = useState<{ fv: number; contributed: number; gain: number; annualizedGrowthOnDeposits: number; assumedRate: number } | null>(null);
 
   const calculate = () => {
     const P = parseFloat(pv);
@@ -1098,8 +1098,8 @@ function InvestmentCalculator() {
       contributed = P + pmt * n;
     }
 
-    const annualizedReturn = t > 0 && P > 0 ? (Math.pow(fv / P, 1 / t) - 1) * 100 : 0;
-    setResult({ fv, contributed, gain: fv - contributed, annualizedReturn });
+    const annualizedGrowthOnDeposits = t > 0 && contributed > 0 ? (Math.pow(fv / contributed, 1 / t) - 1) * 100 : 0;
+    setResult({ fv, contributed, gain: fv - contributed, annualizedGrowthOnDeposits, assumedRate: annualRate * 100 });
   };
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString();
 
@@ -1116,10 +1116,11 @@ function InvestmentCalculator() {
       {result && (
         <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
           <div className="text-center mb-4"><div className="text-sm text-gray-500 dark:text-gray-400">Future Value</div><div className="text-4xl font-extrabold text-green-600">{fmt(result.fv)}</div></div>
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400 mb-3">Assumed annual return: {result.assumedRate.toFixed(2)}%</div>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Total Invested</div><div className="font-bold">{fmt(result.contributed)}</div></div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Investment Gain</div><div className="font-bold text-green-500">{fmt(result.gain)}</div></div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Annualized Return</div><div className="font-bold text-indigo-600">{result.annualizedReturn.toFixed(2)}%</div></div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Annualized Growth on Deposits</div><div className="font-bold text-indigo-600">{result.annualizedGrowthOnDeposits.toFixed(2)}%</div></div>
           </div>
         </div>
       )}
