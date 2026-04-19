@@ -2671,7 +2671,19 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     },
     'inflation-calculator': {
       fields: [{ id: 'amount', label: 'Current Amount ($)', placeholder: '1000' }, { id: 'rate', label: 'Inflation Rate (%)', placeholder: '3' }, { id: 'years', label: 'Years', placeholder: '10' }],
-      compute: (v) => { const future = v.amount * Math.pow(1 + v.rate/100, v.years); return `Future cost: $${future.toFixed(2)} | Today's purchasing power of $${v.amount}: $${(v.amount/Math.pow(1+v.rate/100,v.years)).toFixed(2)}`; },
+      compute: (v) => {
+        const amount = Math.max(0, v.amount);
+        const annualInflation = Math.max(0, v.rate) / 100;
+        const years = Math.max(0, v.years);
+
+        const inflationFactor = Math.pow(1 + annualInflation, years);
+        const futureCost = amount * inflationFactor;
+        const currentBuyingPower = inflationFactor === 0 ? 0 : amount / inflationFactor;
+        const cumulativeInflationPct = (inflationFactor - 1) * 100;
+        const monthlyInflationPct = (Math.pow(1 + annualInflation, 1 / 12) - 1) * 100;
+
+        return `Future cost: $${futureCost.toFixed(2)} | Current buying power of this amount after ${years.toFixed(1)}y: $${currentBuyingPower.toFixed(2)} | Cumulative inflation: ${cumulativeInflationPct.toFixed(2)}% | Monthly-equivalent inflation: ${monthlyInflationPct.toFixed(4)}% | Required nominal return to preserve value: ${(annualInflation * 100).toFixed(2)}%/yr`;
+      },
     },
     'income-tax-calculator': {
       fields: [{ id: 'income', label: 'Taxable Income ($)', placeholder: '75000' }, { id: 'state', label: 'State Tax Rate (%)', placeholder: '5' }],
