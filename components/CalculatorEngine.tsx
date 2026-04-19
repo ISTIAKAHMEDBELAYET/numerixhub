@@ -3487,6 +3487,25 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { title: 'Credit Impact and Loan Shopping', content: 'Your credit score affects the interest rate offered. Excellent credit (750+) gets best rates; poor credit (below 620) pays much higher rates. Improve credit before applying: pay bills on time, reduce debt, check credit reports for errors. Multiple loan inquiries within 45 days count as single inquiry (hard pull). Shopping rates is smart but do it quickly to minimize impact. Lenders offer rates based on credit score, income, debt-to-income ratio, and loan characteristics. Build credit before major borrowing needs.' },
     ],
   },
+  'finance-calculator': {
+    howTo: 'Enter any known values among present value (PV), payment (PMT), annual rate, and number of periods. Use the calculator to project future value, compare financing options, or estimate how much recurring savings is needed to reach a target amount. Keep rate and period units consistent (for example, annual rate with years, or monthly rate with months).',
+    formula: 'Core TVM formulas: FV = PV(1+r)^n + PMT[((1+r)^n - 1)/r], PV = FV/(1+r)^n, PMT = [FV - PV(1+r)^n] * r / ((1+r)^n - 1).',
+    faqs: [
+      { q: 'What is a finance calculator used for?', a: 'It solves time value of money (TVM) problems such as loan payments, savings growth, future value targets, and present value decisions.' },
+      { q: 'What is TVM (Time Value of Money)?', a: 'TVM means money today is worth more than the same money in the future because it can earn returns over time.' },
+      { q: 'What is the difference between nominal and effective rate?', a: 'Nominal APR is the stated annual rate, while effective annual rate (EAR/APY) includes compounding effects and represents true annual growth cost.' },
+      { q: 'Should I use monthly or yearly periods?', a: 'Use the period that matches your cash flow. If payments are monthly, convert annual rate to monthly and set number of periods in months.' },
+      { q: 'Can this help compare two loan offers?', a: 'Yes. Compare payment amount, total paid, and total interest under each rate/term combination to identify the better offer.' },
+    ],
+    sections: [
+      { title: 'What a Finance Calculator Solves', content: 'A finance calculator handles four core variables: present value (PV), payment (PMT), interest rate (r), and number of periods (n). With any three, you can solve the fourth. This makes it useful for planning loans, investments, retirement contributions, and purchase decisions.' },
+      { title: 'Time Value of Money Basics', content: 'TVM is the foundation of finance math. A dollar today can be invested to become more later. This is why future cash flows are discounted back to present value and why compounding grows balances over time.' },
+      { title: 'Compounding Frequency Matters', content: 'Interest can compound annually, quarterly, monthly, or daily. More frequent compounding increases effective returns for savers and effective borrowing cost for debt. Always compare products using effective annual rate (EAR/APY).' },
+      { title: 'Using PV, FV, and PMT Together', content: 'PV answers what a future target is worth today. FV estimates what today\'s savings become later. PMT estimates required regular deposits or loan installments. Together they help you plan goals realistically.' },
+      { title: 'Loan and Investment Decision Making', content: 'For loans, compare monthly payment and total interest. For investments, compare total contributions versus growth from return. Small differences in rate or term can create large long-term cost and return differences.' },
+      { title: 'Practical Validation Tips', content: 'Double-check units, signs, and assumptions. Keep all inputs in the same period system, include realistic rates, and test multiple scenarios (optimistic/base/conservative) before making final decisions.' },
+    ],
+  },
   'retirement-calculator': {
     howTo: 'Enter your current age, retirement age, current retirement savings, annual savings amount, annual return rate (%), annual inflation rate, and expected life expectancy. Use Retirement Rules to apply pre-calculated savings targets (4%, 10%, 80% rules). The calculator projects whether you have enough saved for retirement and shows year-by-year accumulation and drawdown.',
     formula: 'Future Value = PV(1+r)^n + PMT × [((1+r)^n − 1) / r]. Drawdown = (Annual Expenses × Years in Retirement) / Safe Withdrawal Rate.',
@@ -3548,7 +3567,7 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { title: 'Retirement and Education Investment Accounts', content: 'Tax-advantaged accounts maximize growth: 401(k) (employer-sponsored, $23,500 annual limit), IRA/Roth IRA ($7,000 annual limit). 401(k): pre-tax contributions reduce current taxes; Roth: pay taxes now, tax-free withdrawal later. 529 Plans: education savings with tax-free growth for qualified expenses. HSAs: health savings accounts with triple tax advantage. Contribution room grows annually—max out if possible. Employer 401(k) match is free money—contribute to get full match. Tax deferral amplifies compound growth dramatically over decades.' },
     ],
   },
-  'currency-converter': {
+  'currency-calculator': {
     howTo: 'Enter an amount, select source and target currencies, then click Calculate. The converter displays the converted amount using current market exchange rates. You can also view a comparison table with major currencies and their rates. Useful for travel planning, international business, and comparing purchasing power across countries.',
     formula: 'Converted Amount = Original Amount × (Target Currency Rate ÷ Source Currency Rate). Exchange rates are based on interbank rates (wholesale) but actual rates depend on your bank, fees, and bid-ask spreads.',
     faqs: [
