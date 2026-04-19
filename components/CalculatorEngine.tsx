@@ -525,8 +525,7 @@ function TipCalculator() {
 // Safe recursive-descent math expression parser (no eval / new Function)
 function safeEval(raw: string): number {
   const src = raw
-    .replace(/×/g, '*').replace(/÷/g, '/')
-    .replace(/π/g, String(Math.PI))
+    .replace(/\bpi\b/g, String(Math.PI))
     .replace(/\be\b/g, String(Math.E))
     .replace(/Math\.sin\(/g, 'sin(').replace(/Math\.cos\(/g, 'cos(')
     .replace(/Math\.tan\(/g, 'tan(').replace(/Math\.log10\(/g, 'log(')
@@ -534,6 +533,7 @@ function safeEval(raw: string): number {
     .replace(/\s+/g, '');
 
   let pos = 0;
+
 
   function peek() { return src[pos]; }
   function consume() { return src[pos++]; }
@@ -618,7 +618,7 @@ function ScientificCalculator() {
     if (justCalc && /[0-9.]/.test(val)) { setDisplay(val); setExpr(val); setJustCalc(false); return; }
     setJustCalc(false);
     if (val === 'C') { setDisplay('0'); setExpr(''); return; }
-    if (val === '⌫') { const s = expr.slice(0, -1) || '0'; setExpr(s); setDisplay(s); return; }
+    if (val === 'DEL') { const s = expr.slice(0, -1) || '0'; setExpr(s); setDisplay(s); return; }
     if (val === '=') {
       try {
         const r = safeEval(expr);
@@ -629,7 +629,7 @@ function ScientificCalculator() {
     }
     const fns: Record<string, string> = {
       sin: 'Math.sin(', cos: 'Math.cos(', tan: 'Math.tan(',
-      ln: 'Math.log(', log: 'Math.log10(', '√': 'Math.sqrt(',
+      ln: 'Math.log(', log: 'Math.log10(', sqrt: 'Math.sqrt(',
     };
     if (fns[val]) { const ne = expr + fns[val]; setExpr(ne); setDisplay(ne); return; }
     const ne = (expr === '0' || expr === 'Error') && /[0-9.(]/.test(val) ? val : expr + val;
@@ -637,43 +637,43 @@ function ScientificCalculator() {
   };
 
   const rows = [
-    ['sin','cos','tan','C','⌫'],
-    ['ln','log','√','π','e'],
-    ['(',')','^','%','1/x'],
-    ['7','8','9','÷','×'],
-    ['4','5','6','-','+'],
-    ['1','2','3','0','.'],
+    ['sin', 'cos', 'tan', 'C', 'DEL'],
+    ['ln', 'log', 'sqrt', 'pi', 'e'],
+    ['(', ')', '^', '%', '1/x'],
+    ['7', '8', '9', '/', '*'],
+    ['4', '5', '6', '-', '+'],
+    ['1', '2', '3', '0', '.'],
     ['='],
   ];
 
   return (
-    <div className="max-w-xs mx-auto">
-      <div className="bg-gray-900 text-white rounded-2xl p-5 shadow-xl">
-        <div className="bg-black/50 rounded-xl p-4 mb-4 min-h-[64px] flex items-end justify-end">
+    <div className="w-full max-w-none sm:max-w-md lg:max-w-xl mx-auto px-1 sm:px-0">
+      <div className="bg-gray-900 text-white rounded-2xl p-4 sm:p-6 shadow-xl">
+        <div className="bg-black/50 rounded-xl p-3 sm:p-5 mb-4 min-h-[72px] sm:min-h-[96px] flex items-end justify-end">
           <div className="text-right w-full">
-            <div className="text-gray-400 text-sm truncate">{expr || '0'}</div>
-            <div className="text-2xl font-bold truncate">{display}</div>
+            <div className="text-gray-400 text-sm sm:text-base truncate">{expr || '0'}</div>
+            <div className="text-2xl sm:text-4xl font-bold truncate">{display}</div>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 sm:space-y-3">
           {rows.map((row, ri) => (
-            <div key={ri} className={`grid gap-2 ${row.length === 1 ? 'grid-cols-1' : `grid-cols-${row.length}`}`}>
-              {row.map(btn => {
-                const isOp = ['÷','×','-','+'].includes(btn);
+            <div key={ri} className={`grid gap-2 sm:gap-3 ${row.length === 1 ? 'grid-cols-1' : 'grid-cols-5'}`}>
+              {row.map((btn) => {
+                const isOp = ['/', '*', '-', '+'].includes(btn);
                 const isClear = btn === 'C';
                 const isEq = btn === '=';
-                const isSpecial = ['sin','cos','tan','ln','log','√','π','e','^','%','1/x','(', ')'].includes(btn);
+                const isSpecial = ['sin', 'cos', 'tan', 'ln', 'log', 'sqrt', 'pi', 'e', '^', '%', '1/x', '(', ')'].includes(btn);
                 return (
                   <button
                     key={btn}
                     onClick={() => {
                       if (btn === '1/x') {
-                        try { const v = safeEval(expr); setDisplay(String(1/v)); setExpr(String(1/v)); setJustCalc(true); } catch { setDisplay('Error'); }
+                        try { const v = safeEval(expr); setDisplay(String(1 / v)); setExpr(String(1 / v)); setJustCalc(true); } catch { setDisplay('Error'); }
                         return;
                       }
                       press(btn);
                     }}
-                    className={`py-3 rounded-xl text-sm font-bold transition-all active:scale-95 ${
+                    className={`py-3 sm:py-4 rounded-xl text-base sm:text-xl font-bold transition-all active:scale-95 ${
                       isEq ? 'bg-indigo-600 hover:bg-indigo-500 text-white' :
                       isClear ? 'bg-red-500 hover:bg-red-400 text-white' :
                       isOp ? 'bg-orange-500 hover:bg-orange-400 text-white' :
@@ -690,7 +690,6 @@ function ScientificCalculator() {
     </div>
   );
 }
-
 function BasicCalculator() {
   const [display, setDisplay] = useState('0');
   const [expr, setExpr] = useState('');
@@ -804,6 +803,85 @@ function BasicCalculator() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ScientificNotationCalculator() {
+  const [input, setInput] = useState('123456789');
+  const [sigFigs, setSigFigs] = useState('6');
+  const [result, setResult] = useState<{
+    scientific: string;
+    engineering: string;
+    eNotation: string;
+    plain: string;
+  } | null>(null);
+
+  const toEngineering = (value: number, digits: number) => {
+    if (value === 0) return '0 x 10^0';
+    const sign = value < 0 ? -1 : 1;
+    const abs = Math.abs(value);
+    const exponent = Math.floor(Math.log10(abs));
+    const engExponent = Math.floor(exponent / 3) * 3;
+    const coeff = sign * (abs / Math.pow(10, engExponent));
+    const precision = Math.max(1, digits);
+    return `${coeff.toPrecision(precision)} x 10^${engExponent}`;
+  };
+
+  const calculate = () => {
+    const value = Number(input);
+    const digits = Math.max(1, Math.min(15, parseInt(sigFigs, 10) || 6));
+    if (!Number.isFinite(value)) {
+      setResult(null);
+      return;
+    }
+
+    setResult({
+      scientific: `${value.toExponential(digits - 1).replace('e', ' x 10^')}`,
+      engineering: toEngineering(value, digits),
+      eNotation: value.toExponential(digits - 1),
+      plain: value.toLocaleString('en-US', { maximumSignificantDigits: 15 }),
+    });
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Number</label>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="e.g. 0.000345 or 3.45e-4"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Significant Figures (1-15)</label>
+          <input
+            type="number"
+            min="1"
+            max="15"
+            value={sigFigs}
+            onChange={(e) => setSigFigs(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+        Convert
+      </button>
+
+      {result && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-3 text-sm sm:text-base">
+          <div><span className="font-semibold text-gray-700 dark:text-gray-200">Scientific:</span> <span className="font-mono">{result.scientific}</span></div>
+          <div><span className="font-semibold text-gray-700 dark:text-gray-200">Engineering:</span> <span className="font-mono">{result.engineering}</span></div>
+          <div><span className="font-semibold text-gray-700 dark:text-gray-200">E-Notation:</span> <span className="font-mono">{result.eNotation}</span></div>
+          <div><span className="font-semibold text-gray-700 dark:text-gray-200">Plain Number:</span> <span className="font-mono">{result.plain}</span></div>
+        </div>
+      )}
     </div>
   );
 }
@@ -8752,6 +8830,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'percentage-calculator': <PercentageCalculator />,
     'tip-calculator': <TipCalculator />,
     'scientific-calculator': <ScientificCalculator />,
+    'scientific-notation-calculator': <ScientificNotationCalculator />,
     'basic-calculator': <BasicCalculator />,
     'loan-calculator': <LoanCalculator />,
     'compound-interest-calculator': <CompoundInterestCalculator />,
@@ -8849,7 +8928,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
               </div>
             </div>
           </div>
-          <div className="p-6">{ui}</div>
+          <div className="p-[5px] sm:p-6">{ui}</div>
         </div>
 
         {/* How to Use */}
@@ -8922,3 +9001,4 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     </div>
   );
 }
+
