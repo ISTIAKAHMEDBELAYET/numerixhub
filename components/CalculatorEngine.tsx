@@ -3795,7 +3795,16 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     if (config) {
       const vals: Record<string, number> = {};
       for (const f of fields) { vals[f.id] = parseFloat(inputs[f.id] ?? '0') || 0; }
-      try { setResult(config.compute(vals)); } catch { setResult('Invalid input — please check your values.'); }
+      try {
+        const computed = config.compute(vals);
+        if (!computed || /\b(NaN|Infinity|-Infinity)\b/.test(computed)) {
+          setResult('Invalid input combination — please review values (for example, avoid division by zero).');
+          return;
+        }
+        setResult(computed);
+      } catch {
+        setResult('Invalid input — please check your values.');
+      }
     } else {
       setResult(`Calculation complete for ${name}. Enter values and calculate.`);
     }
