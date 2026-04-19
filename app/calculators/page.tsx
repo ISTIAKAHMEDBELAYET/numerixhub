@@ -45,24 +45,51 @@ function CalculatorsContent() {
     }
   }, [search, router]);
 
-  const filtered = calculators.filter(calc => {
-    const matchesCategory = activeCategory === 'all' || calc.category === activeCategory;
-    const q = search.toLowerCase().trim();
-    
-    // If no search query, show all in category
-    if (!q) return matchesCategory;
-    
-    // Search in name (exact match or word start)
-    const nameMatch = calc.name.toLowerCase().includes(q);
-    
-    // Search in description
-    const descMatch = calc.description.toLowerCase().includes(q);
-    
-    // Search in keywords (word by word)
-    const keywordMatch = calc.keywords.some(k => k.toLowerCase().includes(q) || q.includes(k.toLowerCase()));
-    
-    return matchesCategory && (nameMatch || descMatch || keywordMatch);
-  });
+  const q = search.toLowerCase().trim();
+
+  const getRelevanceScore = (calc: (typeof calculators)[number], query: string) => {
+    if (!query) return 0;
+
+    const name = calc.name.toLowerCase();
+    const description = calc.description.toLowerCase();
+    const slug = calc.slug.toLowerCase();
+    const keywords = calc.keywords.map(k => k.toLowerCase());
+    const words = name.split(/\s+/);
+    const firstWord = query.split(/\s+/)[0];
+
+    let score = 0;
+
+    // Highest priority: exact and prefix matches in title.
+    if (name === query) score += 2000;
+    if (name.startsWith(query)) score += 1600;
+    if (words.some(w => w.startsWith(query))) score += 1300;
+    if (firstWord && words.some(w => w.startsWith(firstWord))) score += 1000;
+    if (name.includes(query)) score += 700;
+
+    // Slug is also important for direct calculator intent.
+    if (slug === query.replace(/\s+/g, '-')) score += 900;
+    if (slug.startsWith(query.replace(/\s+/g, '-'))) score += 750;
+    if (slug.includes(query.replace(/\s+/g, '-'))) score += 500;
+
+    // Keyword and description are secondary signals.
+    if (keywords.some(k => k === query)) score += 600;
+    if (keywords.some(k => k.startsWith(query))) score += 450;
+    if (keywords.some(k => k.includes(query) || query.includes(k))) score += 300;
+    if (description.startsWith(query)) score += 180;
+    if (description.includes(query)) score += 90;
+
+    return score;
+  };
+
+  const filtered = calculators
+    .filter(calc => activeCategory === 'all' || calc.category === activeCategory)
+    .map(calc => ({ calc, score: getRelevanceScore(calc, q) }))
+    .filter(item => !q || item.score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.calc.name.localeCompare(b.calc.name);
+    })
+    .map(item => item.calc);
 
   const categoryCountMap = Object.fromEntries(
     categories.map(cat => [cat.id, calculators.filter(c => c.category === cat.id).length])
