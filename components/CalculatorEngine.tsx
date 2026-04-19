@@ -887,18 +887,59 @@ function RetirementCalculator() {
   const [rate, setRate] = useState('7');
   const [years, setYears] = useState('30');
   const [inflation, setInflation] = useState('3');
-  const [result, setResult] = useState<{ nominal: number; real: number; contributed: number; interest: number } | null>(null);
+  const [preRetIncome, setPreRetIncome] = useState('70000');
+  const [replacePct, setReplacePct] = useState('80');
+  const [otherMonthlyIncome, setOtherMonthlyIncome] = useState('0');
+  const [result, setResult] = useState<{
+    nominal: number;
+    real: number;
+    contributed: number;
+    interest: number;
+    annualIncomeTarget: number;
+    annualPortfolioNeed: number;
+    requiredNestEgg: number;
+    monthlyFromPortfolio: number;
+    readinessGap: number;
+  } | null>(null);
 
   const calculate = () => {
-    const P = parseFloat(current), pmt = parseFloat(monthly), r = parseFloat(rate) / 100 / 12;
-    const n = parseFloat(years) * 12, inf = parseFloat(inflation) / 100;
-    if (isNaN(P) || isNaN(pmt) || !r || !n) return;
-    const nominal = P * Math.pow(1 + r, n) + pmt * (Math.pow(1 + r, n) - 1) / r;
+    const P = parseFloat(current);
+    const pmt = parseFloat(monthly);
+    const annualRate = parseFloat(rate) / 100;
+    const r = annualRate / 12;
+    const n = parseFloat(years) * 12;
+    const inf = parseFloat(inflation) / 100;
+    const income = parseFloat(preRetIncome) || 0;
+    const replace = (parseFloat(replacePct) || 80) / 100;
+    const otherIncomeAnnual = (parseFloat(otherMonthlyIncome) || 0) * 12;
+
+    if (isNaN(P) || isNaN(pmt) || isNaN(n) || n <= 0) return;
+
+    const nominal = r === 0 ? P + pmt * n : P * Math.pow(1 + r, n) + pmt * (Math.pow(1 + r, n) - 1) / r;
     const realRate = (1 + parseFloat(rate) / 100) / (1 + inf) - 1;
     const realMonthly = realRate / 12;
-    const real = P * Math.pow(1 + realMonthly, n) + pmt * (Math.pow(1 + realMonthly, n) - 1) / realMonthly;
+    const real = realMonthly === 0
+      ? P + pmt * n
+      : P * Math.pow(1 + realMonthly, n) + pmt * (Math.pow(1 + realMonthly, n) - 1) / realMonthly;
     const contributed = P + pmt * n;
-    setResult({ nominal, real, contributed, interest: nominal - contributed });
+
+    const annualIncomeTarget = income * replace;
+    const annualPortfolioNeed = Math.max(0, annualIncomeTarget - otherIncomeAnnual);
+    const requiredNestEgg = annualPortfolioNeed / 0.04;
+    const monthlyFromPortfolio = nominal * 0.04 / 12;
+    const readinessGap = requiredNestEgg - nominal;
+
+    setResult({
+      nominal,
+      real,
+      contributed,
+      interest: nominal - contributed,
+      annualIncomeTarget,
+      annualPortfolioNeed,
+      requiredNestEgg,
+      monthlyFromPortfolio,
+      readinessGap,
+    });
   };
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString();
 
@@ -909,7 +950,10 @@ function RetirementCalculator() {
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Monthly Contribution ($)</label><input type="number" value={monthly} onChange={e => setMonthly(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Return (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Years to Retirement</label><input type="number" value={years} onChange={e => setYears(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
-        <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Inflation Rate (%)</label><input type="number" step="0.1" value={inflation} onChange={e => setInflation(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Current Annual Income ($)</label><input type="number" value={preRetIncome} onChange={e => setPreRetIncome(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Income Needed in Retirement (%)</label><input type="number" step="1" value={replacePct} onChange={e => setReplacePct(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Other Retirement Income ($/month)</label><input type="number" value={otherMonthlyIncome} onChange={e => setOtherMonthlyIncome(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Inflation Rate (%)</label><input type="number" step="0.1" value={inflation} onChange={e => setInflation(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
       </div>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Retirement</button>
       {result && (
@@ -919,6 +963,18 @@ function RetirementCalculator() {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Real Value (today&apos;s $)</div><div className="font-bold text-indigo-600">{fmt(result.real)}</div></div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Interest Earned</div><div className="font-bold text-green-500">{fmt(result.interest)}</div></div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center col-span-2"><div className="text-xs text-gray-500 mb-1">Total Contributed</div><div className="font-bold text-gray-900 dark:text-white">{fmt(result.contributed)}</div></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">80% Rule Target Income (annual)</div><div className="font-bold">{fmt(result.annualIncomeTarget)}</div></div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Needed from Portfolio (annual)</div><div className="font-bold">{fmt(result.annualPortfolioNeed)}</div></div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Required Nest Egg (4% rule)</div><div className="font-bold">{fmt(result.requiredNestEgg)}</div></div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Estimated Safe Monthly Withdrawal</div><div className="font-bold">{fmt(result.monthlyFromPortfolio)}</div></div>
+          </div>
+          <div className={`rounded-lg p-3 text-center ${result.readinessGap <= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-amber-50 dark:bg-amber-900/20'}`}>
+            <div className="text-xs text-gray-500 mb-1">Retirement Readiness Gap</div>
+            <div className={`font-bold ${result.readinessGap <= 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
+              {result.readinessGap <= 0 ? `On track (+${fmt(Math.abs(result.readinessGap))})` : `Short by ${fmt(result.readinessGap)}`}
+            </div>
           </div>
         </div>
       )}
