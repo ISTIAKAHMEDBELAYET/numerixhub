@@ -1671,14 +1671,42 @@ function CreditCardCalculator() {
 
 function AutoLoanCalculator() {
   const [price, setPrice] = useState('30000');
+  const [cashIncentive, setCashIncentive] = useState('0');
   const [down, setDown] = useState('3000');
   const [rate, setRate] = useState('7.5');
   const [term, setTerm] = useState('60');
   const [tradeIn, setTradeIn] = useState('0');
-  const [result, setResult] = useState<{ monthly: number; totalPaid: number; totalInterest: number; loanAmount: number } | null>(null);
+  const [tradeOwed, setTradeOwed] = useState('0');
+  const [salesTax, setSalesTax] = useState('7');
+  const [fees, setFees] = useState('1200');
+  const [includeTaxFees, setIncludeTaxFees] = useState(true);
+  const [result, setResult] = useState<{
+    monthly: number;
+    totalPaid: number;
+    totalInterest: number;
+    loanAmount: number;
+    taxAmount: number;
+    upfrontPayment: number;
+    totalCost: number;
+  } | null>(null);
 
   const calculate = () => {
-    const P = parseFloat(price) - parseFloat(down) - parseFloat(tradeIn);
+    const carPrice = parseFloat(price) || 0;
+    const rebate = parseFloat(cashIncentive) || 0;
+    const downPayment = parseFloat(down) || 0;
+    const tradeValue = parseFloat(tradeIn) || 0;
+    const tradeLoanOwed = parseFloat(tradeOwed) || 0;
+    const taxRate = parseFloat(salesTax) || 0;
+    const otherFees = parseFloat(fees) || 0;
+
+    const adjustedPrice = Math.max(0, carPrice - rebate);
+    const netTradeCredit = tradeValue - tradeLoanOwed;
+    const taxableAmount = Math.max(0, adjustedPrice - Math.max(0, netTradeCredit));
+    const taxAmount = taxableAmount * (taxRate / 100);
+
+    let P = adjustedPrice - downPayment - tradeValue + tradeLoanOwed;
+    if (includeTaxFees) P += taxAmount + otherFees;
+
     const r = parseFloat(rate) / 100 / 12;
     const n = parseFloat(term);
     if (!P || P <= 0 || !n) return;
@@ -1689,7 +1717,13 @@ function AutoLoanCalculator() {
       monthly = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     }
     const totalPaid = monthly * n;
-    setResult({ monthly, totalPaid, totalInterest: totalPaid - P, loanAmount: P });
+    const totalInterest = totalPaid - P;
+    const upfrontBase = downPayment + Math.max(0, netTradeCredit);
+    const upfrontTaxFees = includeTaxFees ? 0 : taxAmount + otherFees;
+    const upfrontPayment = upfrontBase + upfrontTaxFees;
+    const totalCost = totalPaid + upfrontPayment;
+
+    setResult({ monthly, totalPaid, totalInterest, loanAmount: P, taxAmount, upfrontPayment, totalCost });
   };
   const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -1697,8 +1731,12 @@ function AutoLoanCalculator() {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Vehicle Price ($)</label><input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Cash Incentive / Rebate ($)</label><input type="number" value={cashIncentive} onChange={e => setCashIncentive(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Down Payment ($)</label><input type="number" value={down} onChange={e => setDown(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Trade-In Value ($)</label><input type="number" value={tradeIn} onChange={e => setTradeIn(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Amount Owed on Trade-In ($)</label><input type="number" value={tradeOwed} onChange={e => setTradeOwed(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Sales Tax (%)</label><input type="number" step="0.1" value={salesTax} onChange={e => setSalesTax(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title/Registration/Fees ($)</label><input type="number" value={fees} onChange={e => setFees(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Interest Rate (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Loan Term (months)</label>
           <select value={term} onChange={e => setTerm(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
@@ -1706,6 +1744,10 @@ function AutoLoanCalculator() {
           </select>
         </div>
       </div>
+      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+        <input type="checkbox" checked={includeTaxFees} onChange={e => setIncludeTaxFees(e.target.checked)} className="rounded border-gray-300 dark:border-gray-600" />
+        Include taxes and fees in loan amount
+      </label>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
       {result && (
         <div className="space-y-3">
@@ -1713,10 +1755,13 @@ function AutoLoanCalculator() {
             <div className="text-xs text-gray-500 mb-1">Monthly Payment</div>
             <div className="text-4xl font-extrabold text-indigo-600">{fmt(result.monthly)}</div>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Loan Amount</div><div className="font-bold">{fmt(result.loanAmount)}</div></div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Paid</div><div className="font-bold">{fmt(result.totalPaid)}</div></div>
             <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.totalInterest)}</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Sales Tax</div><div className="font-bold">{fmt(result.taxAmount)}</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Upfront Payment</div><div className="font-bold">{fmt(result.upfrontPayment)}</div></div>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Vehicle Cost</div><div className="font-bold text-emerald-600">{fmt(result.totalCost)}</div></div>
           </div>
         </div>
       )}
