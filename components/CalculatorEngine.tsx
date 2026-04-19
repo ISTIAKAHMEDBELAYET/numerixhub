@@ -2396,8 +2396,38 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       compute: (v) => { const P = v.price - v.down; const r = v.rate / 100 / 12; const n = v.term; const m = (P * r * Math.pow(1+r,n)) / (Math.pow(1+r,n)-1); return `Monthly: $${m.toFixed(2)} | Total: $${(m*n).toFixed(2)} | Interest: $${(m*n-P).toFixed(2)}`; },
     },
     'interest-calculator': {
-      fields: [{ id: 'principal', label: 'Principal ($)', placeholder: '10000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '5' }, { id: 'years', label: 'Years', placeholder: '5' }],
-      compute: (v) => { const si = v.principal * v.rate / 100 * v.years; const ci = v.principal * Math.pow(1 + v.rate/100, v.years) - v.principal; return `Simple Interest: $${si.toFixed(2)} | Compound Interest: $${ci.toFixed(2)}`; },
+      fields: [
+        { id: 'principal', label: 'Initial Investment ($)', placeholder: '20000' },
+        { id: 'annualContrib', label: 'Annual Contribution ($)', placeholder: '5000' },
+        { id: 'rate', label: 'Annual Interest Rate (%)', placeholder: '5' },
+        { id: 'years', label: 'Investment Length (years)', placeholder: '5' },
+        { id: 'compound', label: 'Compounds Per Year (1,4,12,365)', placeholder: '12' },
+        { id: 'tax', label: 'Tax Rate on Interest (%)', placeholder: '0' },
+        { id: 'inflation', label: 'Inflation Rate (%)', placeholder: '3' },
+      ],
+      compute: (v) => {
+        const principal = Math.max(0, v.principal);
+        const annualContrib = Math.max(0, v.annualContrib);
+        const years = Math.max(0, v.years);
+        const comp = Math.max(1, Math.round(v.compound || 12));
+        const r = v.rate / 100;
+        const tax = Math.max(0, v.tax) / 100;
+        const inflation = Math.max(0, v.inflation) / 100;
+
+        const grossEnd = principal * Math.pow(1 + r / comp, comp * years);
+        const contribFv = annualContrib > 0
+          ? annualContrib * ((Math.pow(1 + r, years) - 1) / (r === 0 ? 1 : r))
+          : 0;
+        const nominalEnd = r === 0 ? principal + annualContrib * years : grossEnd + contribFv;
+
+        const totalContrib = principal + annualContrib * years;
+        const grossInterest = nominalEnd - totalContrib;
+        const afterTaxInterest = grossInterest * (1 - tax);
+        const afterTaxEnd = totalContrib + afterTaxInterest;
+        const inflationAdjusted = afterTaxEnd / Math.pow(1 + inflation, years || 1);
+
+        return `Ending Balance: $${afterTaxEnd.toFixed(2)} | Total Contributions: $${totalContrib.toFixed(2)} | Total Interest: $${afterTaxInterest.toFixed(2)} | Inflation-Adjusted Value: $${inflationAdjusted.toFixed(2)}`;
+      },
     },
     'payment-calculator': {
       fields: [{ id: 'amount', label: 'Loan Amount ($)', placeholder: '20000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '7' }, { id: 'term', label: 'Term (months)', placeholder: '60' }],
