@@ -2608,26 +2608,44 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       ],
       compute: (v) => {
         const P = Math.max(0, v.amount);
-        const r = v.rate / 100 / 12;
+        const r = Math.max(0, v.rate) / 100 / 12;
         const n = Math.max(1, Math.round(v.term));
+        if (P <= 0) return 'Enter a valid loan amount greater than 0.';
 
         const fixedTermPayment = r === 0 ? P / n : (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
         const fixedTermTotal = fixedTermPayment * n;
+        const fixedTermInterest = fixedTermTotal - P;
 
         if (v.payment > 0) {
-          const userPayment = v.payment;
+          const userPayment = Math.max(0, v.payment);
           if (r > 0 && userPayment <= P * r) {
             return `Fixed payment is too low to cover monthly interest. Increase monthly payment above $${(P * r).toFixed(2)}.`;
           }
 
-          const payoffMonths = r === 0
-            ? Math.ceil(P / userPayment)
-            : Math.ceil(-Math.log(1 - (P * r) / userPayment) / Math.log(1 + r));
-          const payoffTotal = userPayment * payoffMonths;
-          return `Fixed Term Monthly: $${fixedTermPayment.toFixed(2)} | Fixed-Payment Payoff: ${payoffMonths} months | Total with fixed payment: $${payoffTotal.toFixed(2)}`;
+          let bal = P;
+          let payoffMonths = 0;
+          let interestPaid = 0;
+          while (bal > 0.01 && payoffMonths < 1200) {
+            const monthlyInterest = bal * r;
+            const principalPaid = Math.min(userPayment - monthlyInterest, bal);
+            if (principalPaid <= 0) {
+              return `Fixed payment is too low to reduce principal. Increase monthly payment above $${(monthlyInterest + 1).toFixed(2)}.`;
+            }
+            bal -= principalPaid;
+            interestPaid += monthlyInterest;
+            payoffMonths++;
+          }
+
+          if (payoffMonths >= 1200) return 'Payoff horizon exceeds 100 years with the current fixed payment.';
+
+          const payoffTotal = P + interestPaid;
+          const years = Math.floor(payoffMonths / 12);
+          const months = payoffMonths % 12;
+          const interestSaved = Math.max(0, fixedTermInterest - interestPaid);
+          return `Fixed-Term Monthly: $${fixedTermPayment.toFixed(2)} | Fixed-Payment Payoff: ${payoffMonths} months (${years}y ${months}m) | Total Paid: $${payoffTotal.toFixed(2)} | Interest: $${interestPaid.toFixed(2)} | Interest Saved vs Term: $${interestSaved.toFixed(2)}`;
         }
 
-        return `Fixed Term Monthly: $${fixedTermPayment.toFixed(2)} | Total of Payments: $${fixedTermTotal.toFixed(2)} | Total Interest: $${(fixedTermTotal - P).toFixed(2)}`;
+        return `Fixed-Term Monthly: $${fixedTermPayment.toFixed(2)} | Total of Payments: $${fixedTermTotal.toFixed(2)} | Total Interest: $${fixedTermInterest.toFixed(2)}`;
       },
     },
     'inflation-calculator': {
