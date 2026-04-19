@@ -769,7 +769,7 @@ function BasicCalculator() {
   ];
 
   return (
-    <div className="w-full max-w-[22rem] sm:max-w-md lg:max-w-xl mx-auto px-2 sm:px-0">
+    <div className="w-full max-w-none sm:max-w-md lg:max-w-xl mx-auto px-1 sm:px-0">
       <div className="bg-gray-900 text-white rounded-2xl p-4 sm:p-6 shadow-xl">
         <div className="bg-black/50 rounded-xl p-3 sm:p-5 mb-4 min-h-[72px] sm:min-h-[96px] flex items-end justify-end">
           <div className="text-right w-full">
