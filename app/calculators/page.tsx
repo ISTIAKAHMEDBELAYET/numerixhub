@@ -48,6 +48,7 @@ function CalculatorsContent() {
   const q = search.toLowerCase().trim();
 
   const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+  const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const stopWords = new Set(['calculator', 'calculators', 'calc', 'tool', 'tools', 'online', 'free']);
 
   const getRelevanceScore = (calc: (typeof calculators)[number], query: string) => {
@@ -67,6 +68,14 @@ function CalculatorsContent() {
     const nameWords = name.split(' ').filter(Boolean);
     const slugWords = slug.split(' ').filter(Boolean);
     const keywordWords = keywords.flatMap(k => k.split(' ').filter(Boolean));
+    const fullText = [name, slug, ...keywords, description].join(' ');
+
+    const allTokensMatch = tokens.every(token => {
+      const tokenRegex = new RegExp(`\\b${escapeRegex(token)}`);
+      return tokenRegex.test(fullText);
+    });
+
+    if (!allTokensMatch) return 0;
 
     let score = 0;
     let matchedCount = 0;
@@ -75,11 +84,11 @@ function CalculatorsContent() {
       let tokenScore = 0;
 
       if (nameWords.includes(token)) tokenScore = Math.max(tokenScore, 600);
-      if (nameWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 500);
+      if (nameWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 520);
       if (name.includes(token)) tokenScore = Math.max(tokenScore, 320);
 
       if (slugWords.includes(token)) tokenScore = Math.max(tokenScore, 420);
-      if (slugWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 360);
+      if (slugWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 380);
       if (slug.includes(token)) tokenScore = Math.max(tokenScore, 250);
 
       if (keywordWords.includes(token)) tokenScore = Math.max(tokenScore, 340);
@@ -95,7 +104,6 @@ function CalculatorsContent() {
       }
     }
 
-    // For multi-word queries, require every meaningful token to match somewhere.
     if (matchedCount < tokens.length) return 0;
 
     const slugQuery = normalizedQuery.replace(/\s+/g, '-');
