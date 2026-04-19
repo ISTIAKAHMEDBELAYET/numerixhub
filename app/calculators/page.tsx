@@ -48,7 +48,6 @@ function CalculatorsContent() {
   const q = search.toLowerCase().trim();
 
   const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
-  const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const stopWords = new Set(['calculator', 'calculators', 'calc', 'tool', 'tools', 'online', 'free']);
 
   const getRelevanceScore = (calc: (typeof calculators)[number], query: string) => {
@@ -61,21 +60,14 @@ function CalculatorsContent() {
     if (tokens.length === 0) return 0;
 
     const name = normalize(calc.name);
-    const description = normalize(calc.description);
-    const slug = normalize(calc.slug.replace(/-/g, ' '));
-    const keywords = calc.keywords.map(k => normalize(k));
-
     const nameWords = name.split(' ').filter(Boolean);
-    const slugWords = slug.split(' ').filter(Boolean);
-    const keywordWords = keywords.flatMap(k => k.split(' ').filter(Boolean));
-    const fullText = [name, slug, ...keywords, description].join(' ');
 
-    const allTokensMatch = tokens.every(token => {
-      const tokenRegex = new RegExp(`\\b${escapeRegex(token)}`);
-      return tokenRegex.test(fullText);
-    });
+    // Strict title-only matching: every query token must match the start of a title word.
+    const allTokensMatchInTitle = tokens.every(token =>
+      nameWords.some(word => word.startsWith(token))
+    );
 
-    if (!allTokensMatch) return 0;
+    if (!allTokensMatchInTitle) return 0;
 
     let score = 0;
     let matchedCount = 0;
@@ -83,20 +75,9 @@ function CalculatorsContent() {
     for (const token of tokens) {
       let tokenScore = 0;
 
-      if (nameWords.includes(token)) tokenScore = Math.max(tokenScore, 600);
+      if (nameWords.includes(token)) tokenScore = Math.max(tokenScore, 650);
       if (nameWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 520);
       if (name.includes(token)) tokenScore = Math.max(tokenScore, 320);
-
-      if (slugWords.includes(token)) tokenScore = Math.max(tokenScore, 420);
-      if (slugWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 380);
-      if (slug.includes(token)) tokenScore = Math.max(tokenScore, 250);
-
-      if (keywordWords.includes(token)) tokenScore = Math.max(tokenScore, 340);
-      if (keywordWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 300);
-      if (keywords.some(k => k.includes(token))) tokenScore = Math.max(tokenScore, 220);
-
-      if (description.startsWith(token)) tokenScore = Math.max(tokenScore, 120);
-      if (description.includes(token)) tokenScore = Math.max(tokenScore, 80);
 
       if (tokenScore > 0) {
         matchedCount += 1;
@@ -106,12 +87,11 @@ function CalculatorsContent() {
 
     if (matchedCount < tokens.length) return 0;
 
-    const slugQuery = normalizedQuery.replace(/\s+/g, '-');
+    const firstToken = tokens[0];
     if (name === normalizedQuery) score += 1800;
     if (name.startsWith(normalizedQuery)) score += 1400;
-    if (slug === normalize(slugQuery.replace(/-/g, ' '))) score += 1100;
-    if (calc.slug.toLowerCase() === slugQuery) score += 1000;
-    if (calc.slug.toLowerCase().startsWith(slugQuery)) score += 850;
+    if (firstToken && nameWords[0]?.startsWith(firstToken)) score += 500;
+    if (firstToken && nameWords[0] === firstToken) score += 800;
 
     return score;
   };
