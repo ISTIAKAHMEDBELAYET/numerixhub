@@ -3239,21 +3239,26 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     // Additional financial calculators
     'currency-calculator': {
       fields: [
-        { id: 'amount', label: 'Amount (Base Currency)', placeholder: '100' },
-        { id: 'rate', label: 'Exchange Rate (1 base = X quote)', placeholder: '0.92' },
+        { id: 'amount', label: 'Amount (Source Currency)', placeholder: '100' },
+        { id: 'sourceRate', label: 'Source per USD (e.g. USD=1, EUR=0.92)', placeholder: '1' },
+        { id: 'targetRate', label: 'Target per USD (e.g. JPY=155)', placeholder: '0.92' },
         { id: 'fee', label: 'Exchange Fee / Spread (%)', placeholder: '1.5' },
       ],
       compute: (v) => {
         const amount = Math.max(0, v.amount);
-        const rate = Math.max(0.0000001, v.rate);
+        const sourceRate = Math.max(0.0000001, v.sourceRate || 1);
+        const targetRate = Math.max(0.0000001, v.targetRate || 1);
         const feePct = Math.max(0, v.fee) / 100;
 
-        const grossQuote = amount * rate;
+        const crossRate = targetRate / sourceRate;
+        const inverseRate = sourceRate / targetRate;
+
+        const grossQuote = amount * crossRate;
         const netQuote = grossQuote * (1 - feePct);
         const effectiveRate = netQuote / (amount || 1);
-        const inverseRate = 1 / rate;
+        const feeCost = grossQuote - netQuote;
 
-        return `Converted (gross): ${grossQuote.toFixed(4)} quote | Converted (after fee): ${netQuote.toFixed(4)} quote | Effective rate: ${effectiveRate.toFixed(6)} | Inverse market rate: 1 quote = ${inverseRate.toFixed(6)} base`;
+        return `Market cross-rate: 1 source = ${crossRate.toFixed(6)} target | Converted (gross): ${grossQuote.toFixed(4)} target | Fee cost: ${feeCost.toFixed(4)} target | Converted (after fee): ${netQuote.toFixed(4)} target | Effective customer rate: ${effectiveRate.toFixed(6)} | Inverse market rate: 1 target = ${inverseRate.toFixed(6)} source`;
       },
     },
     'finance-calculator': {
