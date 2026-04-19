@@ -2430,8 +2430,35 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       },
     },
     'payment-calculator': {
-      fields: [{ id: 'amount', label: 'Loan Amount ($)', placeholder: '20000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '7' }, { id: 'term', label: 'Term (months)', placeholder: '60' }],
-      compute: (v) => { const r = v.rate / 100 / 12; const n = v.term; const m = (v.amount * r * Math.pow(1+r,n)) / (Math.pow(1+r,n)-1); return `Monthly Payment: $${m.toFixed(2)} | Total: $${(m*n).toFixed(2)}`; },
+      fields: [
+        { id: 'amount', label: 'Loan Amount ($)', placeholder: '200000' },
+        { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' },
+        { id: 'term', label: 'Term (months)', placeholder: '180' },
+        { id: 'payment', label: 'Fixed Monthly Payment ($, optional)', placeholder: '1700' },
+      ],
+      compute: (v) => {
+        const P = Math.max(0, v.amount);
+        const r = v.rate / 100 / 12;
+        const n = Math.max(1, Math.round(v.term));
+
+        const fixedTermPayment = r === 0 ? P / n : (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        const fixedTermTotal = fixedTermPayment * n;
+
+        if (v.payment > 0) {
+          const userPayment = v.payment;
+          if (r > 0 && userPayment <= P * r) {
+            return `Fixed payment is too low to cover monthly interest. Increase monthly payment above $${(P * r).toFixed(2)}.`;
+          }
+
+          const payoffMonths = r === 0
+            ? Math.ceil(P / userPayment)
+            : Math.ceil(-Math.log(1 - (P * r) / userPayment) / Math.log(1 + r));
+          const payoffTotal = userPayment * payoffMonths;
+          return `Fixed Term Monthly: $${fixedTermPayment.toFixed(2)} | Fixed-Payment Payoff: ${payoffMonths} months | Total with fixed payment: $${payoffTotal.toFixed(2)}`;
+        }
+
+        return `Fixed Term Monthly: $${fixedTermPayment.toFixed(2)} | Total of Payments: $${fixedTermTotal.toFixed(2)} | Total Interest: $${(fixedTermTotal - P).toFixed(2)}`;
+      },
     },
     'inflation-calculator': {
       fields: [{ id: 'amount', label: 'Current Amount ($)', placeholder: '1000' }, { id: 'rate', label: 'Inflation Rate (%)', placeholder: '3' }, { id: 'years', label: 'Years', placeholder: '10' }],
