@@ -1645,21 +1645,61 @@ function AmortizationCalculator() {
   const [amount, setAmount] = useState('250000');
   const [rate, setRate] = useState('6.5');
   const [term, setTerm] = useState('30');
-  const [result, setResult] = useState<{ monthly: number; total: number; interest: number; schedule: { month: number; payment: number; principal: number; interest: number; balance: number }[] } | null>(null);
+  const [extra, setExtra] = useState('0');
+  const [result, setResult] = useState<{
+    monthly: number;
+    total: number;
+    interest: number;
+    payoffMonths: number;
+    interestSaved: number;
+    monthsSaved: number;
+    schedule: { month: number; payment: number; principal: number; interest: number; balance: number }[];
+  } | null>(null);
 
   const calculate = () => {
-    const P = parseFloat(amount), r = parseFloat(rate) / 100 / 12, n = parseFloat(term) * 12;
-    if (!P || !r || !n) return;
-    const monthly = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    let balance = P;
-    const schedule = [];
-    for (let i = 1; i <= Math.min(n, 12); i++) {
-      const int = balance * r;
-      const prin = monthly - int;
-      balance -= prin;
-      schedule.push({ month: i, payment: monthly, principal: prin, interest: int, balance: Math.max(0, balance) });
-    }
-    setResult({ monthly, total: monthly * n, interest: monthly * n - P, schedule });
+    const P = parseFloat(amount);
+    const r = parseFloat(rate) / 100 / 12;
+    const n = parseFloat(term) * 12;
+    const extraPay = Math.max(0, parseFloat(extra) || 0);
+    if (!P || !n) return;
+
+    const monthly = r === 0 ? P / n : (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+    const simulate = (extraMonthly: number, captureRows = false) => {
+      let balance = P;
+      let month = 0;
+      let totalInterest = 0;
+      const rows: { month: number; payment: number; principal: number; interest: number; balance: number }[] = [];
+
+      while (balance > 0.01 && month < n + 360) {
+        const int = r === 0 ? 0 : balance * r;
+        const principalPart = Math.min(monthly - int + extraMonthly, balance);
+        const payment = principalPart + int;
+        balance = Math.max(0, balance - principalPart);
+        totalInterest += int;
+        month++;
+
+        if (captureRows && month <= 12) {
+          rows.push({ month, payment, principal: principalPart, interest: int, balance });
+        }
+      }
+
+      return { payoffMonths: month, totalInterest, rows };
+    };
+
+    const base = simulate(0, false);
+    const withExtra = simulate(extraPay, true);
+    const totalPaid = P + withExtra.totalInterest;
+
+    setResult({
+      monthly,
+      total: totalPaid,
+      interest: withExtra.totalInterest,
+      payoffMonths: withExtra.payoffMonths,
+      interestSaved: Math.max(0, base.totalInterest - withExtra.totalInterest),
+      monthsSaved: Math.max(0, base.payoffMonths - withExtra.payoffMonths),
+      schedule: withExtra.rows,
+    });
   };
   const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -1670,13 +1710,17 @@ function AmortizationCalculator() {
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Rate (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Term (years)</label><input type="number" value={term} onChange={e => setTerm(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
       </div>
+      <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Extra Monthly Payment ($)</label><input type="number" value={extra} onChange={e => setExtra(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Generate Schedule</button>
       {result && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
             <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Monthly Payment</div><div className="font-bold text-indigo-600">{fmt(result.monthly)}</div></div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Payment</div><div className="font-bold">{fmt(result.total)}</div></div>
             <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.interest)}</div></div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Payoff Time</div><div className="font-bold">{result.payoffMonths} months</div></div>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Months Saved</div><div className="font-bold text-emerald-600">{result.monthsSaved}</div></div>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3"><div className="text-xs text-gray-500 mb-1">Interest Saved</div><div className="font-bold text-emerald-600">{fmt(result.interestSaved)}</div></div>
           </div>
           <div className="overflow-x-auto"><table className="w-full text-xs text-left"><thead><tr className="bg-gray-100 dark:bg-gray-700">{['Month', 'Payment', 'Principal', 'Interest', 'Balance'].map(h => <th key={h} className="px-3 py-2 font-semibold text-gray-600 dark:text-gray-300">{h}</th>)}</tr></thead><tbody>{result.schedule.map(row => <tr key={row.month} className="border-t border-gray-100 dark:border-gray-700"><td className="px-3 py-2">{row.month}</td><td className="px-3 py-2">{fmt(row.payment)}</td><td className="px-3 py-2 text-green-600">{fmt(row.principal)}</td><td className="px-3 py-2 text-red-500">{fmt(row.interest)}</td><td className="px-3 py-2">{fmt(row.balance)}</td></tr>)}</tbody></table></div>
           <p className="text-xs text-gray-400 text-center">Showing first 12 months of {term}-year schedule</p>
