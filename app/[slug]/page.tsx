@@ -22,13 +22,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const calc = getCalculatorBySlug(params.slug);
   if (!calc) return { title: 'Calculator Not Found' };
+
   const canonicalSlug = getCanonicalSlug(params.slug);
+  const isAlias = params.slug !== canonicalSlug;
   const canonicalUrl = `https://numerixhub.pages.dev/${canonicalSlug}/`;
-  const title = `${calc.name} Online – Free | NumerixHub`;
+  const title = `${calc.name} Free Online`;
   const rawDesc = `Free ${calc.name} online. ${calc.description} No signup required. Fast and accurate.`;
   const description = rawDesc.length > 160
     ? rawDesc.slice(0, 160).replace(/\s+\S*$/, '')
     : rawDesc;
+
   return {
     title,
     description,
@@ -36,16 +39,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     alternates: {
       canonical: canonicalUrl,
     },
+    robots: isAlias
+      ? {
+        index: false,
+        follow: true,
+      }
+      : undefined,
     openGraph: {
-      title,
+      title: `${calc.name} | NumerixHub`,
       description: calc.description,
       url: canonicalUrl,
       type: 'website',
-      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${calc.name} – NumerixHub` }],
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${calc.name} - NumerixHub` }],
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `${calc.name} | NumerixHub`,
       description: calc.description,
       images: ['/og-image.png'],
     },
@@ -55,10 +64,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default function CalculatorPage({ params }: { params: { slug: string } }) {
   const calc = getCalculatorBySlug(params.slug);
   if (!calc) notFound();
+
   const canonicalSlug = getCanonicalSlug(params.slug);
   const canonicalUrl = `https://numerixhub.pages.dev/${canonicalSlug}/`;
 
-  // Early theme sync script for static calculator pages
+  // Early theme sync script for static export: ensures dark mode before hydration
   const themeScript = `
     (function(){
       function getCookie(name){
@@ -114,17 +124,15 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Early theme sync for static export: ensures dark mode is correct before hydration */}
       <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       <Header />
       <main className="flex-1">
-        {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 text-sm text-gray-500 dark:text-gray-400">
             <Link href="/" className="hover:text-indigo-600">Home</Link>
-            <span className="mx-2">›</span>
+            <span className="mx-2">&gt;</span>
             <Link href="/calculators/" className="hover:text-indigo-600">Calculators</Link>
-            <span className="mx-2">›</span>
+            <span className="mx-2">&gt;</span>
             <span className="text-gray-900 dark:text-white">{calc.name}</span>
           </div>
         </nav>
@@ -135,7 +143,6 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
       </main>
       <Footer />
 
-      {/* Schema.org JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}

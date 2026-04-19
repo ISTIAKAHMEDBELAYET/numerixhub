@@ -78,9 +78,42 @@ export default function HomePage() {
     math: mathCount,
     utility: utilityCount,
   };
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+  const featuredItemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Featured Calculators',
+    itemListElement: featured.slice(0, 12).map((calc, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: calc.name,
+      url: `https://numerixhub.pages.dev/${calc.slug}/`,
+    })),
+  };
+  const homePageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'NumerixHub - 200+ Free Online Calculators',
+    url: 'https://numerixhub.pages.dev/',
+    description: 'Use 200+ free online calculators for finance, health, math, and utility tasks.',
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homePageSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(featuredItemListSchema) }} />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

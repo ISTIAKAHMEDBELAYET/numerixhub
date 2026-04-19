@@ -3,13 +3,13 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy – NumerixHub',
-  description: 'NumerixHub Privacy Policy – how we handle your data.',
+  title: 'Privacy Policy and Data Practices',
+  description: 'NumerixHub Privacy Policy - how we handle your data.',
   alternates: {
     canonical: 'https://numerixhub.pages.dev/privacy/',
   },
   openGraph: {
-    title: 'Privacy Policy – NumerixHub',
+    title: 'Privacy Policy and Data Practices | NumerixHub',
     description: 'Read how NumerixHub handles privacy, analytics, and calculator data processing.',
     url: 'https://numerixhub.pages.dev/privacy/',
     type: 'website',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Privacy Policy – NumerixHub',
+    title: 'Privacy Policy and Data Practices | NumerixHub',
     description: 'Read how NumerixHub handles privacy and calculator data.',
     images: ['/og-image.png'],
   },
@@ -78,3 +78,5 @@ export default function PrivacyPage() {
     </div>
   );
 }
+
+

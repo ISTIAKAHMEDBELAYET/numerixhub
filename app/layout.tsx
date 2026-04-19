@@ -5,8 +5,8 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://numerixhub.pages.dev'),
   title: {
-    default: 'NumerixHub – 200+ Free Online Calculators',
-    template: '%s | NumerixHub – Free Calculators',
+    default: 'NumerixHub - 200+ Free Online Calculators',
+    template: '%s | NumerixHub',
   },
   description: 'Free online calculators for math, finance, health & fitness, and more. 200+ accurate tools. No signup required. Fast, private, and mobile-friendly.',
   keywords: ['free calculator', 'online calculator', 'math calculator', 'finance calculator', 'health calculator', 'BMI calculator', 'mortgage calculator'],
@@ -29,20 +29,20 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://numerixhub.pages.dev',
     siteName: 'NumerixHub',
-    title: 'NumerixHub – 200+ Free Online Calculators',
+    title: 'NumerixHub - 200+ Free Online Calculators',
     description: 'Free online calculators for math, finance, health & fitness, and more. 200+ accurate tools. No signup required.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'NumerixHub – Free Online Calculators',
+        alt: 'NumerixHub - Free Online Calculators',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NumerixHub – 200+ Free Online Calculators',
+    title: 'NumerixHub - 200+ Free Online Calculators',
     description: 'Free online calculators for math, finance, health & fitness. No signup. 100% free.',
     images: ['/og-image.png'],
     creator: '@numerixhub',
@@ -139,3 +139,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

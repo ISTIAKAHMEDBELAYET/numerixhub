@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'All Online Calculators – 200+ Free Tools | NumerixHub',
+  title: 'All Calculators Free Online',
   description: 'Browse 200+ free online calculators by category including finance, health, math, and utility tools on NumerixHub.',
   keywords: ['all calculators', 'online calculator directory', 'free calculator tools', 'finance calculator list', 'math calculator list'],
   alternates: {
     canonical: 'https://numerixhub.pages.dev/calculators/',
   },
   openGraph: {
-    title: 'All Online Calculators – 200+ Free Tools | NumerixHub',
+    title: 'All Calculators Free Online | NumerixHub',
     description: 'Browse 200+ free calculators by category on NumerixHub.',
     url: 'https://numerixhub.pages.dev/calculators/',
     type: 'website',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'All Online Calculators – 200+ Free Tools | NumerixHub',
+    title: 'All Calculators Free Online | NumerixHub',
     description: 'Browse 200+ free calculators by category on NumerixHub.',
     images: ['/og-image.png'],
   },

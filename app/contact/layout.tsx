@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contact NumerixHub – Calculator Support & Suggestions',
+  title: 'Contact and Support',
   description: 'Contact NumerixHub for calculator suggestions, bug reports, and support questions.',
   keywords: ['contact numerixhub', 'calculator support', 'report calculator issue', 'calculator suggestion'],
   alternates: {
     canonical: 'https://numerixhub.pages.dev/contact/',
   },
   openGraph: {
-    title: 'Contact NumerixHub – Calculator Support & Suggestions',
+    title: 'Contact and Support',
     description: 'Reach out to NumerixHub for support, suggestions, and feedback.',
     url: 'https://numerixhub.pages.dev/contact/',
     type: 'website',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Contact NumerixHub – Calculator Support & Suggestions',
+    title: 'Contact and Support',
     description: 'Reach out to NumerixHub for support, suggestions, and feedback.',
     images: ['/og-image.png'],
   },

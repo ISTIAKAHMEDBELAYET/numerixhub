@@ -4,13 +4,13 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy',
-  description: 'NumerixHub Cookie Policy – Learn about the cookies we use, why we use them, and how you can control them.',
+  title: 'Cookie Policy and Preferences',
+  description: 'NumerixHub Cookie Policy - Learn about the cookies we use, why we use them, and how you can control them.',
   alternates: {
     canonical: 'https://numerixhub.pages.dev/cookies/',
   },
   openGraph: {
-    title: 'Cookie Policy – NumerixHub',
+    title: 'Cookie Policy - NumerixHub',
     description: 'Learn what cookies NumerixHub uses and how to control cookie preferences.',
     url: 'https://numerixhub.pages.dev/cookies/',
     type: 'website',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cookie Policy – NumerixHub',
+    title: 'Cookie Policy - NumerixHub',
     description: 'Learn what cookies NumerixHub uses and how to control preferences.',
     images: ['/og-image.png'],
   },
@@ -146,3 +146,4 @@ export default function CookiesPage() {
     </div>
   );
 }
+

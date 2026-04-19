@@ -56,6 +56,12 @@ function getRelevanceScore(calc: (typeof calculators)[number], query: string) {
 export default function CalculatorsDirectory() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const quickLinksByCategory = useMemo(() => {
+    return categories.map((category) => ({
+      ...category,
+      links: calculators.filter((c) => c.category === category.id).slice(0, 8),
+    }));
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -147,6 +153,29 @@ export default function CalculatorsDirectory() {
             </Link>
           </div>
         )}
+
+        <section className="mt-14 pt-10 border-t border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Popular Calculator Links by Category</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Quick links to high-demand tools to help search engines and users discover key calculator pages faster.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {quickLinksByCategory.map((category) => (
+              <div key={category.id} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">{category.emoji} {category.name}</h3>
+                <ul className="space-y-2 text-sm">
+                  {category.links.map((calc) => (
+                    <li key={calc.slug}>
+                      <Link href={`/${calc.slug}/`} className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                        {calc.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </>
   );

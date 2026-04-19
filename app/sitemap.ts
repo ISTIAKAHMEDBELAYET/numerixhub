@@ -4,6 +4,11 @@ import { calculators } from '@/lib/calculators';
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://numerixhub.pages.dev';
   const now = new Date();
+  const aliasSlugs = new Set([
+    'permutation-combination-calculator',
+    'shoe-size-conversion',
+    'day-of-the-week-calculator',
+  ]);
 
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -50,12 +55,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const calculatorPages: MetadataRoute.Sitemap = calculators.map((calc) => ({
+  const calculatorPages: MetadataRoute.Sitemap = calculators
+    .filter((calc) => !aliasSlugs.has(calc.slug))
+    .map((calc) => ({
     url: `${baseUrl}/${calc.slug}/`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
-  }));
+    }));
 
   return [...staticPages, ...calculatorPages];
 }
