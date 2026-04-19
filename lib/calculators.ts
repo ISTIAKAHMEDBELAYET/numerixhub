@@ -172,7 +172,6 @@ const rawCalculators: Calculator[] = [
   { slug: 'day-of-week-calculator', name: 'Day of the Week Calculator', description: 'This weekday calculator can find the day of the week of any date and provides the calendar of the month.', category: 'utility', emoji: '📅', keywords: ['day of week', 'weekday', 'calendar'] },
   { slug: 'time-zone-calculator', name: 'Time Zone Calculator', description: 'This calculator converts between different time zones around the world using the GMT format.', category: 'utility', emoji: '🌍', keywords: ['time zone', 'gmt', 'world time'] },
   { slug: 'sleep-calculator', name: 'Sleep Calculator', description: 'Calculator to compute the time to wake up or go to bed based on sleep cycle or duration of sleep required.', category: 'utility', emoji: '😴', keywords: ['sleep', 'sleep cycles', 'rest'] },
-  { slug: 'ovulation-calculator', name: 'Ovulation Calculator', description: 'This free ovulation calculator provides estimates of a person\'s possible ovulation windows and corresponding due dates.', category: 'utility', emoji: '📅', keywords: ['ovulation', 'pregnancy', 'fertile window'] },
   { slug: 'period-calculator', name: 'Period Calculator', description: 'This free calculator estimates days in the future during which a person is expected to undergo their period.', category: 'utility', emoji: '📅', keywords: ['period', 'menstrual', 'cycle'] },
 
   // UTILITY & OTHER (40+)
@@ -213,7 +212,6 @@ const rawCalculators: Calculator[] = [
   { slug: 'base64-calculator', name: 'Base64 Encode/Decode', description: 'This free online tool can Base64-encode or decode text, images, and files directly in the browser.', category: 'utility', emoji: '💻', keywords: ['base64', 'encode', 'decode'] },
   { slug: 'url-encoder', name: 'URL Encode/Decode', description: 'This free online tool can encode or decode data to and from a URL-compatible format.', category: 'utility', emoji: '🔗', keywords: ['url encode', 'url decode', 'encoding'] },
   { slug: 'shoe-size-calculator', name: 'Shoe Size Conversion', description: 'This free tool converts between shoe sizes used in the U.S., Canada, UK, India, EU, Japan, Mexico, and China.', category: 'utility', emoji: '👟', keywords: ['shoe size', 'footwear', 'measurement'] },
-  { slug: 'height-calculator', name: 'Height Calculator', description: 'This free height calculator predicts a child\'s adult height and can also convert between different units of height.', category: 'utility', emoji: '📏', keywords: ['height', 'prediction', 'measurement'] },
   { slug: 'dice-roller', name: 'Dice Roller', description: 'Online virtual dice roller that is capable of simultaneously rolling up to 100 dice randomly.',category: 'utility', emoji: '🎲', keywords: ['dice', 'roller', 'random'] },
   { slug: 'time-card-calculator', name: 'Time Card Calculator', description: 'This free time card calculator generates weekly time reports based on provided work times and hourly rates.', category: 'utility', emoji: '🗂️', keywords: ['time card', 'work hours', 'payroll'] },
 ];
