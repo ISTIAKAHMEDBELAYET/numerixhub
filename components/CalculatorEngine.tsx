@@ -744,37 +744,83 @@ function CompoundInterestCalculator() {
 }
 
 function LoanCalculator() {
+  const [mode, setMode] = useState<'amortized' | 'deferred' | 'bond'>('amortized');
   const [amount, setAmount] = useState('25000');
   const [rate, setRate] = useState('6.5');
   const [term, setTerm] = useState('5');
-  const [result, setResult] = useState<{ monthly: number; total: number; interest: number } | null>(null);
+  const [result, setResult] = useState<
+    | { kind: 'amortized'; monthly: number; total: number; interest: number }
+    | { kind: 'deferred'; maturity: number; interest: number }
+    | { kind: 'bond'; presentValue: number; interest: number }
+    | null
+  >(null);
 
   const calculate = () => {
     const P = parseFloat(amount);
     const r = parseFloat(rate) / 100 / 12;
     const n = parseFloat(term) * 12;
-    if (!P || !r || !n) return;
-    const monthly = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    setResult({ monthly, total: monthly * n, interest: monthly * n - P });
+    if (isNaN(P) || P <= 0 || isNaN(n) || n <= 0) return;
+
+    if (mode === 'amortized') {
+      const monthly = r === 0 ? P / n : (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      const total = monthly * n;
+      setResult({ kind: 'amortized', monthly, total, interest: total - P });
+      return;
+    }
+
+    if (mode === 'deferred') {
+      const maturity = r === 0 ? P : P * Math.pow(1 + r, n);
+      setResult({ kind: 'deferred', maturity, interest: maturity - P });
+      return;
+    }
+
+    const presentValue = r === 0 ? P : P / Math.pow(1 + r, n);
+    setResult({ kind: 'bond', presentValue, interest: P - presentValue });
   };
 
   const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div className="space-y-5">
+      <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+        <button onClick={() => { setMode('amortized'); setResult(null); }} className={`flex-1 py-2 text-sm font-medium ${mode === 'amortized' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Amortized Loan</button>
+        <button onClick={() => { setMode('deferred'); setResult(null); }} className={`flex-1 py-2 text-sm font-medium ${mode === 'deferred' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Deferred Payment</button>
+        <button onClick={() => { setMode('bond'); setResult(null); }} className={`flex-1 py-2 text-sm font-medium ${mode === 'bond' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>Bond (Face Value)</button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Loan Amount ($)</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{mode === 'bond' ? 'Face Value at Maturity ($)' : 'Loan Amount ($)'}</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Rate (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Term (years)</label><input type="number" value={term} onChange={e => setTerm(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
       </div>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
       {result && (
         <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
-          <div className="text-center mb-5"><div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Payment</div><div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">{fmt(result.monthly)}</div></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Total Payment</div><div className="font-bold text-gray-900 dark:text-white">{fmt(result.total)}</div></div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.interest)}</div></div>
-          </div>
+          {result.kind === 'amortized' && (
+            <>
+              <div className="text-center mb-5"><div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Payment</div><div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">{fmt(result.monthly)}</div></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Total Payment</div><div className="font-bold text-gray-900 dark:text-white">{fmt(result.total)}</div></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.interest)}</div></div>
+              </div>
+            </>
+          )}
+          {result.kind === 'deferred' && (
+            <>
+              <div className="text-center mb-5"><div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Amount Due at Maturity</div><div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">{fmt(result.maturity)}</div></div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Total Interest</div><div className="font-bold text-red-500">{fmt(result.interest)}</div></div>
+              </div>
+            </>
+          )}
+          {result.kind === 'bond' && (
+            <>
+              <div className="text-center mb-5"><div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Amount Received Today</div><div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">{fmt(result.presentValue)}</div></div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Discount / Interest Cost</div><div className="font-bold text-red-500">{fmt(result.interest)}</div></div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
