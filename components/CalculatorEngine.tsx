@@ -3148,8 +3148,23 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     },
     // Additional financial calculators
     'currency-calculator': {
-      fields: [{ id: 'amount', label: 'Amount (USD)', placeholder: '100' }, { id: 'rate', label: 'Exchange Rate (1 USD = X foreign)', placeholder: '0.92' }],
-      compute: (v) => `${v.amount.toFixed(2)} USD = ${(v.amount * v.rate).toFixed(2)} foreign | Reverse: ${(v.amount / v.rate).toFixed(2)} USD`,
+      fields: [
+        { id: 'amount', label: 'Amount (Base Currency)', placeholder: '100' },
+        { id: 'rate', label: 'Exchange Rate (1 base = X quote)', placeholder: '0.92' },
+        { id: 'fee', label: 'Exchange Fee / Spread (%)', placeholder: '1.5' },
+      ],
+      compute: (v) => {
+        const amount = Math.max(0, v.amount);
+        const rate = Math.max(0.0000001, v.rate);
+        const feePct = Math.max(0, v.fee) / 100;
+
+        const grossQuote = amount * rate;
+        const netQuote = grossQuote * (1 - feePct);
+        const effectiveRate = netQuote / (amount || 1);
+        const inverseRate = 1 / rate;
+
+        return `Converted (gross): ${grossQuote.toFixed(4)} quote | Converted (after fee): ${netQuote.toFixed(4)} quote | Effective rate: ${effectiveRate.toFixed(6)} | Inverse market rate: 1 quote = ${inverseRate.toFixed(6)} base`;
+      },
     },
     'finance-calculator': {
       fields: [{ id: 'pv', label: 'Present Value ($)', placeholder: '0' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' }, { id: 'n', label: 'Periods (months)', placeholder: '60' }, { id: 'pmt', label: 'Payment ($, optional)', placeholder: '0' }],
