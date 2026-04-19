@@ -697,18 +697,34 @@ function CompoundInterestCalculator() {
   const [time, setTime] = useState('10');
   const [compound, setCompound] = useState('12');
   const [contribution, setContribution] = useState('0');
-  const [result, setResult] = useState<{ total: number; interest: number; contributed: number } | null>(null);
+  const [result, setResult] = useState<{ total: number; interest: number; contributed: number; effectiveAnnualRate: number } | null>(null);
 
   const calculate = () => {
     const P = parseFloat(principal);
-    const r = parseFloat(rate) / 100;
+    const nominalAnnualRate = parseFloat(rate) / 100;
     const t = parseFloat(time);
-    const n = parseFloat(compound);
-    const pmt = parseFloat(contribution);
-    if (!P || !r || !t || !n) return;
-    const totalPrincipal = P * Math.pow(1 + r / n, n * t) + pmt * (Math.pow(1 + r / n, n * t) - 1) / (r / n);
-    const contributed = P + pmt * n * t; // pmt per period × periods-per-year × years
-    setResult({ total: totalPrincipal, interest: totalPrincipal - contributed, contributed });
+    const compoundsPerYear = Math.max(1, parseFloat(compound) || 12);
+    const monthlyContribution = parseFloat(contribution) || 0;
+    if (isNaN(P) || P < 0 || isNaN(t) || t <= 0 || isNaN(nominalAnnualRate) || nominalAnnualRate < 0) return;
+
+    const effectiveAnnualRate = nominalAnnualRate === 0
+      ? 0
+      : Math.pow(1 + nominalAnnualRate / compoundsPerYear, compoundsPerYear) - 1;
+    const monthlyRate = effectiveAnnualRate === 0
+      ? 0
+      : Math.pow(1 + effectiveAnnualRate, 1 / 12) - 1;
+    const months = Math.round(t * 12);
+
+    const grownPrincipal = monthlyRate === 0
+      ? P
+      : P * Math.pow(1 + monthlyRate, months);
+    const grownContributions = monthlyRate === 0
+      ? monthlyContribution * months
+      : monthlyContribution * (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate;
+
+    const totalPrincipal = grownPrincipal + grownContributions;
+    const contributed = P + monthlyContribution * months;
+    setResult({ total: totalPrincipal, interest: totalPrincipal - contributed, contributed, effectiveAnnualRate });
   };
 
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString();
@@ -733,6 +749,7 @@ function CompoundInterestCalculator() {
             <div className="text-sm text-gray-500 dark:text-gray-400">Final Balance</div>
             <div className="text-4xl font-extrabold text-green-600">{fmt(result.total)}</div>
           </div>
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400 mb-3">Effective annual rate (EAR): {(result.effectiveAnnualRate * 100).toFixed(3)}%</div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Total Deposited</div><div className="font-bold text-gray-900 dark:text-white">{fmt(result.contributed)}</div></div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center"><div className="text-xs text-gray-500 mb-1">Interest Earned</div><div className="font-bold text-green-500">{fmt(result.interest)}</div></div>
