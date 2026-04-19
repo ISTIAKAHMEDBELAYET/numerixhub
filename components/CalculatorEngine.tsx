@@ -2487,6 +2487,51 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       fields: [{ id: 'principal', label: 'Principal ($)', placeholder: '1000' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '5' }, { id: 'time', label: 'Time (years)', placeholder: '3' }],
       compute: (v) => `Interest: $${(v.principal * v.rate / 100 * v.time).toFixed(2)} | Total: $${(v.principal + v.principal * v.rate / 100 * v.time).toFixed(2)}`,
     },
+    'debt-ratio-calculator': {
+      fields: [{ id: 'monthlyDebt', label: 'Monthly Debt Payments ($)', placeholder: '1200' }, { id: 'monthlyIncome', label: 'Gross Monthly Income ($)', placeholder: '5000' }],
+      compute: (v) => {
+        const debt = Math.max(0, v.monthlyDebt);
+        const income = Math.max(0, v.monthlyIncome);
+        if (income <= 0) return 'Enter monthly income greater than 0.';
+        const dti = (debt / income) * 100;
+        const status = dti < 36 ? 'Healthy' : dti <= 43 ? 'Borderline' : 'High risk';
+        return `Debt-to-Income (DTI): ${dti.toFixed(2)}% | Status: ${status} | Remaining income after debt: $${(income - debt).toFixed(2)}`;
+      },
+    },
+    'take-home-pay-calculator': {
+      fields: [{ id: 'salary', label: 'Annual Gross Salary ($)', placeholder: '80000' }, { id: 'federal', label: 'Federal Tax Rate (%)', placeholder: '18' }, { id: 'state', label: 'State Tax Rate (%)', placeholder: '5' }, { id: 'fica', label: 'FICA Rate (%)', placeholder: '7.65' }],
+      compute: (v) => {
+        const annual = Math.max(0, v.salary);
+        const taxRate = Math.max(0, v.federal + v.state + v.fica) / 100;
+        const netAnnual = annual * (1 - taxRate);
+        return `Net Annual: $${netAnnual.toFixed(2)} | Net Monthly: $${(netAnnual / 12).toFixed(2)} | Net Bi-weekly: $${(netAnnual / 26).toFixed(2)} | Effective total tax: ${(taxRate * 100).toFixed(2)}%`;
+      },
+    },
+    'long-division-calculator': {
+      fields: [{ id: 'dividend', label: 'Dividend', placeholder: '125' }, { id: 'divisor', label: 'Divisor', placeholder: '8' }],
+      compute: (v) => {
+        const dividend = Math.trunc(v.dividend);
+        const divisor = Math.trunc(v.divisor);
+        if (divisor === 0) return 'Division by zero is undefined. Please enter a non-zero divisor.';
+        const quotient = Math.trunc(dividend / divisor);
+        const remainder = Math.abs(dividend % divisor);
+        return `Quotient: ${quotient} | Remainder: ${remainder} | Decimal value: ${(dividend / divisor).toFixed(8).replace(/\.?0+$/, '')}`;
+      },
+    },
+    'p-value-calculator': {
+      fields: [{ id: 'z', label: 'Z-score', placeholder: '1.96' }, { id: 'tails', label: 'Tails (1 or 2)', placeholder: '2' }],
+      compute: (v) => {
+        const z = Math.abs(v.z);
+        const tails = v.tails >= 2 ? 2 : 1;
+        // Abramowitz-Stegun approximation for normal CDF
+        const t = 1 / (1 + 0.2316419 * z);
+        const d = Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI);
+        const cdf = 1 - d * (0.319381530 * t - 0.356563782 * t * t + 1.781477937 * t * t * t - 1.821255978 * t * t * t * t + 1.330274429 * t * t * t * t * t);
+        const oneTail = 1 - cdf;
+        const p = Math.min(1, tails === 2 ? oneTail * 2 : oneTail);
+        return `Approx p-value (${tails}-tailed): ${p.toFixed(6)} | Significance: ${p < 0.01 ? 'Strongly significant (<0.01)' : p < 0.05 ? 'Significant (<0.05)' : 'Not significant (>=0.05)'}`;
+      },
+    },
     'percent-off-calculator': {
       fields: [{ id: 'price', label: 'Original Price ($)', placeholder: '80' }, { id: 'percent', label: 'Percent Off (%)', placeholder: '25' }],
       compute: (v) => `You save: $${(v.price * v.percent / 100).toFixed(2)} | Final price: $${(v.price * (1 - v.percent / 100)).toFixed(2)}`,
@@ -4171,6 +4216,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'percentage-calculator': <PercentageCalculator />,
     'tip-calculator': <TipCalculator />,
     'scientific-calculator': <ScientificCalculator />,
+    'basic-calculator': <ScientificCalculator />,
     'loan-calculator': <LoanCalculator />,
     'compound-interest-calculator': <CompoundInterestCalculator />,
     'calorie-calculator': <CalorieCalculator />,
