@@ -691,6 +691,123 @@ function ScientificCalculator() {
   );
 }
 
+function BasicCalculator() {
+  const [display, setDisplay] = useState('0');
+  const [expr, setExpr] = useState('');
+  const [justCalc, setJustCalc] = useState(false);
+
+  const press = (val: string) => {
+    if (justCalc && /[0-9.]/.test(val)) {
+      setDisplay(val);
+      setExpr(val);
+      setJustCalc(false);
+      return;
+    }
+
+    setJustCalc(false);
+
+    if (val === 'C') {
+      setDisplay('0');
+      setExpr('');
+      return;
+    }
+
+    if (val === 'DEL') {
+      const next = expr.slice(0, -1);
+      setExpr(next);
+      setDisplay(next || '0');
+      return;
+    }
+
+    if (val === '=') {
+      try {
+        const result = safeEval(expr || '0');
+        const next = Number.isFinite(result) ? String(parseFloat(result.toFixed(10))) : 'Error';
+        setDisplay(next);
+        setExpr(next === 'Error' ? '' : next);
+        setJustCalc(true);
+      } catch {
+        setDisplay('Error');
+        setExpr('');
+      }
+      return;
+    }
+
+    const operators = new Set(['+', '-', '*', '/', '%']);
+    const last = expr[expr.length - 1];
+
+    if (operators.has(val)) {
+      if (!expr) {
+        if (val === '-') {
+          setExpr('-');
+          setDisplay('-');
+        }
+        return;
+      }
+
+      if (operators.has(last)) {
+        const next = expr.slice(0, -1) + val;
+        setExpr(next);
+        setDisplay(next);
+        return;
+      }
+    }
+
+    if (val === '.' && /(^|[+\-*/%])\d*\.\d*$/.test(expr)) return;
+
+    const next = expr === '0' && /[0-9.]/.test(val) ? val : expr + val;
+    setExpr(next);
+    setDisplay(next);
+  };
+
+  const rows = [
+    ['C', 'DEL', '%', '/'],
+    ['7', '8', '9', '*'],
+    ['4', '5', '6', '-'],
+    ['1', '2', '3', '+'],
+    ['0', '.', '='],
+  ];
+
+  return (
+    <div className="max-w-xs mx-auto">
+      <div className="bg-gray-900 text-white rounded-2xl p-5 shadow-xl">
+        <div className="bg-black/50 rounded-xl p-4 mb-4 min-h-[64px] flex items-end justify-end">
+          <div className="text-right w-full">
+            <div className="text-gray-400 text-sm truncate">{expr || '0'}</div>
+            <div className="text-2xl font-bold truncate">{display}</div>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {rows.map((row, ri) => (
+            <div key={ri} className={`grid gap-2 ${row.length === 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+              {row.map((btn) => {
+                const isEq = btn === '=';
+                const isClear = btn === 'C' || btn === 'DEL';
+                const isOp = ['+', '-', '*', '/', '%'].includes(btn);
+
+                return (
+                  <button
+                    key={btn}
+                    onClick={() => press(btn)}
+                    className={`py-3 rounded-xl text-sm font-bold transition-all active:scale-95 ${
+                      isEq ? 'bg-indigo-600 hover:bg-indigo-500 text-white' :
+                      isClear ? 'bg-red-500 hover:bg-red-400 text-white' :
+                      isOp ? 'bg-orange-500 hover:bg-orange-400 text-white' :
+                      'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
+                  >
+                    {btn}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CompoundInterestCalculator() {
   const [principal, setPrincipal] = useState('10000');
   const [rate, setRate] = useState('7');
@@ -8635,7 +8752,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'percentage-calculator': <PercentageCalculator />,
     'tip-calculator': <TipCalculator />,
     'scientific-calculator': <ScientificCalculator />,
-    'basic-calculator': <ScientificCalculator />,
+    'basic-calculator': <BasicCalculator />,
     'loan-calculator': <LoanCalculator />,
     'compound-interest-calculator': <CompoundInterestCalculator />,
     'calorie-calculator': <CalorieCalculator />,
