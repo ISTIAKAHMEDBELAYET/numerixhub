@@ -3274,19 +3274,38 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       },
     },
     'finance-calculator': {
-      fields: [{ id: 'pv', label: 'Present Value ($)', placeholder: '0' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' }, { id: 'n', label: 'Periods (months)', placeholder: '60' }, { id: 'pmt', label: 'Payment ($, optional)', placeholder: '0' }],
+      fields: [
+        { id: 'pv', label: 'Present Value ($)', placeholder: '0' },
+        { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' },
+        { id: 'n', label: 'Periods (months)', placeholder: '60' },
+        { id: 'pmt', label: 'Payment ($, optional)', placeholder: '0' },
+        { id: 'targetFv', label: 'Target Future Value ($, optional)', placeholder: '100000' },
+      ],
       compute: (v) => {
-        const r = v.rate / 100 / 12;
+        const pv = Math.max(0, v.pv);
+        const r = Math.max(0, v.rate) / 100 / 12;
         const periods = Math.max(0, Math.round(v.n));
         const payment = Math.max(0, v.pmt);
+        const targetFv = Math.max(0, v.targetFv || 0);
+
+        if (periods <= 0) return 'Enter periods greater than 0.';
 
         const fv = r === 0
-          ? v.pv + payment * periods
-          : v.pv * Math.pow(1 + r, periods) + (payment > 0 ? payment * ((Math.pow(1 + r, periods) - 1) / r) : 0);
+          ? pv + payment * periods
+          : pv * Math.pow(1 + r, periods) + (payment > 0 ? payment * ((Math.pow(1 + r, periods) - 1) / r) : 0);
 
-        const totalContributions = v.pv + payment * periods;
+        const growthFactor = r === 0 ? periods : ((Math.pow(1 + r, periods) - 1) / r);
+        const requiredPaymentForTarget = targetFv > 0
+          ? Math.max(0, (targetFv - (r === 0 ? pv : pv * Math.pow(1 + r, periods))) / (growthFactor || 1))
+          : 0;
+
+        const totalContributions = pv + payment * periods;
         const growth = fv - totalContributions;
         const ear = Math.pow(1 + r, 12) - 1;
+
+        if (targetFv > 0) {
+          return `Projected FV: $${fv.toFixed(2)} | Target FV: $${targetFv.toFixed(2)} | Required payment for target: $${requiredPaymentForTarget.toFixed(2)}/period | Total Contributions (current inputs): $${totalContributions.toFixed(2)} | Growth: $${growth.toFixed(2)} | Effective Annual Rate: ${(ear * 100).toFixed(2)}%`;
+        }
 
         return `Future Value: $${fv.toFixed(2)} | Total Contributions: $${totalContributions.toFixed(2)} | Growth: $${growth.toFixed(2)} | Effective Annual Rate: ${(ear * 100).toFixed(2)}%`;
       },
