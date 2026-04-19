@@ -47,36 +47,63 @@ function CalculatorsContent() {
 
   const q = search.toLowerCase().trim();
 
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+  const stopWords = new Set(['calculator', 'calculators', 'calc', 'tool', 'tools', 'online', 'free']);
+
   const getRelevanceScore = (calc: (typeof calculators)[number], query: string) => {
     if (!query) return 0;
 
-    const name = calc.name.toLowerCase();
-    const description = calc.description.toLowerCase();
-    const slug = calc.slug.toLowerCase();
-    const keywords = calc.keywords.map(k => k.toLowerCase());
-    const words = name.split(/\s+/);
-    const firstWord = query.split(/\s+/)[0];
+    const normalizedQuery = normalize(query);
+    const rawTokens = normalizedQuery.split(' ').filter(Boolean);
+    const meaningfulTokens = rawTokens.filter(token => !stopWords.has(token));
+    const tokens = meaningfulTokens.length > 0 ? meaningfulTokens : rawTokens;
+    if (tokens.length === 0) return 0;
+
+    const name = normalize(calc.name);
+    const description = normalize(calc.description);
+    const slug = normalize(calc.slug.replace(/-/g, ' '));
+    const keywords = calc.keywords.map(k => normalize(k));
+
+    const nameWords = name.split(' ').filter(Boolean);
+    const slugWords = slug.split(' ').filter(Boolean);
+    const keywordWords = keywords.flatMap(k => k.split(' ').filter(Boolean));
 
     let score = 0;
+    let matchedCount = 0;
 
-    // Highest priority: exact and prefix matches in title.
-    if (name === query) score += 2000;
-    if (name.startsWith(query)) score += 1600;
-    if (words.some(w => w.startsWith(query))) score += 1300;
-    if (firstWord && words.some(w => w.startsWith(firstWord))) score += 1000;
-    if (name.includes(query)) score += 700;
+    for (const token of tokens) {
+      let tokenScore = 0;
 
-    // Slug is also important for direct calculator intent.
-    if (slug === query.replace(/\s+/g, '-')) score += 900;
-    if (slug.startsWith(query.replace(/\s+/g, '-'))) score += 750;
-    if (slug.includes(query.replace(/\s+/g, '-'))) score += 500;
+      if (nameWords.includes(token)) tokenScore = Math.max(tokenScore, 600);
+      if (nameWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 500);
+      if (name.includes(token)) tokenScore = Math.max(tokenScore, 320);
 
-    // Keyword and description are secondary signals.
-    if (keywords.some(k => k === query)) score += 600;
-    if (keywords.some(k => k.startsWith(query))) score += 450;
-    if (keywords.some(k => k.includes(query) || query.includes(k))) score += 300;
-    if (description.startsWith(query)) score += 180;
-    if (description.includes(query)) score += 90;
+      if (slugWords.includes(token)) tokenScore = Math.max(tokenScore, 420);
+      if (slugWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 360);
+      if (slug.includes(token)) tokenScore = Math.max(tokenScore, 250);
+
+      if (keywordWords.includes(token)) tokenScore = Math.max(tokenScore, 340);
+      if (keywordWords.some(w => w.startsWith(token))) tokenScore = Math.max(tokenScore, 300);
+      if (keywords.some(k => k.includes(token))) tokenScore = Math.max(tokenScore, 220);
+
+      if (description.startsWith(token)) tokenScore = Math.max(tokenScore, 120);
+      if (description.includes(token)) tokenScore = Math.max(tokenScore, 80);
+
+      if (tokenScore > 0) {
+        matchedCount += 1;
+        score += tokenScore;
+      }
+    }
+
+    // For multi-word queries, require every meaningful token to match somewhere.
+    if (matchedCount < tokens.length) return 0;
+
+    const slugQuery = normalizedQuery.replace(/\s+/g, '-');
+    if (name === normalizedQuery) score += 1800;
+    if (name.startsWith(normalizedQuery)) score += 1400;
+    if (slug === normalize(slugQuery.replace(/-/g, ' '))) score += 1100;
+    if (calc.slug.toLowerCase() === slugQuery) score += 1000;
+    if (calc.slug.toLowerCase().startsWith(slugQuery)) score += 850;
 
     return score;
   };
