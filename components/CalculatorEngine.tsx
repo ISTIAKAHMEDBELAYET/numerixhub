@@ -2477,7 +2477,16 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
   const configs: Record<string, CalcConfig> = {
     'sales-tax-calculator': {
       fields: [{ id: 'price', label: 'Price ($)', placeholder: '100' }, { id: 'tax', label: 'Tax Rate (%)', placeholder: '8.5' }],
-      compute: (v) => `Tax: $${(v.price * v.tax / 100).toFixed(2)} | Total: $${(v.price * (1 + v.tax / 100)).toFixed(2)}`,
+      compute: (v) => {
+        const price = Math.max(0, v.price);
+        const rate = Math.max(0, v.tax) / 100;
+        if (price <= 0) return 'Enter a price greater than 0.';
+
+        const taxAmount = price * rate;
+        const total = price + taxAmount;
+        const preTaxFromTotal = total / (1 + rate);
+        return `Tax: $${taxAmount.toFixed(2)} | Total: $${total.toFixed(2)} | Effective Rate: ${(rate * 100).toFixed(2)}% | Pre-tax from total: $${preTaxFromTotal.toFixed(2)}`;
+      },
     },
     'discount-calculator': {
       fields: [{ id: 'price', label: 'Original Price ($)', placeholder: '100' }, { id: 'discount', label: 'Discount (%)', placeholder: '20' }],
@@ -4143,6 +4152,29 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { title: 'State Tax Considerations', content: 'State tax structures vary widely. Some states use flat rates, some progressive rates, and some have no income tax. Use a realistic estimate for your state and revisit assumptions when laws change.' },
       { title: 'Using Tax Estimates in Budgeting', content: 'Use estimated net income to set savings goals, debt payoff plans, and lifestyle budgets. Conservative tax assumptions can reduce surprises at year-end.' },
       { title: 'Limits of Simplified Tax Models', content: 'Simplified calculators are excellent for quick scenarios but cannot replace full return preparation. Always validate with complete records, filing status details, and current-year tax guidance.' },
+    ],
+  },
+  'sales-tax-calculator': {
+    howTo: 'Enter the pre-tax price and sales tax rate, then click Calculate. The calculator returns tax amount, total after tax, and effective rate. Use it for online checkout estimates, invoice validation, and comparing locations with different tax rates.',
+    formula: 'Tax Amount = Price * (Tax Rate / 100). Total Price = Price + Tax Amount. Reverse-tax price from final total: Pre-tax = Total / (1 + Tax Rate).',
+    faqs: [
+      { q: 'How do I calculate sales tax quickly?', a: 'Multiply the pre-tax price by the tax rate as a decimal. Add that tax amount to the original price to get total checkout cost.' },
+      { q: 'What if I only know the final total with tax?', a: 'Use reverse tax: pre-tax price = total / (1 + tax rate). Then tax amount = total - pre-tax.' },
+      { q: 'Does this include local and city taxes?', a: 'It includes whatever combined rate you enter. If your area has state + county + city tax, add them together as one rate input.' },
+      { q: 'Why do two stores show different tax totals?', a: 'Different jurisdictions, product taxability rules, rounding methods, and exemptions can produce different final tax amounts.' },
+      { q: 'Is sales tax applied before or after discount?', a: 'In most places, sales tax is calculated on discounted price, but rules can vary by location and promotion type.' },
+      { q: 'How do I estimate tax on multiple items?', a: 'Sum taxable item prices first, then apply combined tax rate to the subtotal for a quick estimate.' },
+      { q: 'Can this calculator help business pricing?', a: 'Yes. It helps quote customer-facing totals and verify whether listed prices are pre-tax or tax-inclusive.' },
+      { q: 'Why can one-cent differences happen?', a: 'Cash registers often round per-line item or per-invoice, so tiny rounding differences are normal.' },
+      { q: 'Do all goods and services use the same rate?', a: 'No. Some categories may be exempt or taxed at special rates depending on jurisdiction.' },
+      { q: 'Should I update tax assumptions regularly?', a: 'Yes. Tax rates and rules can change, so update assumptions before major purchases or pricing updates.' },
+    ],
+    sections: [
+      { title: 'Sales Tax Basics', content: 'Sales tax is usually a percentage added to taxable purchases at checkout. Final amount paid equals item subtotal plus tax amount.' },
+      { title: 'Tax-Inclusive vs Tax-Exclusive Pricing', content: 'Some markets show tax-exclusive sticker prices while others display tax-inclusive totals. Reverse-tax formulas help convert between the two.' },
+      { title: 'Combined Jurisdiction Rates', content: 'Real transactions may include multiple layers such as state, county, and city rates. Use a combined rate for practical estimation.' },
+      { title: 'Budgeting and Purchase Planning', content: 'Including tax in planning prevents underestimating true purchase cost and improves budgeting accuracy, especially for large purchases.' },
+      { title: 'Business and Compliance Use', content: 'For merchants, sales-tax math supports accurate quoting, invoice checks, and reconciliation before filing obligations.' },
     ],
   },
   'salary-calculator': {
