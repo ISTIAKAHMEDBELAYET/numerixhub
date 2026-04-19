@@ -2697,22 +2697,42 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     },
     'salary-calculator': {
       fields: [{ id: 'salary', label: 'Annual Salary ($)', placeholder: '60000' }, { id: 'hours', label: 'Hours per Week', placeholder: '40' }],
-      compute: (v) => { const hourly = v.salary / (v.hours * 52); return `Hourly: $${hourly.toFixed(2)} | Monthly: $${(v.salary/12).toFixed(2)} | Bi-weekly: $${(v.salary/26).toFixed(2)} | Weekly: $${(v.salary/52).toFixed(2)}`; },
+      compute: (v) => {
+        const annual = Math.max(0, v.salary);
+        const hours = Math.max(1, v.hours);
+        const hourly = annual / (hours * 52);
+        return `Hourly: $${hourly.toFixed(2)} | Monthly: $${(annual/12).toFixed(2)} | Bi-weekly: $${(annual/26).toFixed(2)} | Weekly: $${(annual/52).toFixed(2)}`;
+      },
     },
     '401k-calculator': {
       fields: [{ id: 'salary', label: 'Annual Salary ($)', placeholder: '70000' }, { id: 'contrib', label: 'Contribution (%)', placeholder: '6' }, { id: 'match', label: 'Employer Match (%)', placeholder: '3' }, { id: 'rate', label: 'Annual Return (%)', placeholder: '7' }, { id: 'years', label: 'Years to Retirement', placeholder: '30' }],
       compute: (v) => {
-        const annual = v.salary * (v.contrib + v.match) / 100;
+        const salary = Math.max(0, v.salary);
+        const contrib = Math.max(0, v.contrib);
+        const match = Math.max(0, v.match);
+        const years = Math.max(0, v.years);
+        const annual = salary * (contrib + match) / 100;
         const monthly = annual / 12;
-        const r = v.rate / 100 / 12;
-        const n = v.years * 12;
-        const fv = monthly * (Math.pow(1+r,n)-1) / r;
-        return `Monthly contribution: $${monthly.toFixed(2)} | Projected balance: $${Math.round(fv).toLocaleString()}`;
+        const r = Math.max(0, v.rate) / 100 / 12;
+        const n = years * 12;
+        const fv = n <= 0
+          ? 0
+          : r === 0
+            ? monthly * n
+            : monthly * (Math.pow(1+r,n)-1) / r;
+        return `Monthly contribution: $${monthly.toFixed(2)} | Annual contribution: $${annual.toFixed(2)} | Projected balance: $${Math.round(fv).toLocaleString()}`;
       },
     },
     'interest-rate-calculator': {
       fields: [{ id: 'pv', label: 'Present Value ($)', placeholder: '10000' }, { id: 'fv', label: 'Future Value ($)', placeholder: '15000' }, { id: 'years', label: 'Years', placeholder: '5' }],
-      compute: (v) => { const r = (Math.pow(v.fv / v.pv, 1 / v.years) - 1) * 100; return `Required Annual Rate: ${r.toFixed(4)}%`; },
+      compute: (v) => {
+        const pv = Math.max(0, v.pv);
+        const fv = Math.max(0, v.fv);
+        const years = Math.max(0, v.years);
+        if (pv <= 0 || fv <= 0 || years <= 0) return 'Enter present value, future value, and years greater than 0.';
+        const r = (Math.pow(fv / pv, 1 / years) - 1) * 100;
+        return `Required Annual Rate (CAGR): ${r.toFixed(4)}%`;
+      },
     },
     'house-affordability-calculator': {
       fields: [{ id: 'income', label: 'Annual Income ($)', placeholder: '80000' }, { id: 'debt', label: 'Monthly Debts ($)', placeholder: '500' }, { id: 'down', label: 'Down Payment ($)', placeholder: '40000' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '7' }],
