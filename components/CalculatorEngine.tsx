@@ -748,34 +748,44 @@ function LoanCalculator() {
   const [amount, setAmount] = useState('25000');
   const [rate, setRate] = useState('6.5');
   const [term, setTerm] = useState('5');
+  const [compoundPerYear, setCompoundPerYear] = useState('12');
   const [result, setResult] = useState<
-    | { kind: 'amortized'; monthly: number; total: number; interest: number }
-    | { kind: 'deferred'; maturity: number; interest: number }
-    | { kind: 'bond'; presentValue: number; interest: number }
+    | { kind: 'amortized'; monthly: number; total: number; interest: number; effectiveAnnualRate: number }
+    | { kind: 'deferred'; maturity: number; interest: number; effectiveAnnualRate: number }
+    | { kind: 'bond'; presentValue: number; interest: number; effectiveAnnualRate: number }
     | null
   >(null);
 
   const calculate = () => {
     const P = parseFloat(amount);
-    const r = parseFloat(rate) / 100 / 12;
-    const n = parseFloat(term) * 12;
-    if (isNaN(P) || P <= 0 || isNaN(n) || n <= 0) return;
+    const years = parseFloat(term);
+    const nominalAnnualRate = parseFloat(rate) / 100;
+    const compounds = Math.max(1, parseInt(compoundPerYear) || 12);
+    const n = years * 12;
+    if (isNaN(P) || P <= 0 || isNaN(n) || n <= 0 || isNaN(nominalAnnualRate) || nominalAnnualRate < 0) return;
+
+    const effectiveAnnualRate = nominalAnnualRate === 0
+      ? 0
+      : Math.pow(1 + nominalAnnualRate / compounds, compounds) - 1;
+    const monthlyRate = effectiveAnnualRate === 0
+      ? 0
+      : Math.pow(1 + effectiveAnnualRate, 1 / 12) - 1;
 
     if (mode === 'amortized') {
-      const monthly = r === 0 ? P / n : (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      const monthly = monthlyRate === 0 ? P / n : (P * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
       const total = monthly * n;
-      setResult({ kind: 'amortized', monthly, total, interest: total - P });
+      setResult({ kind: 'amortized', monthly, total, interest: total - P, effectiveAnnualRate });
       return;
     }
 
     if (mode === 'deferred') {
-      const maturity = r === 0 ? P : P * Math.pow(1 + r, n);
-      setResult({ kind: 'deferred', maturity, interest: maturity - P });
+      const maturity = effectiveAnnualRate === 0 ? P : P * Math.pow(1 + effectiveAnnualRate, years);
+      setResult({ kind: 'deferred', maturity, interest: maturity - P, effectiveAnnualRate });
       return;
     }
 
-    const presentValue = r === 0 ? P : P / Math.pow(1 + r, n);
-    setResult({ kind: 'bond', presentValue, interest: P - presentValue });
+    const presentValue = effectiveAnnualRate === 0 ? P : P / Math.pow(1 + effectiveAnnualRate, years);
+    setResult({ kind: 'bond', presentValue, interest: P - presentValue, effectiveAnnualRate });
   };
 
   const fmt = (n: number) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -792,6 +802,18 @@ function LoanCalculator() {
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">{mode === 'bond' ? 'Face Value at Maturity ($)' : 'Loan Amount ($)'}</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Rate (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Term (years)</label><input type="number" value={term} onChange={e => setTerm(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Compounding Frequency</label>
+        <select value={compoundPerYear} onChange={e => setCompoundPerYear(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <option value="365">Daily</option>
+          <option value="52">Weekly</option>
+          <option value="26">Biweekly</option>
+          <option value="12">Monthly</option>
+          <option value="4">Quarterly</option>
+          <option value="2">Semi-Annually</option>
+          <option value="1">Annually</option>
+        </select>
       </div>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate</button>
       {result && (
@@ -821,6 +843,9 @@ function LoanCalculator() {
               </div>
             </>
           )}
+          <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+            Effective annual rate (EAR): {(result.effectiveAnnualRate * 100).toFixed(3)}%
+          </div>
         </div>
       )}
     </div>
