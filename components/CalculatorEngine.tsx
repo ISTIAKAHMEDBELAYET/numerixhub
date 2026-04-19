@@ -924,10 +924,11 @@ function CalorieCalculator() {
 // ── Additional dedicated calculator components ────────────────────────────────
 
 function RetirementCalculator() {
+  const [currentAge, setCurrentAge] = useState('35');
+  const [retirementAge, setRetirementAge] = useState('65');
   const [current, setCurrent] = useState('50000');
   const [monthly, setMonthly] = useState('500');
   const [rate, setRate] = useState('7');
-  const [years, setYears] = useState('30');
   const [inflation, setInflation] = useState('3');
   const [preRetIncome, setPreRetIncome] = useState('70000');
   const [replacePct, setReplacePct] = useState('80');
@@ -949,13 +950,16 @@ function RetirementCalculator() {
     const pmt = parseFloat(monthly);
     const annualRate = parseFloat(rate) / 100;
     const r = annualRate / 12;
-    const n = parseFloat(years) * 12;
+    const ageNow = parseFloat(currentAge);
+    const ageRetire = parseFloat(retirementAge);
+    const yearsToRetirement = ageRetire - ageNow;
+    const n = yearsToRetirement * 12;
     const inf = parseFloat(inflation) / 100;
     const income = parseFloat(preRetIncome) || 0;
     const replace = (parseFloat(replacePct) || 80) / 100;
     const otherIncomeAnnual = (parseFloat(otherMonthlyIncome) || 0) * 12;
 
-    if (isNaN(P) || isNaN(pmt) || isNaN(n) || n <= 0) return;
+    if (isNaN(P) || isNaN(pmt) || isNaN(n) || n <= 0 || isNaN(ageNow) || isNaN(ageRetire) || ageRetire <= ageNow) return;
 
     const nominal = r === 0 ? P + pmt * n : P * Math.pow(1 + r, n) + pmt * (Math.pow(1 + r, n) - 1) / r;
     const realRate = (1 + parseFloat(rate) / 100) / (1 + inf) - 1;
@@ -988,10 +992,12 @@ function RetirementCalculator() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Current Age</label><input type="number" value={currentAge} onChange={e => setCurrentAge(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Retirement Age</label><input type="number" value={retirementAge} onChange={e => setRetirementAge(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Current Savings ($)</label><input type="number" value={current} onChange={e => setCurrent(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Monthly Contribution ($)</label><input type="number" value={monthly} onChange={e => setMonthly(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Return (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Years to Retirement</label><input type="number" value={years} onChange={e => setYears(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div className="flex items-end"><div className="w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-600 dark:text-gray-300">Years to retirement: <span className="font-semibold">{Math.max(0, (parseFloat(retirementAge) || 0) - (parseFloat(currentAge) || 0))}</span></div></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Current Annual Income ($)</label><input type="number" value={preRetIncome} onChange={e => setPreRetIncome(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Income Needed in Retirement (%)</label><input type="number" step="1" value={replacePct} onChange={e => setReplacePct(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Other Retirement Income ($/month)</label><input type="number" value={otherMonthlyIncome} onChange={e => setOtherMonthlyIncome(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
