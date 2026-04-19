@@ -4204,6 +4204,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'amortization-calculator': <AmortizationCalculator />,
     'mortgage-amortization-calculator': <AmortizationCalculator />,
     'credit-card-calculator': <CreditCardCalculator />,
+    'credit-card-payoff-calculator': <CreditCardCalculator />,
     'credit-cards-payoff-calculator': <CreditCardCalculator />,
     'debt-payoff-calculator': <CreditCardCalculator />,
     'auto-loan-calculator': <AutoLoanCalculator />,
