@@ -91,7 +91,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Dark mode init - must be first to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var m=localStorage.getItem('darkMode');if(m==='true'||(!m&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+            __html: `(function(){
+              function getCookie(name){
+                var escaped = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+                var match = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
+                return match ? decodeURIComponent(match[1]) : null;
+              }
+              function applyTheme(){
+                try {
+                  var m = null;
+                  try { m = localStorage.getItem('darkMode'); } catch (e) {}
+                  if (m !== 'true' && m !== 'false') {
+                    var cm = getCookie('darkMode');
+                    if (cm === 'true' || cm === 'false') m = cm;
+                  }
+                  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var shouldUseDark = m === 'true' || (m === null && prefersDark);
+                  document.documentElement.classList.toggle('dark', shouldUseDark);
+                } catch (e) {}
+              }
+              applyTheme();
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyTheme, { once: true });
+              } else {
+                applyTheme();
+              }
+              window.addEventListener('pageshow', applyTheme);
+              setTimeout(applyTheme, 0);
+              setTimeout(applyTheme, 50);
+            })();`,
           }}
         />
         {/* Schema.org JSON-LD */}

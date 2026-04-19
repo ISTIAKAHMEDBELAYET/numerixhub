@@ -5,6 +5,22 @@ import Footer from '@/components/Footer';
 export const metadata: Metadata = {
   title: 'Privacy Policy – NumerixHub',
   description: 'NumerixHub Privacy Policy – how we handle your data.',
+  alternates: {
+    canonical: 'https://numerixhub.pages.dev/privacy/',
+  },
+  openGraph: {
+    title: 'Privacy Policy – NumerixHub',
+    description: 'Read how NumerixHub handles privacy, analytics, and calculator data processing.',
+    url: 'https://numerixhub.pages.dev/privacy/',
+    type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'NumerixHub Privacy Policy' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy – NumerixHub',
+    description: 'Read how NumerixHub handles privacy and calculator data.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function PrivacyPage() {

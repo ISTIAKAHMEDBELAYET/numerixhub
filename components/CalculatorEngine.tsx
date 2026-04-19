@@ -8600,6 +8600,34 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
   const relatedCalcs = calculators.filter(c => c.category === calc.category && c.slug !== calc.slug).slice(0, 6);
   const content = calcContent[calc.slug] ?? defaultContent(calc.name);
 
+  const faqSchema = content.faqs.length > 0
+    ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: content.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.a,
+        },
+      })),
+    }
+    : null;
+
+  const relatedItemListSchema = relatedCalcs.length > 0
+    ? {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: relatedCalcs.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        url: `https://numerixhub.pages.dev/${item.slug}/`,
+      })),
+    }
+    : null;
+
   const calculatorComponents: Record<string, React.ReactNode> = {
     'bmi-calculator': <BMICalculator />,
     'mortgage-calculator': <MortgageCalculator />,
@@ -8679,6 +8707,19 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+      {relatedItemListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(relatedItemListSchema) }}
+        />
+      )}
+
       {/* Main Calculator */}
       <div className="lg:col-span-2 space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
@@ -8722,77 +8763,14 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
         {content.faqs.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
-            <style>{`
-              details {
-                border: 1px solid #e5e7eb;
-                border-radius: 0.5rem;
-                overflow: hidden;
-                margin-bottom: 0.5rem;
-              }
-              :root.dark details {
-                border-color: #374151;
-              }
-              summary {
-                background-color: #f9fafb;
-                padding: 1rem;
-                cursor: pointer;
-                user-select: none;
-                font-weight: 600;
-                color: #111827;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                transition: background-color 0.2s;
-              }
-              :root.dark summary {
-                background-color: #374151;
-                color: #f3f4f6;
-              }
-              summary:hover {
-                background-color: #f3f4f6;
-              }
-              :root.dark summary:hover {
-                background-color: #4b5563;
-              }
-              details[open] summary {
-                border-bottom: 1px solid #e5e7eb;
-              }
-              :root.dark details[open] summary {
-                border-bottom-color: #374151;
-              }
-              details > *:not(summary) {
-                padding: 0.75rem 1rem;
-                background-color: white;
-                color: #4b5563;
-              }
-              :root.dark details > *:not(summary) {
-                background-color: #1f2937;
-                color: #9ca3af;
-              }
-              .chevron {
-                width: 1.25rem;
-                height: 1.25rem;
-                color: #4f46e5;
-                transition: transform 0.3s;
-                flex-shrink: 0;
-              }
-              :root.dark .chevron {
-                color: #818cf8;
-              }
-              details[open] .chevron {
-                transform: rotate(180deg);
-              }
-            `}</style>
-            <div>
+            <div className="space-y-2">
               {content.faqs.map((faq, i) => (
-                <details key={i}>
-                  <summary>
+                <details key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden group">
+                  <summary className="px-4 py-3 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-between">
                     <span className="text-left pr-4">{faq.q}</span>
-                    <svg className="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
+                    <span className="text-indigo-600 dark:text-indigo-400 text-lg leading-none">+</span>
                   </summary>
-                  <p className="text-sm leading-relaxed">{faq.a}</p>
+                  <p className="px-4 py-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800">{faq.a}</p>
                 </details>
               ))}
             </div>

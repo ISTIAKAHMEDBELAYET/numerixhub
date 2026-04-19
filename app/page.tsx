@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CalculatorCard from '@/components/CalculatorCard';
@@ -6,6 +7,28 @@ import FAQAccordion from '@/components/FAQAccordion';
 import NewsletterForm from '@/components/NewsletterForm';
 import { getFeaturedCalculators, getCalculatorsByCategory } from '@/lib/calculators';
 import { categories } from '@/lib/categories';
+
+export const metadata: Metadata = {
+  title: 'NumerixHub – 200+ Free Online Calculators',
+  description: 'Use 200+ free online calculators for finance, health, math, and utility tasks. Fast, accurate, mobile-friendly tools with no signup required.',
+  keywords: ['free online calculators', 'financial calculators', 'health calculators', 'math calculators', 'utility calculators', 'mortgage calculator', 'BMI calculator'],
+  alternates: {
+    canonical: 'https://numerixhub.pages.dev/',
+  },
+  openGraph: {
+    title: 'NumerixHub – 200+ Free Online Calculators',
+    description: 'Use 200+ free online calculators for finance, health, math, and utility tasks. Fast, accurate, mobile-friendly tools.',
+    url: 'https://numerixhub.pages.dev/',
+    type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'NumerixHub Free Online Calculators' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NumerixHub – 200+ Free Online Calculators',
+    description: 'Use 200+ free online calculators for finance, health, math, and utility tasks.',
+    images: ['/og-image.png'],
+  },
+};
 
 const faqItems = [
   {
@@ -97,7 +120,7 @@ export default function HomePage() {
         <section className="hidden md:block py-16 bg-gray-50 dark:bg-gray-800/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Featured Calculators</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Featured Online Calculators</h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2">Most popular tools used by millions</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
@@ -120,7 +143,7 @@ export default function HomePage() {
         <section className="hidden md:block py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Browse by Category</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Browse Calculator Categories</h2>
               <p className="text-gray-500 dark:text-gray-400 mt-2">Find the calculator you need</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

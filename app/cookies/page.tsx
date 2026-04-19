@@ -9,6 +9,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://numerixhub.pages.dev/cookies/',
   },
+  openGraph: {
+    title: 'Cookie Policy – NumerixHub',
+    description: 'Learn what cookies NumerixHub uses and how to control cookie preferences.',
+    url: 'https://numerixhub.pages.dev/cookies/',
+    type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'NumerixHub Cookie Policy' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cookie Policy – NumerixHub',
+    description: 'Learn what cookies NumerixHub uses and how to control preferences.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function CookiesPage() {

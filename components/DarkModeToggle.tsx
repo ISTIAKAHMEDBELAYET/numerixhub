@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from 'react';
 
+function persistThemePreference(enabled: boolean) {
+  const value = enabled ? 'true' : 'false';
+  try {
+    localStorage.setItem('darkMode', value);
+  } catch {
+    // Cookie fallback covers environments that block localStorage.
+  }
+  document.cookie = `darkMode=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
+}
+
 export default function DarkModeToggle() {
   const [darkMode, setDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -15,11 +25,11 @@ export default function DarkModeToggle() {
     const html = document.documentElement;
     if (html.classList.contains('dark')) {
       html.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
+      persistThemePreference(false);
       setDarkMode(false);
     } else {
       html.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
+      persistThemePreference(true);
       setDarkMode(true);
     }
   };

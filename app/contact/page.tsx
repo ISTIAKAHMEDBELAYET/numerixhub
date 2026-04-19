@@ -6,11 +6,37 @@ import Footer from '@/components/Footer';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message = typeof payload?.error === 'string' ? payload.error : 'Unable to send message right now. Please try again.';
+        setSubmitError(message);
+        return;
+      }
+
+      setSubmitted(true);
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch {
+      setSubmitError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -28,12 +54,20 @@ export default function ContactPage() {
               <div className="text-5xl mb-4">✅</div>
               <h2 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-2">Message Sent!</h2>
               <p className="text-green-700 dark:text-green-400">Thanks for reaching out. We&apos;ll get back to you within 24–48 hours.</p>
-              <button onClick={() => setSubmitted(false)} className="mt-4 text-sm text-green-600 dark:text-green-400 hover:underline">Send another message</button>
+              <button
+                onClick={() => {
+                  setSubmitted(false);
+                  setSubmitError(null);
+                }}
+                className="mt-4 text-sm text-green-600 dark:text-green-400 hover:underline"
+              >
+                Send another message
+              </button>
             </div>
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Name</label>
                     <input type="text" required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-900 dark:text-white" placeholder="Your name" />
@@ -57,7 +91,16 @@ export default function ContactPage() {
                   <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Message</label>
                   <textarea required rows={5} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-900 dark:text-white resize-none" placeholder="Your message..." />
                 </div>
-                <button type="submit" className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Send Message</button>
+                {submitError && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                </button>
               </form>
             </div>
           )}
