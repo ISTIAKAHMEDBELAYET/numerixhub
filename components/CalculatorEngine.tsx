@@ -109,6 +109,7 @@ function MortgageCalculator() {
     loanAmount: number; downPayment: number; monthly: number; totalMonthly: number;
     totalPayment: number; totalInterest: number; propTaxMo: number; insuranceMo: number;
     pmiMo: number; hoaMo: number; payoffDate: string; payoffMonths: number;
+    baselineMonths: number; baselineInterest: number;
     schedule: { year: number; principal: number; interest: number; balance: number }[];
   } | null>(null);
 
@@ -119,8 +120,10 @@ function MortgageCalculator() {
     if (loan <= 0) return;
     const r = parseFloat(rate) / 100 / 12;
     const n = parseInt(term) * 12;
-    if (!r || !n) return;
-    const monthly = (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    if (!n) return;
+    const monthly = r === 0
+      ? loan / n
+      : (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
     const propTaxMo = price * (parseFloat(propTax) / 100) / 12;
     const insuranceMo = parseFloat(insurance) / 12;
     const pmiMo = down / price < 0.2 ? loan * (parseFloat(pmi) / 100) / 12 : 0;
@@ -128,29 +131,57 @@ function MortgageCalculator() {
     const extra = parseFloat(extraMonthly) || 0;
     const totalMonthly = monthly + propTaxMo + insuranceMo + pmiMo + hoaMo;
 
-    // Payoff with extra payment
-    let balance = loan, months = 0;
-    const yearlyData: { year: number; principal: number; interest: number; balance: number }[] = [];
-    let yearPrin = 0, yearInt = 0;
-    while (balance > 0.01 && months < n + 360) {
-      const int = balance * r;
-      const prin = Math.min(monthly - int + extra, balance);
-      balance = Math.max(0, balance - prin);
-      yearPrin += prin; yearInt += int;
-      months++;
-      if (months % 12 === 0 || balance <= 0.01) {
-        yearlyData.push({ year: Math.ceil(months / 12), principal: yearPrin, interest: yearInt, balance });
-        yearPrin = 0; yearInt = 0;
+    const runAmortization = (extraPay: number) => {
+      let balance = loan;
+      let months = 0;
+      let totalInterestAcc = 0;
+      const yearlyData: { year: number; principal: number; interest: number; balance: number }[] = [];
+      let yearPrin = 0;
+      let yearInt = 0;
+
+      while (balance > 0.01 && months < n + 360) {
+        const int = r === 0 ? 0 : balance * r;
+        const prin = Math.min(monthly - int + extraPay, balance);
+        balance = Math.max(0, balance - prin);
+        yearPrin += prin;
+        yearInt += int;
+        totalInterestAcc += int;
+        months++;
+
+        if (months % 12 === 0 || balance <= 0.01) {
+          yearlyData.push({ year: Math.ceil(months / 12), principal: yearPrin, interest: yearInt, balance });
+          yearPrin = 0;
+          yearInt = 0;
+        }
       }
-    }
+
+      return { months, totalInterest: totalInterestAcc, schedule: yearlyData };
+    };
+
+    const baseline = runAmortization(0);
+    const accelerated = runAmortization(extra);
 
     const sd = new Date(startDate + '-01');
-    sd.setMonth(sd.getMonth() + months);
+    sd.setMonth(sd.getMonth() + accelerated.months);
     const payoffStr = sd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-    const totalInterest = yearlyData.reduce((s, r) => s + r.interest, 0);
-
-    setResult({ loanAmount: loan, downPayment: down, monthly, totalMonthly, totalPayment: monthly * months, totalInterest, propTaxMo, insuranceMo, pmiMo, hoaMo, payoffDate: payoffStr, payoffMonths: months, schedule: yearlyData });
+    setResult({
+      loanAmount: loan,
+      downPayment: down,
+      monthly,
+      totalMonthly,
+      totalPayment: loan + accelerated.totalInterest,
+      totalInterest: accelerated.totalInterest,
+      propTaxMo,
+      insuranceMo,
+      pmiMo,
+      hoaMo,
+      payoffDate: payoffStr,
+      payoffMonths: accelerated.months,
+      baselineMonths: baseline.months,
+      baselineInterest: baseline.totalInterest,
+      schedule: accelerated.schedule,
+    });
   };
 
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString('en-US');
@@ -232,6 +263,11 @@ function MortgageCalculator() {
               </div>
             )}
             {result.pmiMo > 0 && <div className="mt-2 text-xs text-amber-600 dark:text-amber-400">⚠️ PMI applies until you reach 20% equity (~{fmt(result.loanAmount * 0.8)} remaining balance)</div>}
+            {parseFloat(extraMonthly) > 0 && result.baselineMonths > result.payoffMonths && (
+              <div className="mt-2 text-xs text-emerald-600 dark:text-emerald-400">
+                Extra payment saves about {result.baselineMonths - result.payoffMonths} month(s) and {fmt(result.baselineInterest - result.totalInterest)} in interest.
+              </div>
+            )}
           </div>
 
           <button type="button" onClick={() => setShowAmort(v => !v)} className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
