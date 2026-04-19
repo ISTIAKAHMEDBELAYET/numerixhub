@@ -2733,11 +2733,29 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     'income-tax-calculator': {
       fields: [{ id: 'income', label: 'Taxable Income ($)', placeholder: '75000' }, { id: 'state', label: 'State Tax Rate (%)', placeholder: '5' }],
       compute: (v) => {
-        const brackets: [number, number][] = [[10275, 0.10], [41775, 0.12], [89075, 0.22], [170050, 0.24], [215950, 0.32], [539900, 0.35], [Infinity, 0.37]];
-        let federal = 0, prev = 0;
-        for (const [limit, rate] of brackets) { if (v.income > prev) { federal += (Math.min(v.income, limit) - prev) * rate; } prev = limit; if (v.income <= limit) break; }
-        const state = v.income * v.state / 100;
-        return `Federal: $${federal.toFixed(2)} | State: $${state.toFixed(2)} | Total: $${(federal+state).toFixed(2)} | Eff. Rate: ${((federal+state)/v.income*100).toFixed(1)}%`;
+        const income = Math.max(0, v.income);
+        const stateRate = Math.max(0, v.state) / 100;
+        if (income <= 0) return 'Enter taxable income greater than 0.';
+
+        const brackets: [number, number][] = [[11000, 0.10], [44725, 0.12], [95375, 0.22], [182100, 0.24], [231250, 0.32], [578125, 0.35], [Infinity, 0.37]];
+        let federal = 0;
+        let prev = 0;
+        let marginal = 0.10;
+        for (const [limit, rate] of brackets) {
+          if (income > prev) {
+            const taxed = Math.min(income, limit) - prev;
+            federal += taxed * rate;
+            marginal = rate;
+          }
+          prev = limit;
+          if (income <= limit) break;
+        }
+
+        const state = income * stateRate;
+        const totalTax = federal + state;
+        const effectiveRate = (totalTax / income) * 100;
+        const netIncome = income - totalTax;
+        return `Federal: $${federal.toFixed(2)} | State: $${state.toFixed(2)} | Total Tax: $${totalTax.toFixed(2)} | Effective Rate: ${effectiveRate.toFixed(2)}% | Marginal Federal Rate: ${(marginal * 100).toFixed(0)}% | Net Income: $${netIncome.toFixed(2)}`;
       },
     },
     'salary-calculator': {
@@ -4087,6 +4105,29 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
       { title: 'Using PV, FV, and PMT Together', content: 'PV answers what a future target is worth today. FV estimates what today\'s savings become later. PMT estimates required regular deposits or loan installments. Together they help you plan goals realistically.' },
       { title: 'Loan and Investment Decision Making', content: 'For loans, compare monthly payment and total interest. For investments, compare total contributions versus growth from return. Small differences in rate or term can create large long-term cost and return differences.' },
       { title: 'Practical Validation Tips', content: 'Double-check units, signs, and assumptions. Keep all inputs in the same period system, include realistic rates, and test multiple scenarios (optimistic/base/conservative) before making final decisions.' },
+    ],
+  },
+  'tax-calculator': {
+    howTo: 'Enter your taxable income and estimated state tax rate, then click Calculate. The calculator estimates federal tax using progressive tax brackets, adds state tax, and returns total tax, effective tax rate, marginal federal bracket, and estimated net income. This is useful for salary planning, side-income projections, and year-end tax estimates.',
+    formula: 'Total Tax = Federal Progressive Tax + (State Rate × Taxable Income). Effective Rate = Total Tax / Taxable Income. Net Income = Taxable Income − Total Tax.',
+    faqs: [
+      { q: 'What is the difference between marginal and effective tax rate?', a: 'Marginal rate is the tax rate on your last dollar earned. Effective rate is total tax divided by total taxable income, usually much lower than marginal rate.' },
+      { q: 'Why is federal tax progressive?', a: 'Progressive tax means different portions of income are taxed at different rates. Moving into a higher bracket does not tax your entire income at that higher rate.' },
+      { q: 'Does this include deductions and credits?', a: 'This tool is an estimate model and does not apply all possible deductions or credits. Use it for planning, then confirm with detailed tax software or a CPA.' },
+      { q: 'How should I choose state tax rate input?', a: 'Use your approximate effective state income tax rate. If your state has no income tax, enter 0%.' },
+      { q: 'Can I use this calculator for paycheck withholding?', a: 'Yes, as a rough estimate. For exact withholding, consider filing status, allowances, pre-tax deductions, and local taxes in payroll tools.' },
+      { q: 'Why does net income here differ from my paycheck?', a: 'Paychecks also include payroll taxes, retirement contributions, health insurance, and other deductions beyond simple federal + state income tax estimates.' },
+      { q: 'Can this help with side hustle or freelance planning?', a: 'Yes. It helps estimate how added taxable income may change total tax and effective rate for budgeting purposes.' },
+      { q: 'What is taxable income exactly?', a: 'Taxable income is the amount of income subject to tax after eligible adjustments and deductions.' },
+      { q: 'Should I update this estimate during the year?', a: 'Yes. Recalculate when your income changes, bonuses occur, or tax assumptions shift.' },
+      { q: 'When should I talk to a tax professional?', a: 'If you have multiple income sources, business income, complex deductions, or large capital gains, professional advice is recommended.' },
+    ],
+    sections: [
+      { title: 'How Progressive Tax Works', content: 'Federal income tax is applied in layers. Each bracket taxes only the portion of income that falls inside that range. This means crossing into a higher bracket does not retroactively increase tax on lower portions.' },
+      { title: 'Effective Rate vs Planning Rate', content: 'Effective tax rate is best for high-level planning and budgeting. Marginal tax rate is best for incremental decisions like bonuses, overtime, freelance work, or investment withdrawals.' },
+      { title: 'State Tax Considerations', content: 'State tax structures vary widely. Some states use flat rates, some progressive rates, and some have no income tax. Use a realistic estimate for your state and revisit assumptions when laws change.' },
+      { title: 'Using Tax Estimates in Budgeting', content: 'Use estimated net income to set savings goals, debt payoff plans, and lifestyle budgets. Conservative tax assumptions can reduce surprises at year-end.' },
+      { title: 'Limits of Simplified Tax Models', content: 'Simplified calculators are excellent for quick scenarios but cannot replace full return preparation. Always validate with complete records, filing status details, and current-year tax guidance.' },
     ],
   },
   'retirement-calculator': {
