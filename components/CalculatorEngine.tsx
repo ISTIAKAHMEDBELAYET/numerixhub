@@ -1026,15 +1026,32 @@ function InvestmentCalculator() {
   const [rate, setRate] = useState('8');
   const [years, setYears] = useState('10');
   const [additional, setAdditional] = useState('0');
-  const [result, setResult] = useState<{ fv: number; contributed: number; gain: number } | null>(null);
+  const [contribFreq, setContribFreq] = useState<'annual' | 'monthly'>('annual');
+  const [result, setResult] = useState<{ fv: number; contributed: number; gain: number; annualizedReturn: number } | null>(null);
 
   const calculate = () => {
-    const P = parseFloat(pv), r = parseFloat(rate) / 100;
-    const t = parseFloat(years), pmt = parseFloat(additional);
-    if (isNaN(P) || !r || !t) return;
-    const fv = P * Math.pow(1 + r, t) + pmt * (Math.pow(1 + r, t) - 1) / r;
-    const contributed = P + pmt * t;
-    setResult({ fv, contributed, gain: fv - contributed });
+    const P = parseFloat(pv);
+    const annualRate = parseFloat(rate) / 100;
+    const t = parseFloat(years);
+    const pmt = parseFloat(additional) || 0;
+    if (isNaN(P) || isNaN(t) || t <= 0) return;
+
+    let fv = 0;
+    let contributed = P;
+
+    if (contribFreq === 'annual') {
+      const r = annualRate;
+      fv = r === 0 ? P + pmt * t : P * Math.pow(1 + r, t) + pmt * (Math.pow(1 + r, t) - 1) / r;
+      contributed = P + pmt * t;
+    } else {
+      const n = t * 12;
+      const r = annualRate / 12;
+      fv = r === 0 ? P + pmt * n : P * Math.pow(1 + r, n) + pmt * (Math.pow(1 + r, n) - 1) / r;
+      contributed = P + pmt * n;
+    }
+
+    const annualizedReturn = t > 0 && P > 0 ? (Math.pow(fv / P, 1 / t) - 1) * 100 : 0;
+    setResult({ fv, contributed, gain: fv - contributed, annualizedReturn });
   };
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString();
 
@@ -1044,15 +1061,17 @@ function InvestmentCalculator() {
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Initial Investment ($)</label><input type="number" value={pv} onChange={e => setPv(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Return (%)</label><input type="number" step="0.1" value={rate} onChange={e => setRate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
         <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Time Period (years)</label><input type="number" value={years} onChange={e => setYears(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
-        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Annual Contribution ($)</label><input type="number" value={additional} onChange={e => setAdditional(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Contribution Amount ($)</label><input type="number" value={additional} onChange={e => setAdditional(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none" /></div>
+        <div className="col-span-2"><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Contribution Frequency</label><select value={contribFreq} onChange={e => setContribFreq(e.target.value as 'annual' | 'monthly')} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"><option value="annual">Annual</option><option value="monthly">Monthly</option></select></div>
       </div>
       <button onClick={calculate} className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Calculate Investment</button>
       {result && (
         <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
           <div className="text-center mb-4"><div className="text-sm text-gray-500 dark:text-gray-400">Future Value</div><div className="text-4xl font-extrabold text-green-600">{fmt(result.fv)}</div></div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Total Invested</div><div className="font-bold">{fmt(result.contributed)}</div></div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Investment Gain</div><div className="font-bold text-green-500">{fmt(result.gain)}</div></div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 text-center"><div className="text-xs text-gray-500 mb-1">Annualized Return</div><div className="font-bold text-indigo-600">{result.annualizedReturn.toFixed(2)}%</div></div>
           </div>
         </div>
       )}
