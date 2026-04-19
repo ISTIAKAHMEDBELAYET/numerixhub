@@ -2852,8 +2852,18 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
       fields: [{ id: 'pv', label: 'Present Value ($)', placeholder: '0' }, { id: 'rate', label: 'Annual Rate (%)', placeholder: '6' }, { id: 'n', label: 'Periods (months)', placeholder: '60' }, { id: 'pmt', label: 'Payment ($, optional)', placeholder: '0' }],
       compute: (v) => {
         const r = v.rate / 100 / 12;
-        const fv = v.pv * Math.pow(1+r, v.n) + (v.pmt > 0 ? v.pmt * ((Math.pow(1+r, v.n) - 1) / r) : 0);
-        return `Future Value: $${fv.toFixed(2)} (over ${v.n} months at ${v.rate}% annual)`;
+        const periods = Math.max(0, Math.round(v.n));
+        const payment = Math.max(0, v.pmt);
+
+        const fv = r === 0
+          ? v.pv + payment * periods
+          : v.pv * Math.pow(1 + r, periods) + (payment > 0 ? payment * ((Math.pow(1 + r, periods) - 1) / r) : 0);
+
+        const totalContributions = v.pv + payment * periods;
+        const growth = fv - totalContributions;
+        const ear = Math.pow(1 + r, 12) - 1;
+
+        return `Future Value: $${fv.toFixed(2)} | Total Contributions: $${totalContributions.toFixed(2)} | Growth: $${growth.toFixed(2)} | Effective Annual Rate: ${(ear * 100).toFixed(2)}%`;
       },
     },
     'mortgage-payoff-calculator': {
