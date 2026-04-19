@@ -8,7 +8,7 @@ export interface Calculator {
   featured?: boolean;
 }
 
-export const calculators: Calculator[] = [
+const rawCalculators: Calculator[] = [
   // FINANCIAL CALCULATORS (80+)
   { slug: '401k-calculator', name: '401K Calculator', description: 'Free 401K calculator to plan and estimate a 401K balance and payout amount in retirement or help with early withdrawals or maximizing employer match.', category: 'financial', emoji: '🏛️', keywords: ['401k', 'retirement', 'contribution', 'employer match'], featured: true },
   { slug: 'apr-calculator', name: 'APR Calculator', description: 'Free calculator to find out the real APR of a loan, considering all the fees and extra charges.', category: 'financial', emoji: '🔢', keywords: ['apr', 'annual percentage rate', 'loan cost'] },
@@ -218,6 +218,14 @@ export const calculators: Calculator[] = [
   { slug: 'time-card-calculator', name: 'Time Card Calculator', description: 'This free time card calculator generates weekly time reports based on provided work times and hourly rates.', category: 'utility', emoji: '🗂️', keywords: ['time card', 'work hours', 'payroll'] },
 ];
 
+// Ensure one canonical calculator per slug across the app.
+const seenSlugs = new Set<string>();
+export const calculators: Calculator[] = rawCalculators.filter((calc) => {
+  if (seenSlugs.has(calc.slug)) return false;
+  seenSlugs.add(calc.slug);
+  return true;
+});
+
 export function getCalculatorBySlug(slug: string): Calculator | undefined {
   return calculators.find(c => c.slug === slug);
 }
@@ -231,10 +239,17 @@ export function getFeaturedCalculators(): Calculator[] {
 }
 
 export function searchCalculators(query: string): Calculator[] {
-  const q = query.toLowerCase();
-  return calculators.filter(c =>
-    c.name.toLowerCase().includes(q) ||
-    c.description.toLowerCase().includes(q) ||
-    c.keywords.some(k => k.toLowerCase().includes(q))
-  );
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+  const stopWords = new Set(['calculator', 'calculators', 'calc', 'tool', 'tools', 'online', 'free']);
+  const q = normalize(query);
+  if (!q) return calculators;
+
+  const rawTokens = q.split(' ').filter(Boolean);
+  const meaningfulTokens = rawTokens.filter(token => !stopWords.has(token));
+  const tokens = meaningfulTokens.length > 0 ? meaningfulTokens : rawTokens;
+
+  return calculators.filter(c => {
+    const nameWords = normalize(c.name).split(' ').filter(Boolean);
+    return tokens.every(token => nameWords.some(word => word.startsWith(token)));
+  });
 }
