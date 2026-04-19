@@ -3290,21 +3290,22 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
 
         if (periods <= 0) return 'Enter periods greater than 0.';
 
+        const growthFactor = r === 0 ? periods : ((Math.pow(1 + r, periods) - 1) / r);
         const fv = r === 0
           ? pv + payment * periods
-          : pv * Math.pow(1 + r, periods) + (payment > 0 ? payment * ((Math.pow(1 + r, periods) - 1) / r) : 0);
+          : pv * Math.pow(1 + r, periods) + (payment > 0 ? payment * growthFactor : 0);
 
-        const growthFactor = r === 0 ? periods : ((Math.pow(1 + r, periods) - 1) / r);
         const requiredPaymentForTarget = targetFv > 0
-          ? Math.max(0, (targetFv - (r === 0 ? pv : pv * Math.pow(1 + r, periods))) / (growthFactor || 1))
+          ? Math.max(0, (targetFv - (r === 0 ? pv : pv * Math.pow(1 + r, periods))) / (growthFactor || periods || 1))
           : 0;
+        const targetGap = targetFv > 0 ? targetFv - fv : 0;
 
         const totalContributions = pv + payment * periods;
         const growth = fv - totalContributions;
         const ear = Math.pow(1 + r, 12) - 1;
 
         if (targetFv > 0) {
-          return `Projected FV: $${fv.toFixed(2)} | Target FV: $${targetFv.toFixed(2)} | Required payment for target: $${requiredPaymentForTarget.toFixed(2)}/period | Total Contributions (current inputs): $${totalContributions.toFixed(2)} | Growth: $${growth.toFixed(2)} | Effective Annual Rate: ${(ear * 100).toFixed(2)}%`;
+          return `Projected FV: $${fv.toFixed(2)} | Target FV: $${targetFv.toFixed(2)} | ${targetGap <= 0 ? `Status: Ahead by $${Math.abs(targetGap).toFixed(2)}` : `Status: Short by $${targetGap.toFixed(2)}`} | Required payment for target: $${requiredPaymentForTarget.toFixed(2)}/period | Total Contributions (current inputs): $${totalContributions.toFixed(2)} | Growth: $${growth.toFixed(2)} | Effective Annual Rate: ${(ear * 100).toFixed(2)}%`;
         }
 
         return `Future Value: $${fv.toFixed(2)} | Total Contributions: $${totalContributions.toFixed(2)} | Growth: $${growth.toFixed(2)} | Effective Annual Rate: ${(ear * 100).toFixed(2)}%`;
@@ -3313,11 +3314,35 @@ function GenericCalculator({ slug, name }: { slug: string; name: string }) {
     'mortgage-payoff-calculator': {
       fields: [{ id: 'balance', label: 'Remaining Balance ($)', placeholder: '250000' }, { id: 'rate', label: 'Interest Rate (%)', placeholder: '6.5' }, { id: 'payment', label: 'Current Monthly Payment ($)', placeholder: '1580' }, { id: 'extra', label: 'Extra Monthly Payment ($)', placeholder: '200' }],
       compute: (v) => {
-        const r = v.rate / 100 / 12;
-        const calcMonths = (bal: number, pmt: number) => { let b = bal, m = 0; while (b > 0 && m < 1200) { b = b * (1 + r) - pmt; m++; } return m; };
-        const orig = calcMonths(v.balance, v.payment);
-        const fast = calcMonths(v.balance, v.payment + v.extra);
-        return `Original payoff: ${orig} months (${(orig/12).toFixed(1)} yrs) | With extra $${v.extra}/mo: ${fast} months (${(fast/12).toFixed(1)} yrs) | Saved: ${orig - fast} months`;
+        const balance = Math.max(0, v.balance);
+        const r = Math.max(0, v.rate) / 100 / 12;
+        const payment = Math.max(0, v.payment);
+        const extra = Math.max(0, v.extra);
+        if (balance <= 0 || payment <= 0) return 'Enter a valid balance and payment greater than 0.';
+
+        const simulate = (pmt: number) => {
+          let b = balance;
+          let m = 0;
+          let totalInterest = 0;
+          while (b > 0.01 && m < 1200) {
+            const interest = b * r;
+            const principal = pmt - interest;
+            if (principal <= 0) return { months: 0, interest: 0, feasible: false };
+            b = Math.max(0, b - principal);
+            totalInterest += interest;
+            m++;
+          }
+          return { months: m, interest: totalInterest, feasible: true };
+        };
+
+        const orig = simulate(payment);
+        if (!orig.feasible) return `Payment is too low to cover monthly interest. Increase payment above $${(balance * r).toFixed(2)}.`;
+        const fast = simulate(payment + extra);
+        if (!fast.feasible) return 'Extra-payment scenario is not feasible with current inputs.';
+
+        const monthsSaved = Math.max(0, orig.months - fast.months);
+        const interestSaved = Math.max(0, orig.interest - fast.interest);
+        return `Original payoff: ${orig.months} months (${(orig.months/12).toFixed(1)} yrs) | With extra $${extra.toFixed(2)}/mo: ${fast.months} months (${(fast.months/12).toFixed(1)} yrs) | Time saved: ${monthsSaved} months | Interest saved: $${interestSaved.toFixed(2)}`;
       },
     },
     'marriage-tax-calculator': {
@@ -4163,6 +4188,7 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'debt-payoff-calculator': <CreditCardCalculator />,
     'auto-loan-calculator': <AutoLoanCalculator />,
     'salary-calculator': <SalaryCalculator />,
+    'tax-calculator': <GenericCalculator slug="income-tax-calculator" name="Tax Calculator" />,
     'body-fat-calculator': <BodyFatCalculator />,
     'tdee-calculator': <TDEECalculator />,
     'calories-burned-calculator': <CaloriesBurnedCalculator />,
