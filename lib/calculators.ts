@@ -214,6 +214,27 @@ const rawCalculators: Calculator[] = [
   { slug: 'shoe-size-calculator', name: 'Shoe Size Conversion', description: 'This free tool converts between shoe sizes used in the U.S., Canada, UK, India, EU, Japan, Mexico, and China.', category: 'utility', emoji: '👟', keywords: ['shoe size', 'footwear', 'measurement'] },
   { slug: 'dice-roller', name: 'Dice Roller', description: 'Online virtual dice roller that is capable of simultaneously rolling up to 100 dice randomly.',category: 'utility', emoji: '🎲', keywords: ['dice', 'roller', 'random'] },
   { slug: 'time-card-calculator', name: 'Time Card Calculator', description: 'This free time card calculator generates weekly time reports based on provided work times and hourly rates.', category: 'utility', emoji: '🗂️', keywords: ['time card', 'work hours', 'payroll'] },
+
+  // LINK ALIASES TO COVER CALCULATOR.NET URL VARIATIONS
+  { slug: 'percent-calculator', name: 'Percent Calculator', description: 'Free percent calculator for percentage values, percentage change, and ratio-based percent calculations.', category: 'math', emoji: '%', keywords: ['percent', 'percentage', 'percent change'] },
+  { slug: 'math-calculator', name: 'Math Calculator', description: 'General math calculator for arithmetic and scientific expressions.', category: 'math', emoji: '🧮', keywords: ['math calculator', 'arithmetic', 'scientific'] },
+  { slug: 'mean-median-mode-range-calculator', name: 'Mean Median Mode Range Calculator', description: 'Calculator to find mean, median, mode, and range from a data set.', category: 'math', emoji: '📊', keywords: ['mean', 'median', 'mode', 'range'] },
+  { slug: 'permutation-and-combination-calculator', name: 'Permutation and Combination Calculator', description: 'Calculator for permutation and combination problems in probability and statistics.', category: 'math', emoji: '🔀', keywords: ['permutation', 'combination', 'ncr', 'npr'] },
+  { slug: 'right-triangle-calculator', name: 'Right Triangle Calculator', description: 'Right triangle calculator for sides, angles, area, and hypotenuse-based calculations.', category: 'math', emoji: '📐', keywords: ['right triangle', 'hypotenuse', 'pythagorean'] },
+  { slug: 'common-factor-calculator', name: 'Common Factor Calculator', description: 'Calculator to find common factors and greatest common factor for integers.', category: 'math', emoji: '🔢', keywords: ['common factor', 'gcf', 'divisors'] },
+
+  { slug: 'conception-calculator', name: 'Conception Calculator', description: 'Conception and due date estimator based on pregnancy timeline inputs.', category: 'health', emoji: '🌸', keywords: ['conception', 'pregnancy', 'fertility'] },
+  { slug: 'pregnancy-conception-calculator', name: 'Pregnancy Conception Calculator', description: 'Pregnancy conception date estimator using due date and cycle assumptions.', category: 'health', emoji: '🤰', keywords: ['pregnancy conception', 'due date', 'gestation'] },
+  { slug: 'anorexic-bmi-calculator', name: 'Anorexic BMI Calculator', description: 'BMI calculator variant focused on very low BMI interpretation ranges.', category: 'health', emoji: '⚖️', keywords: ['anorexic bmi', 'bmi', 'underweight'] },
+  { slug: 'overweight-calculator', name: 'Overweight Calculator', description: 'Weight status calculator using BMI-aligned ranges and interpretation.', category: 'health', emoji: '⚖️', keywords: ['overweight', 'bmi', 'weight status'] },
+  { slug: 'weight-watchers-points-calculator', name: 'Weight Watchers Points Calculator', description: 'Diet points estimator for meal planning and calorie-awareness workflows.', category: 'health', emoji: '🥗', keywords: ['weight watchers', 'points', 'diet'] },
+
+  { slug: 'base64-encode-decode', name: 'Base64 Encode Decode', description: 'Base64 encoder and decoder for text and developer utilities.', category: 'utility', emoji: '💻', keywords: ['base64', 'encode', 'decode'] },
+  { slug: 'url-encode-decode', name: 'URL Encode Decode', description: 'URL encoder/decoder for converting reserved characters to URL-safe format.', category: 'utility', emoji: '🔗', keywords: ['url encode', 'url decode', 'percent encoding'] },
+  { slug: 'shoe-size-conversion', name: 'Shoe Size Conversion', description: 'Shoe size conversion between international regions and standards.', category: 'utility', emoji: '👟', keywords: ['shoe size conversion', 'shoe size', 'footwear'] },
+  { slug: 'day-of-the-week-calculator', name: 'Day of the Week Calculator', description: 'Find weekday from a specific date with calendar context.', category: 'utility', emoji: '📅', keywords: ['day of week', 'weekday', 'calendar day'] },
+  { slug: 'marriage-calculator', name: 'Marriage Calculator', description: 'Marriage-related planning calculator for tax and financial scenario analysis.', category: 'financial', emoji: '💍', keywords: ['marriage calculator', 'marriage tax', 'couple finance'] },
+  { slug: 'real-estate-calculator', name: 'Real Estate Calculator', description: 'Real estate planning calculator for property financing and investment scenarios.', category: 'financial', emoji: '🏘️', keywords: ['real estate', 'property', 'investment'] },
 ];
 
 // Ensure one canonical calculator per slug across the app.

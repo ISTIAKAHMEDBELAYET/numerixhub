@@ -3969,10 +3969,23 @@ const calcContent: Record<string, { howTo: string; formula?: string; faqs: { q: 
 };
 
 const defaultContent = (name: string) => ({
-  howTo: `${name} — enter the required values in the fields above and click Calculate to get instant, accurate results. All calculations run locally in your browser with no data sent to any server.`,
+  howTo: `${name} — enter the required values in the fields above and click Calculate to get instant, accurate results. Review the output carefully, adjust assumptions if needed, and compare multiple scenarios for better decision-making. All calculations run locally in your browser with no data sent to any server.`,
   faqs: [
-    { q: `Is this ${name} free to use?`, a: 'Yes, completely free with no signup, no ads, and no data collection.' },
-    { q: 'Are the results accurate?', a: 'All formulas follow standard mathematical and financial definitions. For professional decisions, please consult a qualified expert.' },
+    { q: `Is this ${name} free to use?`, a: 'Yes, this calculator is completely free with no signup required and no hidden charges.' },
+    { q: `How accurate is this ${name}?`, a: 'Results are based on standard formulas and the inputs you provide. Accuracy depends on input quality and assumptions.' },
+    { q: `Can I use ${name} on mobile devices?`, a: 'Yes, this calculator is fully responsive and works on desktop, tablet, and mobile screens.' },
+    { q: `Does ${name} store my data?`, a: 'No personal input is stored by this calculator during normal use. Calculations are performed client-side.' },
+    { q: `What should I do if results look wrong?`, a: 'Double-check units, decimal placement, and all required fields. Then recalculate with corrected values.' },
+    { q: `Can I use ${name} for professional decisions?`, a: 'Use it as an initial planning tool. For legal, medical, financial, or engineering decisions, consult a qualified professional.' },
+    { q: `Does this calculator support what-if scenarios?`, a: 'Yes. Change one input at a time to compare outcomes and understand sensitivity.' },
+    { q: `Why do small input changes create large result differences?`, a: 'Many formulas include compounding or nonlinear behavior, where small changes can meaningfully impact outputs.' },
+    { q: `Can beginners use this ${name} easily?`, a: 'Yes. Input labels are designed to be simple and practical for both beginners and advanced users.' },
+    { q: `How often should I recalculate?`, a: 'Recalculate whenever your assumptions, rates, measurements, or target values change.' },
+  ],
+  sections: [
+    { title: `How ${name} Works`, content: `This calculator transforms your inputs into results using established formulas. Enter realistic values, keep units consistent, and use the outputs to evaluate practical scenarios.` },
+    { title: 'Input Quality and Assumptions', content: 'The reliability of any result depends on assumptions and data quality. Validate source values, confirm units, and avoid rounding too aggressively in critical calculations.' },
+    { title: 'Best Practices for Better Results', content: 'Run multiple scenarios, compare conservative and optimistic assumptions, and combine calculator outputs with real-world constraints before acting on results.' },
   ],
 });
 
@@ -4030,10 +4043,26 @@ export default function CalculatorEngine({ calc }: CalculatorEngineProps) {
     'binary-calculator': <BinaryCalculator />,
     'hex-calculator': <BinaryCalculator />,
     'base64-calculator': <Base64Calculator />,
+    'base64-encode-decode': <Base64Calculator />,
     'url-encoder': <URLEncoder />,
+    'url-encode-decode': <URLEncoder />,
     'time-zone-calculator': <TimeZoneCalculator />,
     'time-calculator': <TimeCalculator />,
     'hours-calculator': <HoursCalculator />,
+    'percent-calculator': <PercentageCalculator />,
+    'math-calculator': <ScientificCalculator />,
+    'right-triangle-calculator': <GenericCalculator slug="triangle-calculator" name="Right Triangle Calculator" />,
+    'conception-calculator': <PregnancyCalculator />,
+    'pregnancy-conception-calculator': <PregnancyCalculator />,
+    'day-of-the-week-calculator': <DateCalculator />,
+    'mean-median-mode-range-calculator': <StatisticsCalculator />,
+    'permutation-and-combination-calculator': <GenericCalculator slug="permutation-combination-calculator" name="Permutation and Combination Calculator" />,
+    'shoe-size-conversion': <GenericCalculator slug="shoe-size-calculator" name="Shoe Size Conversion" />,
+    'common-factor-calculator': <GenericCalculator slug="gcf-calculator" name="Common Factor Calculator" />,
+    'marriage-calculator': <GenericCalculator slug="marriage-tax-calculator" name="Marriage Calculator" />,
+    'anorexic-bmi-calculator': <BMICalculator />,
+    'overweight-calculator': <BMICalculator />,
+    'weight-watchers-points-calculator': <CalorieCalculator />,
   };
 
   const ui = calculatorComponents[calc.slug] ?? <GenericCalculator slug={calc.slug} name={calc.name} />;
