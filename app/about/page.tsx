@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: 'About NumerixHub and Our Mission',
   description: 'Learn about NumerixHub, the home of 200+ free online calculators for math, finance, health, and more.',
   alternates: {
-    canonical: 'https://numerixhub.pages.dev/about/',
+    canonical: 'https://numerixhub.tech/about/',
   },
   openGraph: {
     title: 'About NumerixHub and Our Mission | NumerixHub',
     description: 'Learn about NumerixHub and our 200+ free calculators for finance, health, math, and utility use cases.',
-    url: 'https://numerixhub.pages.dev/about/',
+    url: 'https://numerixhub.tech/about/',
     type: 'website',
     images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'About NumerixHub' }],
   },
@@ -50,41 +50,3 @@ export default function AboutPage() {
                   { emoji: '💰', title: '80+ Financial Calculators', desc: 'Mortgages, loans, investments, taxes, retirement planning and more.' },
                   { emoji: '❤️', title: '30+ Health Calculators', desc: 'BMI, calories, fitness, pregnancy, nutrition tracking and more.' },
                   { emoji: '🧮', title: '40+ Math Calculators', desc: 'Scientific, statistics, geometry, algebra and more.' },
-                  { emoji: '🔧', title: '50+ Utility Calculators', desc: 'Date, time, conversion, construction, electronics and more.' },
-                ].map(item => (
-                  <div key={item.title} className="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                    <span className="text-2xl">{item.emoji}</span>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Commitment</h2>
-              <ul className="space-y-3 text-gray-600 dark:text-gray-400">
-                {[
-                  '🆓 Always free — no subscription, no hidden fees',
-                  '🔒 Privacy first — all calculations run in your browser',
-                  '✅ Accurate — verified formulas used by professionals',
-                  '📱 Mobile-friendly — works on any device',
-                  '⚡ Fast — instant results as you type',
-                  '♿ Accessible — built with accessibility in mind',
-                ].map(item => (
-                  <li key={item} className="flex items-center space-x-2">
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
-

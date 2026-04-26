@@ -9,20 +9,20 @@ export default function CalculatorsPage() {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'All Calculators Free Online',
-    url: 'https://numerixhub.pages.dev/calculators/',
+    url: 'https://numerixhub.tech/calculators/',
     description: 'Browse 200+ free online calculators for finance, health, math, and utility tasks.',
     isPartOf: {
       '@type': 'WebSite',
       name: 'NumerixHub',
-      url: 'https://numerixhub.pages.dev/',
+      url: 'https://numerixhub.tech/',
     },
   };
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numerixhub.pages.dev/' },
-      { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://numerixhub.pages.dev/calculators/' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numerixhub.tech/' },
+      { '@type': 'ListItem', position: 2, name: 'Calculators', item: 'https://numerixhub.tech/calculators/' },
     ],
   };
   const calculatorsItemListSchema = {
@@ -36,7 +36,7 @@ export default function CalculatorsPage() {
         '@type': 'ListItem',
         position: index + 1,
         name: calc.name,
-        url: `https://numerixhub.pages.dev/${calc.slug}/`,
+        url: `https://numerixhub.tech/${calc.slug}/`,
       })),
   };
   const categoryItemListSchema = {
@@ -47,7 +47,7 @@ export default function CalculatorsPage() {
       '@type': 'ListItem',
       position: index + 1,
       name: cat.name,
-      url: `https://numerixhub.pages.dev/calculators/?category=${cat.id}`,
+      url: `https://numerixhub.tech/calculators/?category=${cat.id}`,
     })),
   };
 
