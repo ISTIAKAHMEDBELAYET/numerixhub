@@ -3,7 +3,7 @@ import Scripts from '@/app/_components/Scripts';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://numerixhub.pages.dev'),
+  metadataBase: new URL('https://numerixhub.tech'),
   title: {
     default: 'NumerixHub - 200+ Free Online Calculators',
     template: '%s | NumerixHub',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://numerixhub.pages.dev',
+    url: 'https://numerixhub.tech',
     siteName: 'NumerixHub',
     title: 'NumerixHub - 200+ Free Online Calculators',
     description: 'Free online calculators for math, finance, health & fitness, and more. 200+ accurate tools. No signup required.',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     creator: '@numerixhub',
   },
   alternates: {
-    canonical: 'https://numerixhub.pages.dev',
+    canonical: 'https://numerixhub.tech',
   },
   verification: {
     google: 'gz39ksQs_piWuN51AN4rlDuymFHHJrGdiju5MOgB1qs',
@@ -60,8 +60,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'NumerixHub',
-    url: 'https://numerixhub.pages.dev',
-    logo: 'https://numerixhub.pages.dev/logo.png',
+    url: 'https://numerixhub.tech',
+    logo: 'https://numerixhub.tech/logo.png',
     description: 'Free online calculators for math, finance, health & fitness, and more.',
     sameAs: [
       'https://twitter.com/numerixhub',
@@ -73,13 +73,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'NumerixHub',
-    url: 'https://numerixhub.pages.dev',
+    url: 'https://numerixhub.tech',
     description: 'Free online calculators for math, finance, health & fitness, and more.',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://numerixhub.pages.dev/calculators/?q={search_term_string}',
+        urlTemplate: 'https://numerixhub.tech/calculators/?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
@@ -139,4 +139,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-
