@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const canonicalSlug = getCanonicalSlug(params.slug);
   const isAlias = params.slug !== canonicalSlug;
-  const canonicalUrl = `https://numerixhub.pages.dev/${canonicalSlug}/`;
+  const canonicalUrl = `https://numerixhub.tech/${canonicalSlug}/`;
   const title = `${calc.name} Free Online`;
   const rawDesc = `Free ${calc.name} online. ${calc.description} No signup required. Fast and accurate.`;
   const description = rawDesc.length > 160
@@ -66,7 +66,7 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
   if (!calc) notFound();
 
   const canonicalSlug = getCanonicalSlug(params.slug);
-  const canonicalUrl = `https://numerixhub.pages.dev/${canonicalSlug}/`;
+  const canonicalUrl = `https://numerixhub.tech/${canonicalSlug}/`;
 
   // Early theme sync script for static export: ensures dark mode before hydration
   const themeScript = `
@@ -111,7 +111,7 @@ export default function CalculatorPage({ params }: { params: { slug: string } })
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://numerixhub.pages.dev',
+        item: 'https://numerixhub.tech',
       },
       {
         '@type': 'ListItem',
