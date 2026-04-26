@@ -36,17 +36,65 @@ export default function AboutPage() {
           </div>
 
           <div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
+            <section className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Mission</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                NumerixHub was built with one simple goal: to provide free, accurate, and easy-to-use calculators to everyone on the internet. Whether you&apos;re calculating a mortgage payment, planning your fitness journey, solving a math problem, or converting units — we have a tool for you.
+                NumerixHub was built to provide free, accurate, and easy-to-use calculators to everyone on the internet. Whether you need to compute a mortgage, calculate BMI, convert units, or solve a math problem, our goal is to make those tools fast, private, and accessible without signup.
               </p>
-            </div>
+            </section>
 
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
+            <section className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">What We Offer</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { emoji: '💰', title: '80+ Financial Calculators', desc: 'Mortgages, loans, investments, taxes, retirement planning and more.' },
-                  { emoji: '❤️', title: '30+ Health Calculators', desc: 'BMI, calories, fitness, pregnancy, nutrition tracking and more.' },
-                  { emoji: '🧮', title: '40+ Math Calculators', desc: 'Scientific, statistics, geometry, algebra and more.' },
+                <div className="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                  <span className="text-2xl">💰</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">80+ Financial Calculators</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Mortgages, loans, investments, taxes, retirement planning and more.</p>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                  <span className="text-2xl">❤️</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">30+ Health Calculators</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">BMI, calories, fitness, pregnancy, nutrition tracking and more.</p>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                  <span className="text-2xl">🧮</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">40+ Math Calculators</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Scientific, statistics, geometry, algebra and more.</p>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                  <span className="text-2xl">🔧</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">50+ Utility Calculators</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Date, time, conversion, construction, electronics and more.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Commitment</h2>
+              <ul className="space-y-3 text-gray-600 dark:text-gray-400">
+                <li>🆓 Always free — no subscription, no hidden fees</li>
+                <li>🔒 Privacy first — all calculations run in your browser</li>
+                <li>✅ Accurate — verified formulas used by professionals</li>
+                <li>📱 Mobile-friendly — works on any device</li>
+                <li>⚡ Fast — instant results as you type</li>
+                <li>♿ Accessible — built with accessibility in mind</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

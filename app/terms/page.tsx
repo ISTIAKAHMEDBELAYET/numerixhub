@@ -31,13 +31,26 @@ export default function TermsPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Terms of Service</h1>
           <p className="text-gray-500 dark:text-gray-400 mb-10">Last updated: January 1, 2025</p>
+
           <div className="space-y-8 text-gray-600 dark:text-gray-400">
-            {[
-              {
-                title: 'Acceptance of Terms',
-                content: 'By accessing and using NumerixHub, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the site.',
-              },
-              {
-                title: 'Use of Calculators',
-                content: 'NumerixHub provides calculators for informational and educational purposes only. All calculations are estimates based on standard formulas and may not be appropriate for all situations. You are responsible for verifying results and should not rely solely on these calculators for major financial, medical, or legal decisions.',
-              },
+            <section>
+              <h2 className="text-2xl font-bold">Acceptance of Terms</h2>
+              <p>By accessing and using NumerixHub, you accept and agree to be bound by these Terms of Service.</p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold">Use of Calculators</h2>
+              <p>NumerixHub provides calculators for informational purposes only. Calculations are estimates and may not fit all use cases.</p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold">Intellectual Property</h2>
+              <p>All content on NumerixHub is the property of NumerixHub and is protected by applicable intellectual property laws.</p>
+            </section>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
